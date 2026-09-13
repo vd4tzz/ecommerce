@@ -1,8 +1,7 @@
 package io.d4tzz.ecommerce.domain.catalog.category;
 
-import java.util.List;
-
 import io.d4tzz.ecommerce.common.Repository;
+import java.util.List;
 
 public interface CategoryRepository extends Repository<Category, CategoryId> {
     boolean exists(CategoryId id);
@@ -17,7 +16,7 @@ public interface CategoryRepository extends Repository<Category, CategoryId> {
 
     void updateChildrenPrefix(String oldPrefix, String newPrefix);
 
-    List<Attribute> findInheritedAttributes(CategoryId categoryId);
+    List<Attribute> findAncestorAttributes(CategoryId categoryId);
 
     List<Attribute> findDescendantAttributes(CategoryId categoryId);
 }

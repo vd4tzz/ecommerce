@@ -1,7 +1,6 @@
 package io.d4tzz.ecommerce.domain.catalog.category;
 
 import io.d4tzz.ecommerce.common.exception.ConflictException;
-import io.d4tzz.ecommerce.common.exception.InvalidArgumentException;
 import io.d4tzz.ecommerce.common.exception.InvalidOperationException;
 import java.util.ArrayList;
 import java.util.Collections;
@@ -196,31 +195,6 @@ public class Category {
 
     public boolean hasAttributeWithCode(String code) {
         return this.attributes.stream().anyMatch(a -> a.getCode().equalsIgnoreCase(code));
-    }
-
-    public void reorderAttributes(List<String> orderedCodes) {
-        if (orderedCodes.size() != this.attributes.size()) {
-            throw new InvalidArgumentException("Order list must match current attributes size");
-        }
-
-        Map<String, Attribute> attributeByCode = HashMap.newHashMap(this.attributes.size());
-        for (Attribute attr : this.attributes) {
-            attributeByCode.put(attr.getCode(), attr);
-        }
-
-        List<Attribute> reordered = new ArrayList<>(this.attributes.size());
-        for (String code : orderedCodes) {
-            Attribute attr = attributeByCode.remove(code.toLowerCase());
-            if (attr == null) {
-                throw new InvalidArgumentException(
-                    "Attribute code '" + code + "' not found or duplicate in reorder list"
-                );
-            }
-
-            reordered.add(attr);
-        }
-
-        this.attributes = reordered;
     }
 
     public CategoryId getId() {

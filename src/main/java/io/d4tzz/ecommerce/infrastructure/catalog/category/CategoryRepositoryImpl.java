@@ -45,10 +45,7 @@ interface SpringCategoryRepository extends JpaRepository<JpaCategory, Long> {
         WHERE c.path LIKE CONCAT(:oldPrefix, '%')
         """
     )
-    void updatePrefixPath(
-        @Param("oldPrefix") String oldPrefix,
-        @Param("newPrefix") String newPrefix
-    );
+    void updatePrefixPath(@Param("oldPrefix") String oldPrefix, @Param("newPrefix") String newPrefix);
 
     List<JpaCategory> findByPathStartingWith(String prefix);
 }
@@ -80,10 +77,8 @@ public class CategoryRepositoryImpl implements CategoryRepository {
     }
 
     @Override
-    public List<Attribute> findInheritedAttributes(CategoryId categoryId) {
-        JpaCategory current = springRepo
-            .findById(categoryId.value())
-            .orElse(null);
+    public List<Attribute> findAncestorAttributes(CategoryId categoryId) {
+        JpaCategory current = springRepo.findById(categoryId.value()).orElse(null);
         if (current == null) {
             return Collections.emptyList();
         }
@@ -103,16 +98,13 @@ public class CategoryRepositoryImpl implements CategoryRepository {
 
     @Override
     public List<Attribute> findDescendantAttributes(CategoryId categoryId) {
-        JpaCategory current = springRepo
-            .findById(categoryId.value())
-            .orElse(null);
+        JpaCategory current = springRepo.findById(categoryId.value()).orElse(null);
         if (current == null) {
             return Collections.emptyList();
         }
 
-        String prefix = (current.getPath() == null ? "" : current.getPath())
-            + current.getId()
-            + ".";
+        String prefix =
+            (current.getPath() == null ? "" : current.getPath()) + current.getId() + Category.PATH_DELIMITER;
 
         List<JpaCategory> descendants = springRepo.findByPathStartingWith(prefix);
         if (descendants.isEmpty()) {
@@ -148,10 +140,7 @@ public class CategoryRepositoryImpl implements CategoryRepository {
         Long parentId = null;
 
         if (category.getParentId() != null) {
-            parentId = springRepo
-                .findById(category.getParentId().value())
-                .orElseThrow()
-                .getId();
+            parentId = springRepo.findById(category.getParentId().value()).orElseThrow().getId();
         }
 
         if (category.getId() == null) {
@@ -163,9 +152,7 @@ public class CategoryRepositoryImpl implements CategoryRepository {
                 parentId
             );
         } else {
-            jpaCategory = springRepo
-                .findById(category.getId().value())
-                .orElseThrow();
+            jpaCategory = springRepo.findById(category.getId().value()).orElseThrow();
 
             jpaCategory.setName(category.getName().value());
             jpaCategory.setSlug(category.getSlug().value());
@@ -179,9 +166,7 @@ public class CategoryRepositoryImpl implements CategoryRepository {
         return toDomain(jpaCategory);
     }
 
-    private List<JpaCategoryAttribute> toJpaAttributes(
-        List<Attribute> domainDefs
-    ) {
+    private List<JpaCategoryAttribute> toJpaAttributes(List<Attribute> domainDefs) {
         if (domainDefs == null) return Collections.emptyList();
         return domainDefs
             .stream()
@@ -201,7 +186,7 @@ public class CategoryRepositoryImpl implements CategoryRepository {
     }
 
     private Category toDomain(JpaCategory jpaCategory) {
-        Long pId = jpaCategory.getParentId();
+        Long parentId = jpaCategory.getParentId();
         List<Attribute> definitions =
             jpaCategory.getAttributes() != null
                 ? jpaCategory
@@ -213,12 +198,7 @@ public class CategoryRepositoryImpl implements CategoryRepository {
                                   ? d
                                         .getValues()
                                         .stream()
-                                        .map(o ->
-                                            AttributeValue.of(
-                                                o.getCode(),
-                                                o.getLabel()
-                                            )
-                                        )
+                                        .map(o -> AttributeValue.of(o.getCode(), o.getLabel()))
                                         .toList()
                                   : Collections.emptyList();
 
@@ -237,7 +217,7 @@ public class CategoryRepositoryImpl implements CategoryRepository {
             CategoryName.of(jpaCategory.getName()),
             CategorySlug.of(jpaCategory.getSlug()),
             jpaCategory.getPath(),
-            pId == null ? null : CategoryId.of(pId),
+            parentId == null ? null : CategoryId.of(parentId),
             definitions
         );
     }
@@ -248,14 +228,8 @@ public class CategoryRepositoryImpl implements CategoryRepository {
     }
 
     @Override
-    public boolean parentHasChildByName(
-        CategoryId parentId,
-        CategoryName name
-    ) {
-        return springRepo.existsByParentIdAndName(
-            parentId == null ? null : parentId.value(),
-            name.value()
-        );
+    public boolean parentHasChildByName(CategoryId parentId, CategoryName name) {
+        return springRepo.existsByParentIdAndName(parentId == null ? null : parentId.value(), name.value());
     }
 
     @Override
