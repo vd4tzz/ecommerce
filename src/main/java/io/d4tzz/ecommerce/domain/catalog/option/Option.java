@@ -1,14 +1,14 @@
 package io.d4tzz.ecommerce.domain.catalog.option;
 
+import io.d4tzz.ecommerce.common.exception.ConflictException;
+import io.d4tzz.ecommerce.common.exception.InvalidArgumentException;
+import io.d4tzz.ecommerce.common.exception.InvalidOperationException;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 
-import io.d4tzz.ecommerce.common.exception.ConflictException;
-import io.d4tzz.ecommerce.common.exception.InvalidArgumentException;
-import io.d4tzz.ecommerce.common.exception.InvalidOperationException;
-
 public class Option {
+
     private OptionId id;
     private OptionName name;
     private List<Value> values;
@@ -57,10 +57,6 @@ public class Option {
         if (checker.isReferenced(valueId)) {
             throw new InvalidOperationException("Cannot remove option value because it is currently in use");
         }
-        removeValue(valueId);
-    }
-
-    public void removeValue(ValueId valueId) {
         this.values.removeIf(val -> valueId.equals(val.getId()));
     }
 
