@@ -1,0 +1,31 @@
+{
+  "lsp": {
+    "jdtls": {
+      "settings": {
+        "java": {
+          "completion": {
+            // 1. Loại bỏ các package gây trùng tên để java.util luôn đứng đầu
+            "filteredTypes": [
+              "java.awt.*",
+              "com.sun.*",
+              "sun.*",
+              "jdk.*",
+              "org.graalvm.*",
+              "io.micrometer.shaded.*",
+            ],
+            // 2. Gợi ý sẵn các static method phổ biến của java.util
+            "favoriteStaticMembers": [
+              "java.util.Objects.requireNonNull",
+              "java.util.Objects.requireNonNullElse",
+              "java.util.Arrays.asList",
+              "java.util.Collections.*",
+              "java.util.stream.Collectors.*",
+            ],
+            // 3. Thứ tự tự động import (java.* luôn ở trên cùng)
+            "importOrder": ["java", "javax", "jakarta", "org", "com", "#"],
+          },
+        },
+      },
+    },
+  },
+}

@@ -1,0 +1,13 @@
+---
+type: specs.openrewrite.org/v1beta/recipe
+name: io.d4tzz.MoveToDomain
+displayName: Move catalog and inventory to domain
+recipeList:
+  - org.openrewrite.java.ChangePackage:
+      oldPackageName: io.d4tzz.ecommerce.catalog
+      newPackageName: io.d4tzz.ecommerce.domain.catalog
+      recursive: true
+  - org.openrewrite.java.ChangePackage:
+      oldPackageName: io.d4tzz.ecommerce.inventory
+      newPackageName: io.d4tzz.ecommerce.domain.inventory
+      recursive: true

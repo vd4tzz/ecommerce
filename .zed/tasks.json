@@ -1,0 +1,16 @@
+[
+  {
+    "label": "run",
+    "command": "./gradlew bootRun",
+    "shell": "system",
+    "env": {
+      "SPRING_OUTPUT_ANSI_ENABLED": "ALWAYS",
+    },
+  },
+  {
+    "label": "Gradle: Debug Test tại con trỏ",
+    "command": "./gradlew test --rerun --debug-jvm --tests \"*$ZED_SYMBOL*\"",
+    "use_new_terminal": false,
+    "save": "current",
+  },
+]
