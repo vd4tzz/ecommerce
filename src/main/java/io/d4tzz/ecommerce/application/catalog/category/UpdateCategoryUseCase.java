@@ -26,14 +26,8 @@ public class UpdateCategoryUseCase {
             .find(CategoryId.of(command.categoryId()))
             .orElseThrow(() -> new NotFoundException("Category not found with id: " + command.categoryId()));
 
-        if (command.name() != null && !command.name().isBlank()) {
-            category.rename(CategoryName.of(command.name()));
-        }
-
-        if (command.slug() != null && !command.slug().isBlank()) {
-            category.changeSlug(CategorySlug.of(command.slug()), categoryRepository::existsBySlug);
-        }
-
+        category.rename(CategoryName.of(command.name()));
+        category.changeSlug(CategorySlug.of(command.slug()), categoryRepository::existsBySlug);
         Category saved = categoryRepository.save(category);
 
         return CategoryDto.simple(saved);
