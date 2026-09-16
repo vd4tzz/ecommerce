@@ -15,6 +15,7 @@ import io.d4tzz.ecommerce.query.catalog.EffectiveAttributeView;
 import java.net.URI;
 import java.util.List;
 import org.springframework.http.ResponseEntity;
+import org.springframework.validation.Validator;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -34,23 +35,34 @@ public class AdminCategoryController {
     private final UpdateCategoryUseCase updateCategoryUseCase;
     private final UpdateCategoryAttributesUseCase updateCategoryAttributesUseCase;
     private final DeleteCategoryUseCase deleteCategoryUseCase;
+    private final Validator validator;
 
     public AdminCategoryController(
         CategoryQueryService categoryQueryService,
         CreateCategoryUseCase createCategoryUseCase,
         UpdateCategoryUseCase updateCategoryUseCase,
         UpdateCategoryAttributesUseCase updateCategoryAttributesUseCase,
-        DeleteCategoryUseCase deleteCategoryUseCase
+        DeleteCategoryUseCase deleteCategoryUseCase,
+        Validator validator
     ) {
         this.categoryQueryService = categoryQueryService;
         this.createCategoryUseCase = createCategoryUseCase;
         this.updateCategoryUseCase = updateCategoryUseCase;
         this.updateCategoryAttributesUseCase = updateCategoryAttributesUseCase;
         this.deleteCategoryUseCase = deleteCategoryUseCase;
+        this.validator = validator;
     }
 
     @PostMapping
-    public ResponseEntity<?> createCategory(@RequestBody CreateCategoryCommand command) {
+    public ResponseEntity<?> createCategory(@RequestBody CreateCategoryRequest request) {
+        var command = new CreateCategoryCommand(
+            request.name(),
+            request.slug(),
+            request.parentId(),
+            request.attributes()
+        );
+        ValidationHelper.validate(command, validator);
+
         var response = createCategoryUseCase.execute(command);
         URI location = ServletUriComponentsBuilder.fromCurrentRequest()
             .path("/{id}")
@@ -75,6 +87,7 @@ public class AdminCategoryController {
     @PutMapping("/{id}")
     public ResponseEntity<?> updateCategory(@PathVariable Long id, @RequestBody UpdateCategoryRequest request) {
         var command = new UpdateCategoryCommand(id, request.name(), request.slug());
+        ValidationHelper.validate(command, validator);
         return ResponseEntity.ok(updateCategoryUseCase.execute(command));
     }
 
@@ -89,6 +102,7 @@ public class AdminCategoryController {
         @RequestBody List<UpdateCategoryAttributesCommand.Attribute> attributes
     ) {
         var command = new UpdateCategoryAttributesCommand(id, attributes);
+        ValidationHelper.validate(command, validator);
         return ResponseEntity.ok(updateCategoryAttributesUseCase.execute(command));
     }
 
@@ -98,5 +112,12 @@ public class AdminCategoryController {
         return ResponseEntity.noContent().build();
     }
 }
+
+record CreateCategoryRequest(
+    String name,
+    String slug,
+    Long parentId,
+    List<CreateCategoryCommand.Attribute> attributes
+) {}
 
 record UpdateCategoryRequest(String name, String slug) {}
