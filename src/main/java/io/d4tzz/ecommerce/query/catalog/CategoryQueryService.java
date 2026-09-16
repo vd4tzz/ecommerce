@@ -9,4 +9,6 @@ public interface CategoryQueryService {
     List<AdminCategoryTableRowView> getAdminCategoryTreeTable();
 
     Optional<AdminCategoryDetailView> getAdminCategoryDetail(Long id);
+
+    List<EffectiveAttributeView> getCategoryEffectiveAttributes(Long id);
 }

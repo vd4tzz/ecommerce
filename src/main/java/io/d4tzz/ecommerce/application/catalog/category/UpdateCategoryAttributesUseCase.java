@@ -57,9 +57,7 @@ public class UpdateCategoryAttributesUseCase {
             .toList();
 
         List<Attribute> ancestorSchema =
-            category.getParentId() != null
-                ? categoryRepository.findAncestorAttributes(category.getParentId())
-                : List.of();
+            category.getParentId() != null ? categoryRepository.findAttributes(category.getParentId()) : List.of();
 
         List<Attribute> descendantSchema = categoryRepository.findDescendantAttributes(categoryId);
 

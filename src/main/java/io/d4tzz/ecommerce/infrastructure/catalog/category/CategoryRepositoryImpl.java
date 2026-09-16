@@ -77,7 +77,7 @@ public class CategoryRepositoryImpl implements CategoryRepository {
     }
 
     @Override
-    public List<Attribute> findAncestorAttributes(CategoryId categoryId) {
+    public List<Attribute> findAttributes(CategoryId categoryId) {
         JpaCategory current = springRepo.findById(categoryId.value()).orElse(null);
         if (current == null) {
             return Collections.emptyList();

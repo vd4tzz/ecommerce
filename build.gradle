@@ -27,6 +27,8 @@ dependencies {
 	testRuntimeOnly 'com.h2database:h2'
 	implementation 'org.postgresql:postgresql:42.7.13'
 	implementation 'org.springframework.boot:spring-boot-starter-validation'
+	implementation 'org.jspecify:jspecify:1.0.0'
+	implementation 'software.amazon.awssdk:s3:2.54.17'
 
 	testImplementation 'org.springframework.boot:spring-boot-testcontainers'
 	testImplementation 'org.testcontainers:testcontainers-postgresql'

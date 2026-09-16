@@ -44,7 +44,7 @@ public class CreateCategoryUseCase {
             parent = categoryRepository
                 .find(parentCategoryId)
                 .orElseThrow(() -> new NotFoundException("Parent category not found with id: " + command.parentId()));
-            ancestorSchema = categoryRepository.findAncestorAttributes(parentCategoryId);
+            ancestorSchema = categoryRepository.findAttributes(parentCategoryId);
         }
 
         List<Attribute> attributes = command

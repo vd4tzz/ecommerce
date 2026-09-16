@@ -16,7 +16,7 @@ public interface CategoryRepository extends Repository<Category, CategoryId> {
 
     void updateChildrenPrefix(String oldPrefix, String newPrefix);
 
-    List<Attribute> findAncestorAttributes(CategoryId categoryId);
+    List<Attribute> findAttributes(CategoryId categoryId);
 
     List<Attribute> findDescendantAttributes(CategoryId categoryId);
 }

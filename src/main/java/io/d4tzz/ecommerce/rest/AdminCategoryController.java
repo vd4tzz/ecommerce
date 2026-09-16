@@ -11,6 +11,7 @@ import io.d4tzz.ecommerce.common.exception.NotFoundException;
 import io.d4tzz.ecommerce.query.catalog.AdminCategoryDetailView;
 import io.d4tzz.ecommerce.query.catalog.AdminCategoryTableRowView;
 import io.d4tzz.ecommerce.query.catalog.CategoryQueryService;
+import io.d4tzz.ecommerce.query.catalog.EffectiveAttributeView;
 import java.net.URI;
 import java.util.List;
 import org.springframework.http.ResponseEntity;
@@ -75,6 +76,11 @@ public class AdminCategoryController {
     public ResponseEntity<?> updateCategory(@PathVariable Long id, @RequestBody UpdateCategoryRequest request) {
         var command = new UpdateCategoryCommand(id, request.name(), request.slug());
         return ResponseEntity.ok(updateCategoryUseCase.execute(command));
+    }
+
+    @GetMapping("/{id}/effective-attributes")
+    public ResponseEntity<List<EffectiveAttributeView>> getCategoryAttributes(@PathVariable Long id) {
+        return ResponseEntity.ok(categoryQueryService.getCategoryEffectiveAttributes(id));
     }
 
     @PutMapping("/{id}/attributes")

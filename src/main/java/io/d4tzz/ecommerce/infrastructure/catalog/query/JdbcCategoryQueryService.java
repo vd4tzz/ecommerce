@@ -1,12 +1,16 @@
 package io.d4tzz.ecommerce.infrastructure.catalog.query;
 
+import io.d4tzz.ecommerce.common.exception.NotFoundException;
 import io.d4tzz.ecommerce.query.catalog.AdminCategoryDetailView;
 import io.d4tzz.ecommerce.query.catalog.AdminCategoryTableRowView;
 import io.d4tzz.ecommerce.query.catalog.CategoryQueryService;
 import io.d4tzz.ecommerce.query.catalog.CategoryTreeNode;
+import io.d4tzz.ecommerce.query.catalog.EffectiveAttributeView;
+import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 import java.util.Optional;
 import java.util.stream.Collectors;
 import org.springframework.jdbc.core.simple.JdbcClient;
@@ -173,6 +177,72 @@ public class JdbcCategoryQueryService implements CategoryQueryService {
                 );
             })
             .optional();
+    }
+
+    @Override
+    public List<EffectiveAttributeView> getCategoryEffectiveAttributes(Long id) {
+        String checkExistSql = "SELECT EXISTS(SELECT 1 FROM categories WHERE id = :id)";
+        Boolean exists = jdbcClient.sql(checkExistSql).param("id", id).query(Boolean.class).single();
+        if (!Boolean.TRUE.equals(exists)) {
+            throw new NotFoundException("Category not found with id: " + id);
+        }
+
+        String sql = """
+            WITH RECURSIVE category_lineage AS (
+                SELECT id, name, attributes, parent_id, 1 AS depth
+                FROM categories
+                WHERE id = :id
+
+                UNION ALL
+
+                SELECT parent.id, parent.name, parent.attributes, parent.parent_id, child.depth + 1 AS depth
+                FROM categories parent
+                JOIN category_lineage child ON parent.id = child.parent_id
+            )
+            SELECT id, name, attributes
+            FROM category_lineage
+            ORDER BY depth DESC
+        """;
+
+        List<EffectiveAttributeView> result = new ArrayList<>();
+
+        jdbcClient
+            .sql(sql)
+            .param("id", id)
+            .query((rs, rowNum) -> {
+                Long rowId = rs.getLong("id");
+                String categoryName = rs.getString("name");
+                String attributesJson = rs.getString("attributes");
+                boolean isInherited = !Objects.equals(rowId, id);
+
+                List<AdminCategoryDetailView.AttributeConfigView> attributes = parseAttributes(attributesJson);
+                for (AdminCategoryDetailView.AttributeConfigView attr : attributes) {
+                    List<EffectiveAttributeView.AttributeValueView> values =
+                        attr.values() != null
+                            ? attr
+                                  .values()
+                                  .stream()
+                                  .map(v -> new EffectiveAttributeView.AttributeValueView(v.code(), v.label()))
+                                  .toList()
+                            : Collections.emptyList();
+
+                    result.add(
+                        new EffectiveAttributeView(
+                            attr.code(),
+                            attr.label(),
+                            attr.type(),
+                            values,
+                            rowId,
+                            categoryName,
+                            isInherited
+                        )
+                    );
+                }
+                return null;
+            })
+            .list();
+
+        return Collections.unmodifiableList(result);
     }
 
     private List<AdminCategoryDetailView.AttributeConfigView> parseAttributes(String json) {
