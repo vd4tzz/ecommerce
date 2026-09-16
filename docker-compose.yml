@@ -1,0 +1,29 @@
+services:
+  postgres:
+    image: postgres:latest
+    container_name: ecommerce-postgres
+    restart: unless-stopped
+    environment:
+      POSTGRES_DB: ecommerce
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: "1"
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql
+
+  seaweedfs:
+    image: chrislusf/seaweedfs:latest
+    container_name: ecommerce-seaweedfs
+    restart: unless-stopped
+    ports:
+      - "8333:8333" # S3 API endpoint
+      - "9333:9333" # Master server
+      - "8888:8888" # Web UI (Filer UI)
+    command: "server -s3 -filer -dir=/data"
+    volumes:
+      - seaweed_data:/data
+
+volumes:
+  postgres_data:
+  seaweed_data:

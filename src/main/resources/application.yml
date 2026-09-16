@@ -1,0 +1,30 @@
+spring:
+  application:
+    name: ecommerce
+
+  datasource:
+    url: jdbc:postgresql://localhost:5432/ecommerce
+    username: postgres
+    password: "1"
+    driver-class-name: org.postgresql.Driver
+
+  jpa:
+    hibernate:
+      ddl-auto: create
+    properties:
+      hibernate:
+        hbm2ddl:
+          create_namespaces: true
+        format_sql: true
+    show-sql: true
+
+app:
+  storage:
+    s3:
+      bucket: ecommerce
+      region: vietnam
+      endpoint: http://localhost:8333
+      access-key: any
+      secret-key: any
+      public-base-url: http://localhost:8333/ecommerce
+      presigned-duration-minutes: 15
