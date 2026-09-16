@@ -60,7 +60,7 @@ public class Option {
         this.values.removeIf(val -> valueId.equals(val.getId()));
     }
 
-    public void renameValue(ValueId valueId, ValueName newName) {
+    public Value renameValue(ValueId valueId, ValueName newName) {
         Value valueToRename = null;
         for (Value value : values) {
             if (value.getId().equals(valueId)) {
@@ -75,6 +75,7 @@ public class Option {
         }
 
         valueToRename.rename(newName);
+        return valueToRename;
     }
 
     public boolean hasValueWithName(ValueName valueName) {

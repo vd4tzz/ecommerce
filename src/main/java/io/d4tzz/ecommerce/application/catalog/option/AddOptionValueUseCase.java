@@ -18,14 +18,14 @@ public class AddOptionValueUseCase {
         this.optionRepository = optionRepository;
     }
 
-    public OptionDto execute(AddOptionValueCommand command) {
+    public OptionDto.ValueDto execute(AddOptionValueCommand command) {
         Option option = optionRepository
             .find(OptionId.of(command.optionId()))
             .orElseThrow(() -> new NotFoundException("Option not found with id: " + command.optionId()));
 
-        option.addValue(ValueName.of(command.name()));
+        var value = option.addValue(ValueName.of(command.name()));
 
-        Option saved = optionRepository.save(option);
-        return OptionDto.from(saved);
+        optionRepository.save(option);
+        return OptionDto.ValueDto.from(value);
     }
 }
