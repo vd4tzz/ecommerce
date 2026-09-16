@@ -39,7 +39,12 @@ public class PostgresFtsInitializer implements ApplicationRunner {
                 USING gin(to_tsvector('simple', immutable_unaccent(name)));
             """).update();
 
-            log.info("PostgreSQL Full-Text Search (FTS) extension, function & index initialized successfully.");
+            jdbcClient.sql("""
+                CREATE INDEX IF NOT EXISTS idx_products_attributes ON products
+                USING gin (attributes);
+            """).update();
+
+            log.info("PostgreSQL FTS & JSONB attributes indexes initialized successfully.");
         } catch (Exception e) {
             log.warn("Could not auto-initialize PostgreSQL FTS index: {}", e.getMessage());
         }

@@ -5,6 +5,7 @@ import jakarta.persistence.Column;
 import jakarta.persistence.EmbeddedId;
 import jakarta.persistence.Entity;
 import jakarta.persistence.FetchType;
+import jakarta.persistence.Index;
 import jakarta.persistence.JoinColumn;
 import jakarta.persistence.ManyToOne;
 import jakarta.persistence.MapsId;
@@ -12,7 +13,7 @@ import jakarta.persistence.Table;
 import jakarta.persistence.Version;
 
 @Entity(name = "ProductOption")
-@Table(name = "product_options")
+@Table(name = "product_options", indexes = { @Index(name = "idx_product_options_option_id", columnList = "option_id") })
 public class JpaProductOption {
 
     @EmbeddedId
@@ -35,16 +36,9 @@ public class JpaProductOption {
 
     public JpaProductOption() {}
 
-    public JpaProductOption(
-        JpaProduct product,
-        Long optionId,
-        Integer position
-    ) {
+    public JpaProductOption(JpaProduct product, Long optionId, Integer position) {
         this.product = product;
-        this.id = new JpaProductOptionId(
-            product != null ? product.getId() : null,
-            optionId
-        );
+        this.id = new JpaProductOptionId(product != null ? product.getId() : null, optionId);
         this.position = position != null ? position : 0;
     }
 

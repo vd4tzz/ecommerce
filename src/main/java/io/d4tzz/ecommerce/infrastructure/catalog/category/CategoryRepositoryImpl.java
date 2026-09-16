@@ -40,7 +40,7 @@ interface SpringCategoryRepository extends JpaRepository<JpaCategory, Long> {
     @Modifying
     @Query(
         """
-        UPDATE category c
+        UPDATE Category c
         SET c.path = REPLACE(c.path, :oldPrefix, :newPrefix)
         WHERE c.path LIKE CONCAT(:oldPrefix, '%')
         """
@@ -161,24 +161,24 @@ public class CategoryRepositoryImpl implements CategoryRepository {
         }
 
         jpaCategory.setAttributes(toJpaAttributes(category.getAttributes()));
-        jpaCategory = springRepo.saveAndFlush(jpaCategory);
+        jpaCategory = springRepo.save(jpaCategory);
 
         return toDomain(jpaCategory);
     }
 
-    private List<JpaCategoryAttribute> toJpaAttributes(List<Attribute> domainDefs) {
-        if (domainDefs == null) return Collections.emptyList();
-        return domainDefs
+    private List<JpaCategoryAttribute> toJpaAttributes(List<Attribute> domainAttributes) {
+        if (domainAttributes == null) return Collections.emptyList();
+        return domainAttributes
             .stream()
-            .map(d ->
+            .map(a ->
                 new JpaCategoryAttribute(
-                    d.getCode(),
-                    d.getLabel(),
-                    d.getType().name(),
-                    d
+                    a.getCode(),
+                    a.getLabel(),
+                    a.getType().name(),
+                    a
                         .getValues()
                         .stream()
-                        .map(o -> new JpaAttributeValue(o.code(), o.label()))
+                        .map(v -> new JpaAttributeValue(v.code(), v.label()))
                         .toList()
                 )
             )
@@ -194,20 +194,15 @@ public class CategoryRepositoryImpl implements CategoryRepository {
                       .stream()
                       .map(d -> {
                           List<AttributeValue> values =
-                              d.getValues() != null
+                              d.values() != null
                                   ? d
-                                        .getValues()
+                                        .values()
                                         .stream()
-                                        .map(o -> AttributeValue.of(o.getCode(), o.getLabel()))
+                                        .map(o -> AttributeValue.of(o.code(), o.label()))
                                         .toList()
                                   : Collections.emptyList();
 
-                          return Attribute.restore(
-                              d.getCode(),
-                              d.getLabel(),
-                              AttributeType.valueOf(d.getType()),
-                              values
-                          );
+                          return Attribute.restore(d.code(), d.label(), AttributeType.valueOf(d.type()), values);
                       })
                       .toList()
                 : Collections.emptyList();

@@ -5,12 +5,20 @@ import jakarta.persistence.FetchType;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
+import jakarta.persistence.Index;
 import jakarta.persistence.JoinColumn;
 import jakarta.persistence.ManyToOne;
 import jakarta.persistence.Table;
+import jakarta.persistence.UniqueConstraint;
 
 @Entity(name = "OptionValue")
-@Table(name = "option_values")
+@Table(
+    name = "option_values",
+    uniqueConstraints = {
+        @UniqueConstraint(name = "uk_option_values_option_id_name", columnNames = { "option_id", "name" }),
+    },
+    indexes = { @Index(name = "idx_option_values_option_id_id", columnList = "option_id, id") }
+)
 public class JpaValue {
 
     @Id

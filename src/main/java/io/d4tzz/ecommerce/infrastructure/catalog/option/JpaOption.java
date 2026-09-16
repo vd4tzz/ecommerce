@@ -7,11 +7,12 @@ import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 import jakarta.persistence.OneToMany;
 import jakarta.persistence.Table;
+import jakarta.persistence.UniqueConstraint;
 import java.util.ArrayList;
 import java.util.List;
 
 @Entity(name = "option")
-@Table(name = "options")
+@Table(name = "options", uniqueConstraints = { @UniqueConstraint(name = "uk_options_name", columnNames = "name") })
 public class JpaOption {
 
     @Id
@@ -20,11 +21,7 @@ public class JpaOption {
 
     private String name;
 
-    @OneToMany(
-        mappedBy = "option",
-        cascade = CascadeType.ALL,
-        orphanRemoval = true
-    )
+    @OneToMany(mappedBy = "option", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<JpaValue> values = new ArrayList<>();
 
     public JpaOption() {}
