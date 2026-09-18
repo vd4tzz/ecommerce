@@ -8,7 +8,6 @@ import io.d4tzz.ecommerce.domain.catalog.product.Product;
 import io.d4tzz.ecommerce.domain.catalog.product.ProductId;
 import io.d4tzz.ecommerce.domain.catalog.product.ProductRepository;
 import io.d4tzz.ecommerce.domain.catalog.product.VariantId;
-import io.d4tzz.ecommerce.domain.catalog.product.Weight;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -36,8 +35,9 @@ public class UpdateProductVariantUseCase {
         );
 
         product.updateVariantDimensions(vId, Dimensions.of(command.length(), command.width(), command.height()));
-        product.updateVariantWeight(vId, Weight.ofGrams(command.weight()));
-        var variant = product.updateVariantMedia(vId, MediaId.of(command.mediaId()));
+        MediaId mediaId =
+            command.mediaId() != null && !command.mediaId().isBlank() ? MediaId.of(command.mediaId()) : null;
+        var variant = product.updateVariantMedia(vId, mediaId);
 
         productRepository.save(product);
 

@@ -16,6 +16,7 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 @RestController
@@ -51,11 +52,17 @@ public class AdminProductMediaController {
         return ResponseEntity.ok(addProductMediaUseCase.execute(command));
     }
 
-    @DeleteMapping("/{id}/media/{mediaId}")
-    public ResponseEntity<?> removeMedia(@PathVariable Long id, @PathVariable String mediaId) {
+    @DeleteMapping("/{id}/media")
+    public ResponseEntity<?> removeMedia(@PathVariable Long id, @RequestParam(name = "mediaId") String mediaId) {
         removeProductMediaUseCase.execute(id, mediaId);
         return ResponseEntity.noContent().build();
     }
+
+    // @DeleteMapping("/{id}/media/{mediaId}")
+    // public ResponseEntity<?> removeMediaByPath(@PathVariable Long id, @PathVariable String mediaId) {
+    //     removeProductMediaUseCase.execute(id, mediaId);
+    //     return ResponseEntity.noContent().build();
+    // }
 
     @PutMapping("/{id}/media/reorder")
     public ResponseEntity<?> reorderMedia(@PathVariable Long id, @RequestBody ReorderProductMediaRequest request) {

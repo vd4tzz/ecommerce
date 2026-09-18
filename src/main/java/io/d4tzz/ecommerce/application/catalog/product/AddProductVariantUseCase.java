@@ -39,10 +39,15 @@ public class AddProductVariantUseCase {
             Map<OptionId, ValueId> combination = HashMap.newHashMap(variantItem.combination().size());
             variantItem.combination().forEach((optId, valId) -> combination.put(OptionId.of(optId), ValueId.of(valId)));
 
+            MediaId mediaId =
+                variantItem.mediaId() != null && !variantItem.mediaId().isBlank()
+                    ? MediaId.of(variantItem.mediaId())
+                    : null;
+
             var variant = product.addVariant(
                 Sku.of(variantItem.sku()),
                 Money.of(variantItem.price()),
-                MediaId.of(variantItem.mediaId()),
+                mediaId,
                 Dimensions.of(variantItem.length(), variantItem.width(), variantItem.height()),
                 Weight.ofGrams(variantItem.weight()),
                 combination,
@@ -51,7 +56,9 @@ public class AddProductVariantUseCase {
             variants.add(variant);
         }
 
-        return variants
+        Product saved = productRepository.save(product);
+        return saved
+            .getVariants()
             .stream()
             .map(v -> ProductDto.ProductVariantDto.from(v))
             .toList();
