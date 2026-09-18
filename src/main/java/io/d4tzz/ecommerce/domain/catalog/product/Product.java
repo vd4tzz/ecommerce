@@ -163,7 +163,7 @@ public class Product {
     }
 
     public Variant updateVariantMedia(VariantId variantId, MediaId mediaId) {
-        if (!this.media.contains(mediaId)) {
+        if (mediaId != null && !this.media.contains(mediaId)) {
             throw new NotFoundException("Media '" + mediaId.value() + "' is not in product gallery");
         }
         Variant variant = findVariantById(variantId);
@@ -325,6 +325,11 @@ public class Product {
     }
 
     public void removeVariant(VariantId variantId) {
+        if (this.status != ProductStatus.DRAFT) {
+            throw new InvalidOperationException(
+                "Cannot remove variant when product is in " + this.status + " status. Only DRAFT products allow variant removal."
+            );
+        }
         this.variants.removeIf(v -> variantId.equals(v.getId()));
     }
 
@@ -380,15 +385,32 @@ public class Product {
     }
 
     public void publish() {
+        if (this.status == ProductStatus.PUBLISHED) {
+            return;
+        }
         this.status = ProductStatus.PUBLISHED;
     }
 
     public void archive() {
+        if (this.status == ProductStatus.ARCHIVED) {
+            return;
+        }
         this.status = ProductStatus.ARCHIVED;
     }
 
     public void draft() {
-        this.status = ProductStatus.DRAFT;
+        if (this.status == ProductStatus.DRAFT) {
+            return;
+        }
+        throw new InvalidOperationException("Cannot transition product back to DRAFT from " + this.status);
+    }
+
+    public void ensureCanDelete() {
+        if (this.status != ProductStatus.DRAFT) {
+            throw new InvalidOperationException(
+                "Cannot delete product in " + this.status + " status. Only DRAFT products can be deleted."
+            );
+        }
     }
 
     public boolean hasVariantWithSku(Sku sku) {
