@@ -3,6 +3,7 @@ package io.d4tzz.ecommerce.infrastructure.catalog.query;
 import io.d4tzz.ecommerce.query.PageResponse;
 import io.d4tzz.ecommerce.query.catalog.AdminProductSearchCriteria;
 import io.d4tzz.ecommerce.query.catalog.AdminProductTableRowView;
+import io.d4tzz.ecommerce.storage.MediaUrlResolver;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.LinkedHashMap;
@@ -15,27 +16,29 @@ import org.springframework.stereotype.Component;
 @Component
 public class AdminProductQuery {
 
-    public static final RowMapper<AdminProductTableRowView> ADMIN_PRODUCT_ROW_MAPPER = (rs, rowNum) ->
-        new AdminProductTableRowView(
-            rs.getLong("id"),
-            rs.getString("name"),
-            rs.getString("slug"),
-            rs.getString("main_image_url"),
-            rs.getObject("category_id", Long.class),
-            rs.getString("category_name"),
-            rs.getString("status"),
-            rs.getBigDecimal("min_price"),
-            rs.getBigDecimal("max_price"),
-            rs.getInt("variant_count"),
-            rs.getInt("media_count")
-        );
-
     private final JdbcClient jdbcClient;
     private final CategoryPathResolver pathResolver;
+    private final MediaUrlResolver urlResolver;
+    private final RowMapper<AdminProductTableRowView> adminProductRowMapper;
 
-    public AdminProductQuery(JdbcClient jdbcClient, CategoryPathResolver pathResolver) {
+    public AdminProductQuery(JdbcClient jdbcClient, CategoryPathResolver pathResolver, MediaUrlResolver urlResolver) {
         this.jdbcClient = jdbcClient;
         this.pathResolver = pathResolver;
+        this.urlResolver = urlResolver;
+        this.adminProductRowMapper = (rs, rowNum) ->
+            new AdminProductTableRowView(
+                rs.getLong("id"),
+                rs.getString("name"),
+                rs.getString("slug"),
+                urlResolver.resolveUrl(rs.getString("main_image_url")),
+                rs.getObject("category_id", Long.class),
+                rs.getString("category_name"),
+                rs.getString("status"),
+                rs.getBigDecimal("min_price"),
+                rs.getBigDecimal("max_price"),
+                rs.getInt("variant_count"),
+                rs.getInt("media_count")
+            );
     }
 
     public PageResponse<AdminProductTableRowView> getAdminProducts(AdminProductSearchCriteria criteria) {
@@ -88,7 +91,7 @@ public class AdminProductQuery {
         dataSpec.param("limit", safeCriteria.getSize());
         dataSpec.param("offset", safeCriteria.getOffset());
 
-        List<AdminProductTableRowView> content = dataSpec.query(ADMIN_PRODUCT_ROW_MAPPER).list();
+        List<AdminProductTableRowView> content = dataSpec.query(adminProductRowMapper).list();
 
         return PageResponse.of(content, safeCriteria.getPage(), safeCriteria.getSize(), totalElements);
     }

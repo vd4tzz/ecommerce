@@ -3,6 +3,7 @@ package io.d4tzz.ecommerce.infrastructure.catalog.query;
 import io.d4tzz.ecommerce.query.PageResponse;
 import io.d4tzz.ecommerce.query.catalog.ProductCardView;
 import io.d4tzz.ecommerce.query.catalog.ProductSearchCriteria;
+import io.d4tzz.ecommerce.storage.MediaUrlResolver;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -15,54 +16,48 @@ import tools.jackson.databind.ObjectMapper;
 @Component
 public class ProductSearchQuery {
 
-    private static final RowMapper<ProductCardView> PRODUCT_CARD_MAPPER = (
-        rs,
-        rowNum
-    ) ->
-        new ProductCardView(
-            rs.getLong("id"),
-            rs.getString("name"),
-            rs.getString("slug"),
-            rs.getString("main_image_url"),
-            rs.getBigDecimal("min_price"),
-            rs.getBigDecimal("max_price"),
-            rs.getLong("category_id"),
-            rs.getString("category_name"),
-            rs.getString("category_slug")
-        );
-
     private final JdbcClient jdbcClient;
     private final CategoryPathResolver pathResolver;
     private final ObjectMapper objectMapper;
+    private final MediaUrlResolver urlResolver;
+    private final RowMapper<ProductCardView> productCardMapper;
 
     public ProductSearchQuery(
         JdbcClient jdbcClient,
         CategoryPathResolver pathResolver,
-        ObjectMapper objectMapper
+        ObjectMapper objectMapper,
+        MediaUrlResolver urlResolver
     ) {
         this.jdbcClient = jdbcClient;
         this.pathResolver = pathResolver;
         this.objectMapper = objectMapper;
+        this.urlResolver = urlResolver;
+        this.productCardMapper = (rs, rowNum) ->
+            new ProductCardView(
+                rs.getLong("id"),
+                rs.getString("name"),
+                rs.getString("slug"),
+                urlResolver.resolveUrl(rs.getString("main_image_url")),
+                rs.getBigDecimal("min_price"),
+                rs.getBigDecimal("max_price"),
+                rs.getLong("category_id"),
+                rs.getString("category_name"),
+                rs.getString("category_slug")
+            );
     }
 
-    public PageResponse<ProductCardView> execute(
-        ProductSearchCriteria criteria
-    ) {
-        ProductSearchCriteria safeCriteria =
-            criteria != null ? criteria : ProductSearchCriteria.empty();
+    public PageResponse<ProductCardView> execute(ProductSearchCriteria criteria) {
+        ProductSearchCriteria safeCriteria = criteria != null ? criteria : ProductSearchCriteria.empty();
 
         List<String> where = new ArrayList<>();
         Map<String, Object> params = new HashMap<>();
         applyFilters(where, params, safeCriteria);
 
-        String whereClause = where.isEmpty()
-            ? ""
-            : "WHERE " + String.join("\n  AND ", where);
+        String whereClause = where.isEmpty() ? "" : "WHERE " + String.join("\n  AND ", where);
 
         // 1. Chạy câu lệnh COUNT (không có ORDER BY, không chạy subquery thừa)
-        String countSql = "SELECT COUNT(*) FROM products p\n" +
-            "JOIN categories c ON p.category_id = c.id\n" +
-            whereClause;
+        String countSql =
+            "SELECT COUNT(*) FROM products p\n" + "JOIN categories c ON p.category_id = c.id\n" + whereClause;
 
         var countSpec = jdbcClient.sql(countSql);
         params.forEach(countSpec::param);
@@ -70,15 +65,11 @@ public class ProductSearchQuery {
         long totalElements = total != null ? total : 0L;
 
         if (totalElements == 0) {
-            return PageResponse.empty(
-                safeCriteria.getPage(),
-                safeCriteria.getSize()
-            );
+            return PageResponse.empty(safeCriteria.getPage(), safeCriteria.getSize());
         }
 
         // 2. Chạy câu lệnh SELECT DATA với LIMIT / OFFSET
-        boolean hasKeyword =
-            safeCriteria.keyword() != null && !safeCriteria.keyword().isBlank();
+        boolean hasKeyword = safeCriteria.keyword() != null && !safeCriteria.keyword().isBlank();
         String orderBy = resolveSortOrder(safeCriteria.sortBy(), hasKeyword);
 
         String dataSql =
@@ -111,25 +102,15 @@ public class ProductSearchQuery {
         dataSpec.param("limit", safeCriteria.getSize());
         dataSpec.param("offset", safeCriteria.getOffset());
 
-        List<ProductCardView> content = dataSpec.query(PRODUCT_CARD_MAPPER).list();
+        List<ProductCardView> content = dataSpec.query(productCardMapper).list();
 
-        return PageResponse.of(
-            content,
-            safeCriteria.getPage(),
-            safeCriteria.getSize(),
-            totalElements
-        );
+        return PageResponse.of(content, safeCriteria.getPage(), safeCriteria.getSize(), totalElements);
     }
 
-    private void applyFilters(
-        List<String> where,
-        Map<String, Object> params,
-        ProductSearchCriteria criteria
-    ) {
+    private void applyFilters(List<String> where, Map<String, Object> params, ProductSearchCriteria criteria) {
         where.add("p.status = 'ACTIVE'");
 
-        boolean hasKeyword =
-            criteria.keyword() != null && !criteria.keyword().isBlank();
+        boolean hasKeyword = criteria.keyword() != null && !criteria.keyword().isBlank();
         if (hasKeyword) {
             where.add(
                 "to_tsvector('simple', immutable_unaccent(p.name)) @@ websearch_to_tsquery('simple', immutable_unaccent(:keyword))"
@@ -138,9 +119,7 @@ public class ProductSearchQuery {
         }
 
         if (criteria.categoryId() != null) {
-            String pathPrefix = pathResolver.getCategoryPathPrefix(
-                criteria.categoryId()
-            );
+            String pathPrefix = pathResolver.getCategoryPathPrefix(criteria.categoryId());
             if (pathPrefix != null) {
                 where.add("(c.id = :categoryId OR c.path LIKE :pathPrefix)");
                 params.put("categoryId", criteria.categoryId());
@@ -161,10 +140,7 @@ public class ProductSearchQuery {
             params.put("maxPrice", criteria.maxPrice());
         }
 
-        if (
-            criteria.optionValueIds() != null &&
-            !criteria.optionValueIds().isEmpty()
-        ) {
+        if (criteria.optionValueIds() != null && !criteria.optionValueIds().isEmpty()) {
             where.add(
                 """
                     EXISTS (
@@ -204,10 +180,7 @@ public class ProductSearchQuery {
         try {
             return objectMapper.writeValueAsString(obj);
         } catch (Exception e) {
-            throw new IllegalArgumentException(
-                "Failed to serialize object to JSON",
-                e
-            );
+            throw new IllegalArgumentException("Failed to serialize object to JSON", e);
         }
     }
 }

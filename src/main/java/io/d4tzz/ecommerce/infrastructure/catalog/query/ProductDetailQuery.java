@@ -12,6 +12,7 @@ import java.util.Objects;
 import java.util.Optional;
 import java.util.stream.Collectors;
 import org.springframework.jdbc.core.simple.JdbcClient;
+import io.d4tzz.ecommerce.storage.MediaUrlResolver;
 import org.springframework.stereotype.Component;
 import tools.jackson.core.type.TypeReference;
 import tools.jackson.databind.ObjectMapper;
@@ -21,13 +22,16 @@ public class ProductDetailQuery {
 
     private final JdbcClient jdbcClient;
     private final ObjectMapper objectMapper;
+    private final MediaUrlResolver urlResolver;
 
     public ProductDetailQuery(
         JdbcClient jdbcClient,
-        ObjectMapper objectMapper
+        ObjectMapper objectMapper,
+        MediaUrlResolver urlResolver
     ) {
         this.jdbcClient = jdbcClient;
         this.objectMapper = objectMapper;
+        this.urlResolver = urlResolver;
     }
 
     public Optional<ProductDetailView> execute(String slug) {
@@ -175,7 +179,7 @@ public class ProductDetailQuery {
         return jdbcClient
             .sql(sql)
             .param("productId", productId)
-            .query((rs, rowNum) -> rs.getString("media_id"))
+            .query((rs, rowNum) -> urlResolver.resolveUrl(rs.getString("media_id")))
             .list();
     }
 
@@ -322,7 +326,7 @@ public class ProductDetailQuery {
                     r.sku(),
                     r.price(),
                     r.compareAt(),
-                    r.mediaId(),
+                    urlResolver.resolveUrl(r.mediaId()),
                     r.length(),
                     r.width(),
                     r.height(),

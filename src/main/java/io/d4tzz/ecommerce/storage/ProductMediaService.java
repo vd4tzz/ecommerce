@@ -33,11 +33,18 @@ public class ProductMediaService {
     private final S3Presigner s3Presigner;
     private final S3Client s3Client;
     private final StorageProperties properties;
+    private final MediaUrlResolver urlResolver;
 
-    public ProductMediaService(S3Presigner s3Presigner, S3Client s3Client, StorageProperties properties) {
+    public ProductMediaService(
+        S3Presigner s3Presigner,
+        S3Client s3Client,
+        StorageProperties properties,
+        MediaUrlResolver urlResolver
+    ) {
         this.s3Presigner = s3Presigner;
         this.s3Client = s3Client;
         this.properties = properties;
+        this.urlResolver = urlResolver;
     }
 
     public PresignedUploadResponse generatePresignedUploadUrl(PresignedUploadRequest request) {
@@ -101,6 +108,6 @@ public class ProductMediaService {
     }
 
     private String resolvePublicUrl(String mediaId) {
-        return properties.publicBaseUrl().replaceAll("/+$", "") + "/" + mediaId;
+        return urlResolver.resolveUrl(mediaId);
     }
 }
