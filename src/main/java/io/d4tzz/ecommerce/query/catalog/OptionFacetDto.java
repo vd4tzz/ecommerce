@@ -4,6 +4,5 @@ public record OptionFacetDto(
     Long optionId,
     Long valueId,
     String optionName,
-    String valueName,
-    Long productCount
+    String valueName
 ) {}

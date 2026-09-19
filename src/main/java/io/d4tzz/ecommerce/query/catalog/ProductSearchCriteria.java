@@ -10,7 +10,7 @@ public record ProductSearchCriteria(
     BigDecimal minPrice,
     BigDecimal maxPrice,
     List<Long> optionValueIds,
-    Map<String, String> attributes,
+    Map<String, List<String>> attributes,
     String sortBy,
     Integer page,
     Integer size,
@@ -22,7 +22,7 @@ public record ProductSearchCriteria(
         BigDecimal minPrice,
         BigDecimal maxPrice,
         List<Long> optionValueIds,
-        Map<String, String> attributes,
+        Map<String, List<String>> attributes,
         String sortBy,
         Integer page,
         Integer size

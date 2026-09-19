@@ -19,7 +19,6 @@ public class ProductSearchQuery {
     private final JdbcClient jdbcClient;
     private final CategoryPathResolver pathResolver;
     private final ObjectMapper objectMapper;
-    private final MediaUrlResolver urlResolver;
     private final RowMapper<ProductCardView> productCardMapper;
 
     public ProductSearchQuery(
@@ -31,7 +30,6 @@ public class ProductSearchQuery {
         this.jdbcClient = jdbcClient;
         this.pathResolver = pathResolver;
         this.objectMapper = objectMapper;
-        this.urlResolver = urlResolver;
         this.productCardMapper = (rs, rowNum) ->
             new ProductCardView(
                 rs.getLong("id"),
@@ -55,7 +53,6 @@ public class ProductSearchQuery {
 
         String whereClause = where.isEmpty() ? "" : "WHERE " + String.join("\n  AND ", where);
 
-        // 1. Chạy câu lệnh COUNT (không có ORDER BY, không chạy subquery thừa)
         String countSql =
             "SELECT COUNT(*) FROM products p\n" + "JOIN categories c ON p.category_id = c.id\n" + whereClause;
 
@@ -68,7 +65,6 @@ public class ProductSearchQuery {
             return PageResponse.empty(safeCriteria.getPage(), safeCriteria.getSize());
         }
 
-        // 2. Chạy câu lệnh SELECT DATA với LIMIT / OFFSET
         boolean hasKeyword = safeCriteria.keyword() != null && !safeCriteria.keyword().isBlank();
         String orderBy = resolveSortOrder(safeCriteria.sortBy(), hasKeyword);
 
@@ -108,7 +104,7 @@ public class ProductSearchQuery {
     }
 
     private void applyFilters(List<String> where, Map<String, Object> params, ProductSearchCriteria criteria) {
-        where.add("p.status = 'ACTIVE'");
+        where.add("p.status = 'PUBLISHED'");
 
         boolean hasKeyword = criteria.keyword() != null && !criteria.keyword().isBlank();
         if (hasKeyword) {
@@ -147,6 +143,10 @@ public class ProductSearchQuery {
                         SELECT 1 FROM product_option_values pov
                         WHERE pov.product_id = p.id
                           AND pov.value_id IN (:optionValueIds)
+                        GROUP BY pov.product_id
+                        HAVING COUNT(DISTINCT pov.option_id) = (
+                            SELECT COUNT(DISTINCT option_id) FROM option_values WHERE id IN (:optionValueIds)
+                        )
                     )
                 """
             );
@@ -154,8 +154,33 @@ public class ProductSearchQuery {
         }
 
         if (criteria.attributes() != null && !criteria.attributes().isEmpty()) {
-            where.add("p.attributes @> CAST(:attrFilter AS jsonb)");
-            params.put("attrFilter", toJson(criteria.attributes()));
+            int attrIdx = 0;
+            for (Map.Entry<String, List<String>> entry : criteria.attributes().entrySet()) {
+                List<String> values = entry.getValue();
+                if (values == null || values.isEmpty()) {
+                    continue;
+                }
+                List<String> orClauses = new ArrayList<>();
+                int valIdx = 0;
+                for (String val : values) {
+                    String scalarParam = "attrScalar_" + attrIdx + "_" + valIdx;
+                    String arrayParam = "attrArray_" + attrIdx + "_" + valIdx;
+                    orClauses.add(
+                        "(p.attributes @> CAST(:" +
+                            scalarParam +
+                            " AS jsonb) OR p.attributes @> CAST(:" +
+                            arrayParam +
+                            " AS jsonb))"
+                    );
+                    params.put(scalarParam, toJson(Map.of(entry.getKey(), val)));
+                    params.put(arrayParam, toJson(Map.of(entry.getKey(), List.of(val))));
+                    valIdx++;
+                }
+                if (!orClauses.isEmpty()) {
+                    where.add("(" + String.join(" OR ", orClauses) + ")");
+                }
+                attrIdx++;
+            }
         }
     }
 

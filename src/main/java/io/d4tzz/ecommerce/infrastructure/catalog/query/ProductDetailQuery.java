@@ -63,7 +63,8 @@ public class ProductDetailQuery {
                 p.attributes
             FROM products p
             LEFT JOIN categories c ON p.category_id = c.id
-            WHERE\s""" + whereClause;
+            WHERE
+            """ + whereClause;
 
         var spec = jdbcClient.sql(sql);
         for (Map.Entry<String, Object> entry : params.entrySet()) {
