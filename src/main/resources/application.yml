@@ -18,7 +18,24 @@ spring:
         format_sql: true
     show-sql: true
 
+  mail:
+    host: ${SPRING_MAIL_HOST:localhost}
+    port: ${SPRING_MAIL_PORT:1025}
+    username: ${SPRING_MAIL_USERNAME:}
+    password: ${SPRING_MAIL_PASSWORD:}
+    properties:
+      mail:
+        smtp:
+          auth: ${SPRING_MAIL_PROPERTIES_MAIL_SMTP_AUTH:false}
+          starttls:
+            enable: ${SPRING_MAIL_PROPERTIES_MAIL_SMTP_STARTTLS_ENABLE:false}
+
 app:
+  security:
+    jwt:
+      secret-key: ${JWT_SECRET_KEY:404E635266556A586E3272357538782F413F4428472B4B6250645367566B5970}
+      access-token-validity: ${JWT_ACCESS_TOKEN_VALIDITY:15m}
+      refresh-token-validity: ${JWT_REFRESH_TOKEN_VALIDITY:7d}
   storage:
     s3:
       bucket: ecommerce
@@ -28,3 +45,11 @@ app:
       secret-key: any
       public-base-url: http://localhost:8333/ecommerce
       presigned-duration-minutes: 15
+
+springdoc:
+  api-docs:
+    path: /v3/api-docs
+  swagger-ui:
+    path: /swagger-ui.html
+    operations-sorter: method
+    tags-sorter: alpha

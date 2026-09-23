@@ -24,6 +24,14 @@ services:
     volumes:
       - seaweed_data:/data
 
+  mailpit:
+    image: axllent/mailpit:latest
+    container_name: ecommerce-mailpit
+    restart: unless-stopped
+    ports:
+      - "1025:1025" # SMTP port (cho backend gửi mail vào)
+      - "8025:8025" # Web UI (mở trình duyệt xem mail)
+
 volumes:
   postgres_data:
   seaweed_data:
