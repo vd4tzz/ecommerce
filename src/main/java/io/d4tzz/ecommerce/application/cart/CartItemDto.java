@@ -1,0 +1,15 @@
+package io.d4tzz.ecommerce.application.cart;
+
+import java.math.BigDecimal;
+
+public record CartItemDto(
+    Long id,
+    Long variantId,
+    String sku,
+    String productName,
+    String productSlug,
+    String mediaUrl,
+    BigDecimal unitPrice,
+    int quantity,
+    BigDecimal totalPrice
+) {}
