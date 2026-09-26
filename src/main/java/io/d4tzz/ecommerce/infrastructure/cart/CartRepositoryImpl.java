@@ -8,10 +8,10 @@ import io.d4tzz.ecommerce.domain.cart.CartRepository;
 import io.d4tzz.ecommerce.domain.catalog.product.VariantId;
 import io.d4tzz.ecommerce.domain.user.UserId;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
-import java.util.function.Function;
 import java.util.stream.Collectors;
 import org.springframework.stereotype.Repository;
 
@@ -41,35 +41,36 @@ public class CartRepositoryImpl implements CartRepository {
             jpaCart = new JpaCart();
             jpaCart.setUserId(cart.getUserId().value());
         } else {
-            jpaCart = springRepo.findById(cart.getId().value()).orElseGet(() -> {
-                JpaCart created = new JpaCart();
-                created.setUserId(cart.getUserId().value());
-                return created;
-            });
+            jpaCart = springRepo.findById(cart.getId().value()).orElseThrow();
         }
 
         // Sync items
-        Map<Long, JpaCartItem> existingByVariant = jpaCart.getItems().stream()
-            .collect(Collectors.toMap(JpaCartItem::getVariantId, Function.identity(), (a, b) -> a));
+        Map<Long, CartItem> existingDomainItemsById = new HashMap<>();
+        List<CartItem> newDomainItems = new ArrayList<>();
 
-        List<JpaCartItem> updatedList = new ArrayList<>();
-        for (CartItem domainItem : cart.getItems()) {
-            Long variantId = domainItem.getVariantId().value();
-            JpaCartItem jpaItem = existingByVariant.get(variantId);
-            if (jpaItem != null) {
-                jpaItem.setQuantity(domainItem.getQuantity());
-                updatedList.add(jpaItem);
+        for (CartItem item : cart.getItems()) {
+            if (item.getId() != null) {
+                existingDomainItemsById.put(item.getId().value(), item);
             } else {
-                JpaCartItem newItem = new JpaCartItem();
-                newItem.setCart(jpaCart);
-                newItem.setVariantId(variantId);
-                newItem.setQuantity(domainItem.getQuantity());
-                updatedList.add(newItem);
+                newDomainItems.add(item);
             }
         }
 
-        jpaCart.getItems().clear();
-        jpaCart.getItems().addAll(updatedList);
+        jpaCart.getItems().removeIf(jpaItem -> !existingDomainItemsById.containsKey(jpaItem.getId()));
+
+        for (JpaCartItem jpaItem : jpaCart.getItems()) {
+            CartItem domainItem = existingDomainItemsById.get(jpaItem.getId());
+            if (domainItem != null) {
+                jpaItem.setQuantity(domainItem.getQuantity());
+            }
+        }
+
+        for (CartItem newItem : newDomainItems) {
+            JpaCartItem jpaItem = new JpaCartItem();
+            jpaItem.setVariantId(newItem.getVariantId().value());
+            jpaItem.setQuantity(newItem.getQuantity());
+            jpaCart.addItem(jpaItem);
+        }
 
         JpaCart saved = springRepo.save(jpaCart);
         return toDomain(saved);
@@ -81,18 +82,14 @@ public class CartRepositoryImpl implements CartRepository {
     }
 
     private Cart toDomain(JpaCart jpa) {
-        List<CartItem> domainItems = jpa.getItems().stream()
-            .map(item -> CartItem.restore(
-                CartItemId.of(item.getId()),
-                VariantId.of(item.getVariantId()),
-                item.getQuantity()
-            ))
+        List<CartItem> domainItems = jpa
+            .getItems()
+            .stream()
+            .map(item ->
+                CartItem.restore(CartItemId.of(item.getId()), VariantId.of(item.getVariantId()), item.getQuantity())
+            )
             .collect(Collectors.toList());
 
-        return Cart.restore(
-            CartId.of(jpa.getId()),
-            UserId.of(jpa.getUserId()),
-            domainItems
-        );
+        return Cart.restore(CartId.of(jpa.getId()), UserId.of(jpa.getUserId()), domainItems);
     }
 }

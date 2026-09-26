@@ -110,9 +110,6 @@ public class Cart {
         return id;
     }
 
-    public void setId(CartId id) {
-        this.id = id;
-    }
 
     public UserId getUserId() {
         return userId;

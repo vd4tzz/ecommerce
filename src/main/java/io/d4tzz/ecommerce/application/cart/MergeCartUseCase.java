@@ -17,14 +17,12 @@ public class MergeCartUseCase {
     public record Command(Long userId, List<Item> items) {}
 
     private final CartRepository cartRepository;
-    private final CartDtoAssembler cartDtoAssembler;
 
-    public MergeCartUseCase(CartRepository cartRepository, CartDtoAssembler cartDtoAssembler) {
+    public MergeCartUseCase(CartRepository cartRepository) {
         this.cartRepository = cartRepository;
-        this.cartDtoAssembler = cartDtoAssembler;
     }
 
-    public CartDto execute(Command command) {
+    public void execute(Command command) {
         UserId userId = UserId.of(command.userId());
         Cart cart = cartRepository.findByUserId(userId).orElseGet(() -> Cart.create(userId));
 
@@ -32,7 +30,6 @@ public class MergeCartUseCase {
             cart.mergeItem(VariantId.of(item.variantId()), item.quantity());
         }
 
-        Cart saved = cartRepository.save(cart);
-        return cartDtoAssembler.toDto(saved);
+        cartRepository.save(cart);
     }
 }

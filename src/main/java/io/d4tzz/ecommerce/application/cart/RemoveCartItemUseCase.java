@@ -15,21 +15,17 @@ public class RemoveCartItemUseCase {
     public record Command(Long userId, Long variantId) {}
 
     private final CartRepository cartRepository;
-    private final CartDtoAssembler cartDtoAssembler;
 
-    public RemoveCartItemUseCase(CartRepository cartRepository, CartDtoAssembler cartDtoAssembler) {
+    public RemoveCartItemUseCase(CartRepository cartRepository) {
         this.cartRepository = cartRepository;
-        this.cartDtoAssembler = cartDtoAssembler;
     }
 
-    public CartDto execute(Command command) {
+    public void execute(Command command) {
         UserId userId = UserId.of(command.userId());
         Cart cart = cartRepository.findByUserId(userId)
             .orElseThrow(() -> new NotFoundException("Cart not found for user: " + command.userId()));
 
         cart.removeItem(VariantId.of(command.variantId()));
-        Cart saved = cartRepository.save(cart);
-
-        return cartDtoAssembler.toDto(saved);
+        cartRepository.save(cart);
     }
 }

@@ -43,9 +43,6 @@ public class CartItem {
         return id;
     }
 
-    public void setId(CartItemId id) {
-        this.id = id;
-    }
 
     public VariantId getVariantId() {
         return variantId;

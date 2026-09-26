@@ -1,12 +1,12 @@
 package io.d4tzz.ecommerce.rest;
 
 import io.d4tzz.ecommerce.application.cart.AddToCartUseCase;
-import io.d4tzz.ecommerce.application.cart.CartDto;
 import io.d4tzz.ecommerce.application.cart.ClearCartUseCase;
-import io.d4tzz.ecommerce.application.cart.GetCartUseCase;
 import io.d4tzz.ecommerce.application.cart.MergeCartUseCase;
 import io.d4tzz.ecommerce.application.cart.RemoveCartItemUseCase;
 import io.d4tzz.ecommerce.application.cart.UpdateCartItemUseCase;
+import io.d4tzz.ecommerce.query.cart.CartDto;
+import io.d4tzz.ecommerce.query.cart.CartQueryService;
 import io.d4tzz.ecommerce.rest.security.CurrentUser;
 import java.util.List;
 import org.springframework.http.ResponseEntity;
@@ -23,7 +23,7 @@ import org.springframework.web.bind.annotation.RestController;
 @RequestMapping("/cart")
 public class CartController {
 
-    private final GetCartUseCase getCartUseCase;
+    private final CartQueryService cartQueryService;
     private final AddToCartUseCase addToCartUseCase;
     private final UpdateCartItemUseCase updateCartItemUseCase;
     private final RemoveCartItemUseCase removeCartItemUseCase;
@@ -31,14 +31,14 @@ public class CartController {
     private final MergeCartUseCase mergeCartUseCase;
 
     public CartController(
-        GetCartUseCase getCartUseCase,
+        CartQueryService cartQueryService,
         AddToCartUseCase addToCartUseCase,
         UpdateCartItemUseCase updateCartItemUseCase,
         RemoveCartItemUseCase removeCartItemUseCase,
         ClearCartUseCase clearCartUseCase,
         MergeCartUseCase mergeCartUseCase
     ) {
-        this.getCartUseCase = getCartUseCase;
+        this.cartQueryService = cartQueryService;
         this.addToCartUseCase = addToCartUseCase;
         this.updateCartItemUseCase = updateCartItemUseCase;
         this.removeCartItemUseCase = removeCartItemUseCase;
@@ -48,7 +48,7 @@ public class CartController {
 
     @GetMapping
     public ResponseEntity<CartDto> getCart(@CurrentUser Long userId) {
-        return ResponseEntity.ok(getCartUseCase.execute(new GetCartUseCase.Query(userId)));
+        return ResponseEntity.ok(cartQueryService.getCart(userId));
     }
 
     @PostMapping("/items")
@@ -57,7 +57,8 @@ public class CartController {
         @RequestBody AddToCartRequest request
     ) {
         var command = new AddToCartUseCase.Command(userId, request.variantId(), request.quantity());
-        return ResponseEntity.ok(addToCartUseCase.execute(command));
+        addToCartUseCase.execute(command);
+        return ResponseEntity.ok(cartQueryService.getCart(userId));
     }
 
     @PutMapping("/items/{variantId}")
@@ -67,7 +68,8 @@ public class CartController {
         @RequestBody UpdateCartItemRequest request
     ) {
         var command = new UpdateCartItemUseCase.Command(userId, variantId, request.quantity());
-        return ResponseEntity.ok(updateCartItemUseCase.execute(command));
+        updateCartItemUseCase.execute(command);
+        return ResponseEntity.ok(cartQueryService.getCart(userId));
     }
 
     @DeleteMapping("/items/{variantId}")
@@ -76,7 +78,8 @@ public class CartController {
         @PathVariable Long variantId
     ) {
         var command = new RemoveCartItemUseCase.Command(userId, variantId);
-        return ResponseEntity.ok(removeCartItemUseCase.execute(command));
+        removeCartItemUseCase.execute(command);
+        return ResponseEntity.ok(cartQueryService.getCart(userId));
     }
 
     @DeleteMapping
@@ -95,7 +98,8 @@ public class CartController {
             .toList() : List.of();
 
         var command = new MergeCartUseCase.Command(userId, domainItems);
-        return ResponseEntity.ok(mergeCartUseCase.execute(command));
+        mergeCartUseCase.execute(command);
+        return ResponseEntity.ok(cartQueryService.getCart(userId));
     }
 }
 

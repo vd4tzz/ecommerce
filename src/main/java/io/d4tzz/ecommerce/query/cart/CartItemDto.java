@@ -1,4 +1,4 @@
-package io.d4tzz.ecommerce.application.cart;
+package io.d4tzz.ecommerce.query.cart;
 
 import java.math.BigDecimal;
 
