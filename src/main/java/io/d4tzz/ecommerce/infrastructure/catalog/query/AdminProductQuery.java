@@ -18,13 +18,13 @@ public class AdminProductQuery {
 
     private final JdbcClient jdbcClient;
     private final CategoryPathResolver pathResolver;
-    private final MediaUrlResolver urlResolver;
+    // private final MediaUrlResolver urlResolver;
     private final RowMapper<AdminProductTableRowView> adminProductRowMapper;
 
     public AdminProductQuery(JdbcClient jdbcClient, CategoryPathResolver pathResolver, MediaUrlResolver urlResolver) {
         this.jdbcClient = jdbcClient;
         this.pathResolver = pathResolver;
-        this.urlResolver = urlResolver;
+        // this.urlResolver = urlResolver;
         this.adminProductRowMapper = (rs, rowNum) ->
             new AdminProductTableRowView(
                 rs.getLong("id"),

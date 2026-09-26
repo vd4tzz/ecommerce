@@ -15,7 +15,9 @@ import io.d4tzz.ecommerce.query.catalog.AdminProductSearchCriteria;
 import io.d4tzz.ecommerce.query.catalog.AdminProductTableRowView;
 import io.d4tzz.ecommerce.query.catalog.ProductDetailView;
 import io.d4tzz.ecommerce.query.catalog.ProductQueryService;
+import io.d4tzz.ecommerce.query.catalog.ProductVariantSummaryView;
 import java.net.URI;
+import java.util.List;
 import java.util.Map;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.DeleteMapping;
@@ -80,6 +82,14 @@ public class AdminProductController {
     @GetMapping("/status-counts")
     public ResponseEntity<Map<String, Long>> getStatusCounts() {
         return ResponseEntity.ok(productQueryService.getAdminProductStatusCounts());
+    }
+
+    @GetMapping("/variants")
+    public ResponseEntity<List<ProductVariantSummaryView>> getVariants(
+        @RequestParam(required = false) String keyword,
+        @RequestParam(defaultValue = "20") int limit
+    ) {
+        return ResponseEntity.ok(productQueryService.getVariants(keyword, limit));
     }
 
     @GetMapping("/{id}")

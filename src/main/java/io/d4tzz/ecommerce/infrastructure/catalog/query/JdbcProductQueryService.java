@@ -8,6 +8,8 @@ import io.d4tzz.ecommerce.query.catalog.ProductCardView;
 import io.d4tzz.ecommerce.query.catalog.ProductDetailView;
 import io.d4tzz.ecommerce.query.catalog.ProductQueryService;
 import io.d4tzz.ecommerce.query.catalog.ProductSearchCriteria;
+import io.d4tzz.ecommerce.query.catalog.ProductVariantSummaryView;
+import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import org.springframework.stereotype.Service;
@@ -24,17 +26,20 @@ public class JdbcProductQueryService implements ProductQueryService {
     private final ProductFacetQuery facetQuery;
     private final ProductDetailQuery detailQuery;
     private final AdminProductQuery adminQuery;
+    private final VariantSearchQuery variantSearchQuery;
 
     public JdbcProductQueryService(
         ProductSearchQuery searchQuery,
         ProductFacetQuery facetQuery,
         ProductDetailQuery detailQuery,
-        AdminProductQuery adminQuery
+        AdminProductQuery adminQuery,
+        VariantSearchQuery variantSearchQuery
     ) {
         this.searchQuery = searchQuery;
         this.facetQuery = facetQuery;
         this.detailQuery = detailQuery;
         this.adminQuery = adminQuery;
+        this.variantSearchQuery = variantSearchQuery;
     }
 
     @Override
@@ -69,5 +74,10 @@ public class JdbcProductQueryService implements ProductQueryService {
     @Override
     public Map<String, Long> getAdminProductStatusCounts() {
         return adminQuery.getProductStatusCounts();
+    }
+
+    @Override
+    public List<ProductVariantSummaryView> getVariants(String keyword, int limit) {
+        return variantSearchQuery.execute(keyword, limit);
     }
 }
