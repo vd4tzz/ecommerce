@@ -1,5 +1,6 @@
 package io.d4tzz.ecommerce.application.user;
 
+import io.d4tzz.ecommerce.application.user.command.ChangePasswordCommand;
 import io.d4tzz.ecommerce.common.exception.NotFoundException;
 import io.d4tzz.ecommerce.domain.user.PasswordHasher;
 import io.d4tzz.ecommerce.domain.user.User;
@@ -12,8 +13,6 @@ import org.springframework.transaction.annotation.Transactional;
 @Transactional
 public class ChangePasswordUseCase {
 
-    public record Command(Long userId, String oldPassword, String newPassword) {}
-
     private final UserRepository userRepository;
     private final PasswordHasher passwordHasher;
 
@@ -22,7 +21,7 @@ public class ChangePasswordUseCase {
         this.passwordHasher = passwordHasher;
     }
 
-    public void execute(Command command) {
+    public void execute(ChangePasswordCommand command) {
         UserId userId = UserId.of(command.userId());
         User user = userRepository
             .find(userId)

@@ -5,8 +5,13 @@ import io.d4tzz.ecommerce.application.cart.ClearCartUseCase;
 import io.d4tzz.ecommerce.application.cart.MergeCartUseCase;
 import io.d4tzz.ecommerce.application.cart.RemoveCartItemUseCase;
 import io.d4tzz.ecommerce.application.cart.UpdateCartItemUseCase;
-import io.d4tzz.ecommerce.query.cart.CartDto;
+import io.d4tzz.ecommerce.application.cart.command.AddToCartCommand;
+import io.d4tzz.ecommerce.application.cart.command.ClearCartCommand;
+import io.d4tzz.ecommerce.application.cart.command.MergeCartCommand;
+import io.d4tzz.ecommerce.application.cart.command.RemoveCartItemCommand;
+import io.d4tzz.ecommerce.application.cart.command.UpdateCartItemCommand;
 import io.d4tzz.ecommerce.query.cart.CartQueryService;
+import io.d4tzz.ecommerce.query.cart.CartView;
 import io.d4tzz.ecommerce.rest.security.CurrentUser;
 import java.util.List;
 import org.springframework.http.ResponseEntity;
@@ -47,57 +52,52 @@ public class CartController {
     }
 
     @GetMapping
-    public ResponseEntity<CartDto> getCart(@CurrentUser Long userId) {
+    public ResponseEntity<CartView> getCart(@CurrentUser Long userId) {
         return ResponseEntity.ok(cartQueryService.getCart(userId));
     }
 
     @PostMapping("/items")
-    public ResponseEntity<CartDto> addItem(
-        @CurrentUser Long userId,
-        @RequestBody AddToCartRequest request
-    ) {
-        var command = new AddToCartUseCase.Command(userId, request.variantId(), request.quantity());
+    public ResponseEntity<CartView> addItem(@CurrentUser Long userId, @RequestBody AddToCartRequest request) {
+        var command = new AddToCartCommand(userId, request.variantId(), request.quantity());
         addToCartUseCase.execute(command);
         return ResponseEntity.ok(cartQueryService.getCart(userId));
     }
 
     @PutMapping("/items/{variantId}")
-    public ResponseEntity<CartDto> updateQuantity(
+    public ResponseEntity<CartView> updateQuantity(
         @CurrentUser Long userId,
         @PathVariable Long variantId,
         @RequestBody UpdateCartItemRequest request
     ) {
-        var command = new UpdateCartItemUseCase.Command(userId, variantId, request.quantity());
+        var command = new UpdateCartItemCommand(userId, variantId, request.quantity());
         updateCartItemUseCase.execute(command);
         return ResponseEntity.ok(cartQueryService.getCart(userId));
     }
 
     @DeleteMapping("/items/{variantId}")
-    public ResponseEntity<CartDto> removeItem(
-        @CurrentUser Long userId,
-        @PathVariable Long variantId
-    ) {
-        var command = new RemoveCartItemUseCase.Command(userId, variantId);
+    public ResponseEntity<CartView> removeItem(@CurrentUser Long userId, @PathVariable Long variantId) {
+        var command = new RemoveCartItemCommand(userId, variantId);
         removeCartItemUseCase.execute(command);
         return ResponseEntity.ok(cartQueryService.getCart(userId));
     }
 
     @DeleteMapping
     public ResponseEntity<Void> clearCart(@CurrentUser Long userId) {
-        clearCartUseCase.execute(new ClearCartUseCase.Command(userId));
+        clearCartUseCase.execute(new ClearCartCommand(userId));
         return ResponseEntity.noContent().build();
     }
 
     @PostMapping("/merge")
-    public ResponseEntity<CartDto> mergeCart(
-        @CurrentUser Long userId,
-        @RequestBody List<MergeCartItemRequest> items
-    ) {
-        List<MergeCartUseCase.Item> domainItems = items != null ? items.stream()
-            .map(item -> new MergeCartUseCase.Item(item.variantId(), item.quantity()))
-            .toList() : List.of();
+    public ResponseEntity<CartView> mergeCart(@CurrentUser Long userId, @RequestBody List<MergeCartItemRequest> items) {
+        List<MergeCartCommand.Item> domainItems =
+            items != null
+                ? items
+                      .stream()
+                      .map(item -> new MergeCartCommand.Item(item.variantId(), item.quantity()))
+                      .toList()
+                : List.of();
 
-        var command = new MergeCartUseCase.Command(userId, domainItems);
+        var command = new MergeCartCommand(userId, domainItems);
         mergeCartUseCase.execute(command);
         return ResponseEntity.ok(cartQueryService.getCart(userId));
     }

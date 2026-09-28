@@ -3,6 +3,8 @@ package io.d4tzz.ecommerce.rest;
 import io.d4tzz.ecommerce.application.user.ChangePasswordUseCase;
 import io.d4tzz.ecommerce.application.user.UpdateProfileUseCase;
 import io.d4tzz.ecommerce.application.user.UserDto;
+import io.d4tzz.ecommerce.application.user.command.ChangePasswordCommand;
+import io.d4tzz.ecommerce.application.user.command.UpdateProfileCommand;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PutMapping;
@@ -30,7 +32,7 @@ public class UserController {
         @PathVariable Long id,
         @RequestBody UpdateProfileRequest request
     ) {
-        var command = new UpdateProfileUseCase.Command(id, request.fullName(), request.phoneNumber(), request.avatarUrl());
+        var command = new UpdateProfileCommand(id, request.fullName(), request.phoneNumber(), request.avatarUrl());
         UserDto response = updateProfileUseCase.execute(command);
         return ResponseEntity.ok(response);
     }
@@ -40,7 +42,7 @@ public class UserController {
         @PathVariable Long id,
         @RequestBody ChangePasswordRequest request
     ) {
-        var command = new ChangePasswordUseCase.Command(id, request.oldPassword(), request.newPassword());
+        var command = new ChangePasswordCommand(id, request.oldPassword(), request.newPassword());
         changePasswordUseCase.execute(command);
         return ResponseEntity.noContent().build();
     }

@@ -1,17 +1,18 @@
 package io.d4tzz.ecommerce.rest;
 
-import io.d4tzz.ecommerce.application.catalog.category.CreateCategoryCommand;
 import io.d4tzz.ecommerce.application.catalog.category.CreateCategoryUseCase;
 import io.d4tzz.ecommerce.application.catalog.category.DeleteCategoryUseCase;
-import io.d4tzz.ecommerce.application.catalog.category.UpdateCategoryAttributesCommand;
 import io.d4tzz.ecommerce.application.catalog.category.UpdateCategoryAttributesUseCase;
-import io.d4tzz.ecommerce.application.catalog.category.UpdateCategoryCommand;
 import io.d4tzz.ecommerce.application.catalog.category.UpdateCategoryUseCase;
+import io.d4tzz.ecommerce.application.catalog.category.command.CreateCategoryCommand;
+import io.d4tzz.ecommerce.application.catalog.category.command.UpdateCategoryAttributesCommand;
+import io.d4tzz.ecommerce.application.catalog.category.command.UpdateCategoryCommand;
 import io.d4tzz.ecommerce.common.exception.NotFoundException;
-import io.d4tzz.ecommerce.query.catalog.AdminCategoryDetailView;
-import io.d4tzz.ecommerce.query.catalog.AdminCategoryTableRowView;
-import io.d4tzz.ecommerce.query.catalog.CategoryQueryService;
-import io.d4tzz.ecommerce.query.catalog.EffectiveAttributeView;
+import io.d4tzz.ecommerce.domain.catalog.category.AttributeType;
+import io.d4tzz.ecommerce.query.catalog.category.AdminCategoryDetailView;
+import io.d4tzz.ecommerce.query.catalog.category.AdminCategoryTableRowView;
+import io.d4tzz.ecommerce.query.catalog.category.CategoryQueryService;
+import io.d4tzz.ecommerce.query.catalog.category.EffectiveAttributeView;
 import java.net.URI;
 import java.util.List;
 import org.springframework.http.ResponseEntity;
@@ -54,21 +55,21 @@ public class AdminCategoryController {
     }
 
     @PostMapping
-    public ResponseEntity<?> createCategory(@RequestBody CreateCategoryRequest request) {
-        var command = new CreateCategoryCommand(
-            request.name(),
-            request.slug(),
-            request.parentId(),
-            request.attributes()
-        );
+    public ResponseEntity<CreateCategoryResponse> createCategory(@RequestBody CreateCategoryRequest request) {
+        List<CreateCategoryCommand.Attribute> attributes = request.attributes() != null
+            ? request.attributes().stream().map(this::toCreateCommandAttribute).toList()
+            : List.of();
+
+        var command = new CreateCategoryCommand(request.name(), request.slug(), request.parentId(), attributes);
         ValidationHelper.validate(command, validator);
 
-        var response = createCategoryUseCase.execute(command);
+        Long categoryId = createCategoryUseCase.execute(command);
         URI location = ServletUriComponentsBuilder.fromCurrentRequest()
             .path("/{id}")
-            .buildAndExpand(response.id())
+            .buildAndExpand(categoryId)
             .toUri();
-        return ResponseEntity.created(location).body(response);
+
+        return ResponseEntity.created(location).body(new CreateCategoryResponse(categoryId));
     }
 
     @GetMapping
@@ -85,10 +86,11 @@ public class AdminCategoryController {
     }
 
     @PutMapping("/{id}")
-    public ResponseEntity<?> updateCategory(@PathVariable Long id, @RequestBody UpdateCategoryRequest request) {
+    public ResponseEntity<Void> updateCategory(@PathVariable Long id, @RequestBody UpdateCategoryRequest request) {
         var command = new UpdateCategoryCommand(id, request.name(), request.slug());
         ValidationHelper.validate(command, validator);
-        return ResponseEntity.ok(updateCategoryUseCase.execute(command));
+        updateCategoryUseCase.execute(command);
+        return ResponseEntity.noContent().build();
     }
 
     @GetMapping("/{id}/effective-attributes")
@@ -97,13 +99,19 @@ public class AdminCategoryController {
     }
 
     @PutMapping("/{id}/attributes")
-    public ResponseEntity<?> updateCategoryAttributes(
+    public ResponseEntity<Void> updateCategoryAttributes(
         @PathVariable Long id,
-        @RequestBody List<UpdateCategoryAttributesCommand.Attribute> attributes
+        @RequestBody List<CategoryAttributeRequest> attributes
     ) {
-        var command = new UpdateCategoryAttributesCommand(id, attributes);
+        List<UpdateCategoryAttributesCommand.Attribute> commandAttributes = attributes != null
+            ? attributes.stream().map(this::toUpdateCommandAttribute).toList()
+            : List.of();
+
+        var command = new UpdateCategoryAttributesCommand(id, commandAttributes);
         ValidationHelper.validate(command, validator);
-        return ResponseEntity.ok(updateCategoryAttributesUseCase.execute(command));
+        updateCategoryAttributesUseCase.execute(command);
+
+        return ResponseEntity.noContent().build();
     }
 
     @DeleteMapping("/{id}")
@@ -111,13 +119,30 @@ public class AdminCategoryController {
         deleteCategoryUseCase.execute(id);
         return ResponseEntity.noContent().build();
     }
+
+    private CreateCategoryCommand.Attribute toCreateCommandAttribute(CategoryAttributeRequest attr) {
+        var values = attr.values() == null ? List.<CreateCategoryCommand.Attribute.Value>of()
+            : attr.values().stream()
+                  .map(v -> new CreateCategoryCommand.Attribute.Value(v.code(), v.label()))
+                  .toList();
+        return new CreateCategoryCommand.Attribute(attr.code(), attr.label(), attr.type(), values);
+    }
+
+    private UpdateCategoryAttributesCommand.Attribute toUpdateCommandAttribute(CategoryAttributeRequest attr) {
+        var values = attr.values() == null ? List.<UpdateCategoryAttributesCommand.Attribute.Value>of()
+            : attr.values().stream()
+                  .map(v -> new UpdateCategoryAttributesCommand.Attribute.Value(v.code(), v.label()))
+                  .toList();
+        return new UpdateCategoryAttributesCommand.Attribute(attr.code(), attr.label(), attr.type(), values);
+    }
 }
 
-record CreateCategoryRequest(
-    String name,
-    String slug,
-    Long parentId,
-    List<CreateCategoryCommand.Attribute> attributes
-) {}
+record CategoryAttributeRequest(String code, String label, AttributeType type, List<Value> values) {
+    public record Value(String code, String label) {}
+}
+
+record CreateCategoryRequest(String name, String slug, Long parentId, List<CategoryAttributeRequest> attributes) {}
+
+record CreateCategoryResponse(Long id) {}
 
 record UpdateCategoryRequest(String name, String slug) {}

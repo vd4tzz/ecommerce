@@ -13,13 +13,13 @@ public class Option {
     private OptionName name;
     private List<Value> values;
 
-    private Option(OptionId id, OptionName name, List<Value> values) {
+    public Option(OptionId id, OptionName name, List<Value> values) {
         this.id = id;
         this.name = name;
-        this.values = values != null ? new ArrayList<>(values) : new ArrayList<>();
+        this.values = values;
     }
 
-    public static Option create(OptionName name, List<ValueName> valueNames, OptionNameChecker checker) {
+    public static Option create(OptionName name, List<ValueName> valueNames, OptionNameUniqueChecker checker) {
         if (checker.exists(name)) {
             throw new ConflictException("Option name '" + name.value() + "' already exists");
         }
@@ -30,11 +30,7 @@ public class Option {
         return option;
     }
 
-    public static Option restore(OptionId id, OptionName name, List<Value> values) {
-        return new Option(id, name, values);
-    }
-
-    public void rename(OptionName newName, OptionNameChecker checker) {
+    public void rename(OptionName newName, OptionNameUniqueChecker checker) {
         if (this.name.equals(newName)) {
             return;
         }

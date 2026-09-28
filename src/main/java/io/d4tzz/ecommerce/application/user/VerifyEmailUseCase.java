@@ -1,14 +1,17 @@
 package io.d4tzz.ecommerce.application.user;
 
+import io.d4tzz.ecommerce.application.user.command.VerifyEmailCommand;
 import io.d4tzz.ecommerce.common.exception.InvalidOperationException;
 import io.d4tzz.ecommerce.common.exception.NotFoundException;
-import io.d4tzz.ecommerce.domain.user.Email;
 import io.d4tzz.ecommerce.domain.security.Otp;
 import io.d4tzz.ecommerce.domain.security.OtpCode;
 import io.d4tzz.ecommerce.domain.security.OtpRepository;
 import io.d4tzz.ecommerce.domain.security.OtpType;
+import io.d4tzz.ecommerce.domain.user.Email;
 import io.d4tzz.ecommerce.domain.user.User;
 import io.d4tzz.ecommerce.domain.user.UserRepository;
+import io.d4tzz.ecommerce.domain.user.event.EmailVerifiedEvent;
+import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -16,17 +19,21 @@ import org.springframework.transaction.annotation.Transactional;
 @Transactional
 public class VerifyEmailUseCase {
 
-    public record Command(String email, String code) {}
-
     private final UserRepository userRepository;
     private final OtpRepository otpRepository;
+    private final ApplicationEventPublisher eventPublisher;
 
-    public VerifyEmailUseCase(UserRepository userRepository, OtpRepository otpRepository) {
+    public VerifyEmailUseCase(
+        UserRepository userRepository,
+        OtpRepository otpRepository,
+        ApplicationEventPublisher eventPublisher
+    ) {
         this.userRepository = userRepository;
         this.otpRepository = otpRepository;
+        this.eventPublisher = eventPublisher;
     }
 
-    public void execute(Command command) {
+    public void execute(VerifyEmailCommand command) {
         Email email = Email.of(command.email());
         User user = userRepository
             .findByEmail(email)
@@ -46,5 +53,7 @@ public class VerifyEmailUseCase {
 
         user.verifyEmail();
         userRepository.save(user);
+
+        eventPublisher.publishEvent(new EmailVerifiedEvent(user.getId(), user.getEmail()));
     }
 }

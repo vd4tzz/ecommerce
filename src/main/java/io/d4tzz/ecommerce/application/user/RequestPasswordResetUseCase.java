@@ -1,11 +1,12 @@
 package io.d4tzz.ecommerce.application.user;
 
+import io.d4tzz.ecommerce.application.user.command.RequestPasswordResetCommand;
 import io.d4tzz.ecommerce.common.exception.NotFoundException;
-import io.d4tzz.ecommerce.domain.user.Email;
 import io.d4tzz.ecommerce.domain.security.Otp;
 import io.d4tzz.ecommerce.domain.security.OtpGenerator;
 import io.d4tzz.ecommerce.domain.security.OtpRepository;
 import io.d4tzz.ecommerce.domain.security.OtpType;
+import io.d4tzz.ecommerce.domain.user.Email;
 import io.d4tzz.ecommerce.domain.user.User;
 import io.d4tzz.ecommerce.domain.user.UserRepository;
 import io.d4tzz.ecommerce.domain.user.event.PasswordResetRequestedEvent;
@@ -16,8 +17,6 @@ import org.springframework.transaction.annotation.Transactional;
 @Service
 @Transactional
 public class RequestPasswordResetUseCase {
-
-    public record Command(String email) {}
 
     private final UserRepository userRepository;
     private final OtpRepository otpRepository;
@@ -36,7 +35,7 @@ public class RequestPasswordResetUseCase {
         this.eventPublisher = eventPublisher;
     }
 
-    public void execute(Command command) {
+    public void execute(RequestPasswordResetCommand command) {
         Email email = Email.of(command.email());
         User user = userRepository
             .findByEmail(email)

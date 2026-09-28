@@ -1,5 +1,6 @@
 package io.d4tzz.ecommerce.application.user;
 
+import io.d4tzz.ecommerce.application.user.command.RegisterUserCommand;
 import io.d4tzz.ecommerce.domain.security.Otp;
 import io.d4tzz.ecommerce.domain.security.OtpGenerator;
 import io.d4tzz.ecommerce.domain.security.OtpRepository;
@@ -9,7 +10,7 @@ import io.d4tzz.ecommerce.domain.user.FullName;
 import io.d4tzz.ecommerce.domain.user.PasswordHasher;
 import io.d4tzz.ecommerce.domain.user.User;
 import io.d4tzz.ecommerce.domain.user.UserRepository;
-import io.d4tzz.ecommerce.domain.user.event.EmailVerificationRequestedEvent;
+import io.d4tzz.ecommerce.domain.user.event.UserRegisteredEvent;
 import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -17,8 +18,6 @@ import org.springframework.transaction.annotation.Transactional;
 @Service
 @Transactional
 public class RegisterUserUseCase {
-
-    public record Command(String email, String password, String fullName) {}
 
     private final UserRepository userRepository;
     private final OtpRepository otpRepository;
@@ -40,7 +39,7 @@ public class RegisterUserUseCase {
         this.eventPublisher = eventPublisher;
     }
 
-    public UserDto execute(Command command) {
+    public UserDto execute(RegisterUserCommand command) {
         User user = User.register(
             Email.of(command.email()),
             command.password(),
@@ -54,7 +53,7 @@ public class RegisterUserUseCase {
         Otp otp = otpService.generateOtp(user.getId(), OtpType.EMAIL_VERIFICATION);
         otpRepository.save(otp);
 
-        eventPublisher.publishEvent(new EmailVerificationRequestedEvent(user.getId(), user.getEmail(), otp.getCode()));
+        eventPublisher.publishEvent(new UserRegisteredEvent(user.getId(), user.getEmail(), otp.getCode()));
 
         return UserDto.from(user);
     }

@@ -1,5 +1,6 @@
 package io.d4tzz.ecommerce.application.catalog.product;
 
+import io.d4tzz.ecommerce.application.catalog.product.command.UpdateProductVariantCommand;
 import io.d4tzz.ecommerce.common.Money;
 import io.d4tzz.ecommerce.common.exception.NotFoundException;
 import io.d4tzz.ecommerce.domain.catalog.product.Dimensions;
@@ -21,7 +22,7 @@ public class UpdateProductVariantUseCase {
         this.productRepository = productRepository;
     }
 
-    public ProductDto.ProductVariantDto execute(UpdateProductVariantCommand command) {
+    public void execute(UpdateProductVariantCommand command) {
         Product product = productRepository
             .find(ProductId.of(command.productId()))
             .orElseThrow(() -> new NotFoundException("Product not found with id: " + command.productId()));
@@ -37,10 +38,8 @@ public class UpdateProductVariantUseCase {
         product.updateVariantDimensions(vId, Dimensions.of(command.length(), command.width(), command.height()));
         MediaId mediaId =
             command.mediaId() != null && !command.mediaId().isBlank() ? MediaId.of(command.mediaId()) : null;
-        var variant = product.updateVariantMedia(vId, mediaId);
+        product.updateVariantMedia(vId, mediaId);
 
         productRepository.save(product);
-
-        return ProductDto.ProductVariantDto.from(variant);
     }
 }

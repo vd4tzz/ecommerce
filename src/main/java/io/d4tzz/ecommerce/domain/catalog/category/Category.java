@@ -23,7 +23,7 @@ public class Category {
     private CategoryId parentId;
     private List<Attribute> attributes;
 
-    private Category(
+    public Category(
         CategoryId id,
         CategoryName name,
         CategorySlug slug,
@@ -59,17 +59,6 @@ public class Category {
             parent == null ? null : parent.getId(),
             validatedAttributes
         );
-    }
-
-    public static Category restore(
-        CategoryId id,
-        CategoryName name,
-        CategorySlug slug,
-        String path,
-        CategoryId parentId,
-        List<Attribute> attributes
-    ) {
-        return new Category(id, name, slug, path, parentId, attributes);
     }
 
     public String prefix() {

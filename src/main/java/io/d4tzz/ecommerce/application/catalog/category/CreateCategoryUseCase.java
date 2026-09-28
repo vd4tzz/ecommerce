@@ -1,5 +1,6 @@
 package io.d4tzz.ecommerce.application.catalog.category;
 
+import io.d4tzz.ecommerce.application.catalog.category.command.CreateCategoryCommand;
 import io.d4tzz.ecommerce.common.exception.NotFoundException;
 import io.d4tzz.ecommerce.domain.catalog.category.Attribute;
 import io.d4tzz.ecommerce.domain.catalog.category.AttributeValue;
@@ -16,26 +17,13 @@ import org.springframework.transaction.annotation.Transactional;
 @Transactional
 public class CreateCategoryUseCase {
 
-    public record Response(
-        Long id,
-        String name,
-        String slug,
-        Long parentId,
-        String path,
-        List<AttributeResponse> attributes
-    ) {
-        public record AttributeResponse(String code, String label, String type, List<AttributeValueResponse> values) {
-            public record AttributeValueResponse(String code, String label) {}
-        }
-    }
-
     private final CategoryRepository categoryRepository;
 
     public CreateCategoryUseCase(CategoryRepository categoryRepository) {
         this.categoryRepository = categoryRepository;
     }
 
-    public CategoryDto execute(CreateCategoryCommand command) {
+    public Long execute(CreateCategoryCommand command) {
         Category parent = null;
         List<Attribute> ancestorSchema = List.of();
 
@@ -75,6 +63,6 @@ public class CreateCategoryUseCase {
 
         Category saved = categoryRepository.save(category);
 
-        return CategoryDto.from(saved);
+        return saved.getId().value();
     }
 }

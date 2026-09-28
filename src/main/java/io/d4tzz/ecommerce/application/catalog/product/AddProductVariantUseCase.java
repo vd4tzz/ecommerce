@@ -1,5 +1,6 @@
 package io.d4tzz.ecommerce.application.catalog.product;
 
+import io.d4tzz.ecommerce.application.catalog.product.command.AddProductVariantCommand;
 import io.d4tzz.ecommerce.common.Money;
 import io.d4tzz.ecommerce.common.exception.NotFoundException;
 import io.d4tzz.ecommerce.domain.catalog.option.OptionId;
@@ -10,11 +11,8 @@ import io.d4tzz.ecommerce.domain.catalog.product.Product;
 import io.d4tzz.ecommerce.domain.catalog.product.ProductId;
 import io.d4tzz.ecommerce.domain.catalog.product.ProductRepository;
 import io.d4tzz.ecommerce.domain.catalog.product.Sku;
-import io.d4tzz.ecommerce.domain.catalog.product.Variant;
 import io.d4tzz.ecommerce.domain.catalog.product.Weight;
-import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -29,12 +27,11 @@ public class AddProductVariantUseCase {
         this.productRepository = productRepository;
     }
 
-    public List<ProductDto.ProductVariantDto> execute(AddProductVariantCommand command) {
+    public void execute(AddProductVariantCommand command) {
         Product product = productRepository
             .find(ProductId.of(command.productId()))
             .orElseThrow(() -> new NotFoundException("Product not found with id: " + command.productId()));
 
-        List<Variant> variants = new ArrayList<>(command.variants().size());
         for (var variantItem : command.variants()) {
             Map<OptionId, ValueId> combination = HashMap.newHashMap(variantItem.combination().size());
             variantItem.combination().forEach((optId, valId) -> combination.put(OptionId.of(optId), ValueId.of(valId)));
@@ -44,7 +41,7 @@ public class AddProductVariantUseCase {
                     ? MediaId.of(variantItem.mediaId())
                     : null;
 
-            var variant = product.addVariant(
+            product.addVariant(
                 Sku.of(variantItem.sku()),
                 Money.of(variantItem.price()),
                 mediaId,
@@ -53,14 +50,8 @@ public class AddProductVariantUseCase {
                 combination,
                 productRepository::existsBySku
             );
-            variants.add(variant);
         }
 
-        Product saved = productRepository.save(product);
-        return saved
-            .getVariants()
-            .stream()
-            .map(v -> ProductDto.ProductVariantDto.from(v))
-            .toList();
+        productRepository.save(product);
     }
 }

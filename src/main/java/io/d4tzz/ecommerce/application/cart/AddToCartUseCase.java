@@ -1,5 +1,6 @@
 package io.d4tzz.ecommerce.application.cart;
 
+import io.d4tzz.ecommerce.application.cart.command.AddToCartCommand;
 import io.d4tzz.ecommerce.common.exception.InvalidArgumentException;
 import io.d4tzz.ecommerce.domain.cart.Cart;
 import io.d4tzz.ecommerce.domain.cart.CartRepository;
@@ -12,15 +13,13 @@ import org.springframework.transaction.annotation.Transactional;
 @Transactional
 public class AddToCartUseCase {
 
-    public record Command(Long userId, Long variantId, int quantity) {}
-
     private final CartRepository cartRepository;
 
     public AddToCartUseCase(CartRepository cartRepository) {
         this.cartRepository = cartRepository;
     }
 
-    public void execute(Command command) {
+    public void execute(AddToCartCommand command) {
         if (command.quantity() <= 0) {
             throw new InvalidArgumentException("Quantity must be greater than zero");
         }

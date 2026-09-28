@@ -47,8 +47,8 @@ public class User {
         this.phoneNumber = phoneNumber;
         this.avatarUrl = avatarUrl;
         this.address = address;
-        this.role = role != null ? role : UserRole.ROLE_CUSTOMER;
-        this.status = status != null ? status : UserStatus.ACTIVE;
+        this.role = role;
+        this.status = status;
         this.emailVerified = emailVerified;
         this.lastLoginAt = lastLoginAt;
         this.createdAt = createdAt != null ? createdAt : Instant.now();

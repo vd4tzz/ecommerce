@@ -3,7 +3,6 @@ package io.d4tzz.ecommerce.domain.catalog.category;
 import io.d4tzz.ecommerce.common.exception.ConflictException;
 import io.d4tzz.ecommerce.common.exception.InvalidArgumentException;
 import java.util.ArrayList;
-import java.util.Collection;
 import java.util.Collections;
 import java.util.HashSet;
 import java.util.List;
@@ -39,40 +38,29 @@ public class Attribute {
         return this.values.stream().map(AttributeValue::code).collect(Collectors.toUnmodifiableSet());
     }
 
-    public void validateValue(Object value) {
-        if (value == null) {
-            throw new InvalidArgumentException("Attribute '" + this.label + "' is required");
-        }
-        if (value instanceof String s && s.isBlank()) {
-            throw new InvalidArgumentException("Attribute '" + this.label + "' cannot be blank");
-        }
-        if (value instanceof Collection<?> c && c.isEmpty()) {
+    public void validateValue(List<String> values) {
+        if (values == null || values.isEmpty()) {
             throw new InvalidArgumentException("Attribute '" + this.label + "' must contain at least one value");
         }
 
         Set<String> validCodes = getCodes();
         switch (this.type) {
-            case SELECT -> {
-                if (!(value instanceof String strVal)) {
-                    throw new InvalidArgumentException("Attribute '" + this.label + "' must be a string identifier");
+            case SINGLE -> {
+                if (values.size() != 1) {
+                    throw new InvalidArgumentException("Attribute '" + this.label + "' must contain exactly one value");
                 }
-                if (!validCodes.contains(strVal)) {
+                String val = values.get(0);
+                if (val == null || val.isBlank() || !validCodes.contains(val)) {
                     throw new InvalidArgumentException(
-                        "Invalid value '" + strVal + "' for attribute '" + this.label + "'"
+                        "Invalid value '" + val + "' for attribute '" + this.label + "'"
                     );
                 }
             }
-            case MULTI_SELECT -> {
-                if (!(value instanceof Collection<?> list)) {
-                    throw new InvalidArgumentException("Attribute '" + this.label + "' must be an array of values");
-                }
-                for (Object val : list) {
-                    if (!(val instanceof String strVal)) {
-                        throw new InvalidArgumentException("Elements in '" + this.label + "' must be strings");
-                    }
-                    if (!validCodes.contains(strVal)) {
+            case MULTI -> {
+                for (String val : values) {
+                    if (val == null || val.isBlank() || !validCodes.contains(val)) {
                         throw new InvalidArgumentException(
-                            "Invalid value '" + strVal + "' in attribute '" + this.label + "'"
+                            "Invalid value '" + val + "' in attribute '" + this.label + "'"
                         );
                     }
                 }
@@ -101,7 +89,7 @@ public class Attribute {
     }
 
     private static List<AttributeValue> validateOptions(List<AttributeValue> values) {
-        if (values == null || values.isEmpty()) {
+        if (values.isEmpty()) {
             throw new InvalidArgumentException("Attribute must have at least one value");
         }
 

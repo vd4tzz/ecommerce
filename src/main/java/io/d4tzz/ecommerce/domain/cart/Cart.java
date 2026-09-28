@@ -19,15 +19,11 @@ public class Cart {
     public Cart(CartId id, UserId userId, List<CartItem> items) {
         this.id = id;
         this.userId = userId;
-        this.items = items != null ? new ArrayList<>(items) : new ArrayList<>();
+        this.items = items;
     }
 
     public static Cart create(UserId userId) {
         return new Cart(null, userId, new ArrayList<>());
-    }
-
-    public static Cart restore(CartId id, UserId userId, List<CartItem> items) {
-        return new Cart(id, userId, items);
     }
 
     public void addItem(VariantId variantId, int quantity) {
@@ -109,7 +105,6 @@ public class Cart {
     public CartId getId() {
         return id;
     }
-
 
     public UserId getUserId() {
         return userId;

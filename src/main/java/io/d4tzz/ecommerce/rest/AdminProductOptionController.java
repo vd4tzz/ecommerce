@@ -1,16 +1,15 @@
 package io.d4tzz.ecommerce.rest;
 
-import io.d4tzz.ecommerce.application.catalog.product.AddProductOptionCommand;
 import io.d4tzz.ecommerce.application.catalog.product.AddProductOptionUseCase;
-import io.d4tzz.ecommerce.application.catalog.product.AddProductOptionValueCommand;
 import io.d4tzz.ecommerce.application.catalog.product.AddProductOptionValueUseCase;
-import io.d4tzz.ecommerce.application.catalog.product.ProductDto;
 import io.d4tzz.ecommerce.application.catalog.product.RemoveProductOptionUseCase;
 import io.d4tzz.ecommerce.application.catalog.product.RemoveProductOptionValueUseCase;
-import io.d4tzz.ecommerce.application.catalog.product.ReorderProductOptionValuesCommand;
 import io.d4tzz.ecommerce.application.catalog.product.ReorderProductOptionValuesUseCase;
-import io.d4tzz.ecommerce.application.catalog.product.ReorderProductOptionsCommand;
 import io.d4tzz.ecommerce.application.catalog.product.ReorderProductOptionsUseCase;
+import io.d4tzz.ecommerce.application.catalog.product.command.AddProductOptionCommand;
+import io.d4tzz.ecommerce.application.catalog.product.command.AddProductOptionValueCommand;
+import io.d4tzz.ecommerce.application.catalog.product.command.ReorderProductOptionValuesCommand;
+import io.d4tzz.ecommerce.application.catalog.product.command.ReorderProductOptionsCommand;
 import java.util.List;
 import org.springframework.http.ResponseEntity;
 import org.springframework.validation.Validator;
@@ -53,41 +52,44 @@ public class AdminProductOptionController {
     }
 
     @PostMapping
-    public ResponseEntity<?> addOption(@PathVariable Long productId, @RequestBody AddProductOptionRequest request) {
+    public ResponseEntity<Void> addOption(@PathVariable Long productId, @RequestBody AddProductOptionRequest request) {
         var command = new AddProductOptionCommand(productId, request.optionId(), request.valueIds());
         ValidationHelper.validate(command, validator);
-        return ResponseEntity.ok(addProductOptionUseCase.execute(command));
+        addProductOptionUseCase.execute(command);
+        return ResponseEntity.noContent().build();
     }
 
     @DeleteMapping("/{optionId}")
-    public ResponseEntity<?> removeOption(@PathVariable Long productId, @PathVariable Long optionId) {
+    public ResponseEntity<Void> removeOption(@PathVariable Long productId, @PathVariable Long optionId) {
         removeProductOptionUseCase.execute(productId, optionId);
         return ResponseEntity.noContent().build();
     }
 
     @PutMapping("/reorder")
-    public ResponseEntity<?> reorderOptions(
+    public ResponseEntity<Void> reorderOptions(
         @PathVariable Long productId,
         @RequestBody ReorderProductOptionsRequest request
     ) {
         var command = new ReorderProductOptionsCommand(productId, request.optionIds());
         ValidationHelper.validate(command, validator);
-        return ResponseEntity.ok(reorderProductOptionsUseCase.execute(command));
+        reorderProductOptionsUseCase.execute(command);
+        return ResponseEntity.noContent().build();
     }
 
     @PostMapping("/{optionId}/values")
-    public ResponseEntity<?> addOptionValues(
+    public ResponseEntity<Void> addOptionValues(
         @PathVariable Long productId,
         @PathVariable Long optionId,
         @RequestBody AddProductOptionValuesRequest request
     ) {
         var command = new AddProductOptionValueCommand(productId, optionId, request.valueIds());
         ValidationHelper.validate(command, validator);
-        return ResponseEntity.ok(addProductOptionValueUseCase.execute(command));
+        addProductOptionValueUseCase.execute(command);
+        return ResponseEntity.noContent().build();
     }
 
     @DeleteMapping("/{optionId}/values/{valueId}")
-    public ResponseEntity<ProductDto> removeOptionValue(
+    public ResponseEntity<Void> removeOptionValue(
         @PathVariable Long productId,
         @PathVariable Long optionId,
         @PathVariable Long valueId
@@ -97,14 +99,15 @@ public class AdminProductOptionController {
     }
 
     @PutMapping("/{optionId}/values/reorder")
-    public ResponseEntity<?> reorderOptionValues(
+    public ResponseEntity<Void> reorderOptionValues(
         @PathVariable Long productId,
         @PathVariable Long optionId,
         @RequestBody ReorderProductOptionValuesRequest request
     ) {
         var command = new ReorderProductOptionValuesCommand(productId, optionId, request.valueIds());
         ValidationHelper.validate(command, validator);
-        return ResponseEntity.ok(reorderProductOptionValuesUseCase.execute(command));
+        reorderProductOptionValuesUseCase.execute(command);
+        return ResponseEntity.noContent().build();
     }
 }
 

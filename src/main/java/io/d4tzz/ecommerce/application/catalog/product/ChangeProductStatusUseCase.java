@@ -1,5 +1,6 @@
 package io.d4tzz.ecommerce.application.catalog.product;
 
+import io.d4tzz.ecommerce.application.catalog.product.command.ChangeProductStatusCommand;
 import io.d4tzz.ecommerce.common.exception.NotFoundException;
 import io.d4tzz.ecommerce.domain.catalog.product.Product;
 import io.d4tzz.ecommerce.domain.catalog.product.ProductId;

@@ -24,7 +24,7 @@ public interface ProductRepository extends Repository<Product, ProductId> {
             Map<OptionId, Set<ValueId>> options,
             Set<MediaId> media,
             List<Variant> variants,
-            Map<String, Object> attributes) {
+            Map<String, List<String>> attributes) {
         return Product.restore(
                 id,
                 name,

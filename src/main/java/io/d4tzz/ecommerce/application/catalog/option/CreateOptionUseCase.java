@@ -1,5 +1,6 @@
 package io.d4tzz.ecommerce.application.catalog.option;
 
+import io.d4tzz.ecommerce.application.catalog.option.command.CreateOptionCommand;
 import io.d4tzz.ecommerce.domain.catalog.option.Option;
 import io.d4tzz.ecommerce.domain.catalog.option.OptionName;
 import io.d4tzz.ecommerce.domain.catalog.option.OptionRepository;
@@ -18,7 +19,7 @@ public class CreateOptionUseCase {
         this.optionRepository = optionRepository;
     }
 
-    public OptionDto execute(CreateOptionCommand command) {
+    public Long execute(CreateOptionCommand command) {
         List<ValueName> valueNames = command
             .values()
             .stream()
@@ -32,6 +33,6 @@ public class CreateOptionUseCase {
         );
 
         Option saved = optionRepository.save(option);
-        return OptionDto.from(saved);
+        return saved.getId().value();
     }
 }

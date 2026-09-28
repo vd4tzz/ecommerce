@@ -1,5 +1,6 @@
 package io.d4tzz.ecommerce.application.user;
 
+import io.d4tzz.ecommerce.application.user.command.UpdateProfileCommand;
 import io.d4tzz.ecommerce.common.exception.NotFoundException;
 import io.d4tzz.ecommerce.domain.user.FullName;
 import io.d4tzz.ecommerce.domain.user.PhoneNumber;
@@ -13,15 +14,13 @@ import org.springframework.transaction.annotation.Transactional;
 @Transactional
 public class UpdateProfileUseCase {
 
-    public record Command(Long userId, String fullName, String phoneNumber, String avatarUrl) {}
-
     private final UserRepository userRepository;
 
     public UpdateProfileUseCase(UserRepository userRepository) {
         this.userRepository = userRepository;
     }
 
-    public UserDto execute(Command command) {
+    public UserDto execute(UpdateProfileCommand command) {
         UserId userId = UserId.of(command.userId());
         User user = userRepository
             .find(userId)

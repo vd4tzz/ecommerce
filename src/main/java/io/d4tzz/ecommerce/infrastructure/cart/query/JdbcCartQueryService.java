@@ -1,8 +1,8 @@
 package io.d4tzz.ecommerce.infrastructure.cart.query;
 
-import io.d4tzz.ecommerce.query.cart.CartDto;
-import io.d4tzz.ecommerce.query.cart.CartItemDto;
+import io.d4tzz.ecommerce.query.cart.CartItemView;
 import io.d4tzz.ecommerce.query.cart.CartQueryService;
+import io.d4tzz.ecommerce.query.cart.CartView;
 import io.d4tzz.ecommerce.storage.MediaUrlResolver;
 import java.math.BigDecimal;
 import java.util.ArrayList;
@@ -24,9 +24,9 @@ public class JdbcCartQueryService implements CartQueryService {
     }
 
     @Override
-    public CartDto getCart(Long userId) {
+    public CartView getCart(Long userId) {
         if (userId == null) {
-            return CartDto.empty(null);
+            return new CartView(null, null, List.of(), 0, BigDecimal.ZERO);
         }
 
         String sql = """
@@ -50,9 +50,9 @@ public class JdbcCartQueryService implements CartQueryService {
                 p.name AS product_name,
                 p.slug AS product_slug
             FROM carts c
-            LEFT JOIN cart_items ci ON c.id = ci.cart_id
-            LEFT JOIN variants v ON ci.variant_id = v.id
-            LEFT JOIN products p ON v.product_id = p.id
+            JOIN cart_items ci ON c.id = ci.cart_id
+            JOIN variants v ON ci.variant_id = v.id
+            JOIN products p ON v.product_id = p.id
             WHERE c.user_id = :userId
             ORDER BY ci.id ASC
             """;
@@ -61,7 +61,7 @@ public class JdbcCartQueryService implements CartQueryService {
             Long cartId,
             Long itemId,
             Long variantId,
-            Integer quantity,
+            int quantity,
             String sku,
             BigDecimal unitPrice,
             String mediaId,
@@ -72,54 +72,51 @@ public class JdbcCartQueryService implements CartQueryService {
         List<CartRow> rows = jdbcClient
             .sql(sql)
             .param("userId", userId)
-            .query((rs, rowNum) -> new CartRow(
-                rs.getLong("cart_id"),
-                rs.getObject("item_id", Long.class),
-                rs.getObject("variant_id", Long.class),
-                rs.getObject("quantity", Integer.class),
-                rs.getString("sku"),
-                rs.getBigDecimal("unit_price"),
-                rs.getString("media_id"),
-                rs.getString("product_name"),
-                rs.getString("product_slug")
-            ))
+            .query((rs, rowNum) ->
+                new CartRow(
+                    rs.getLong("cart_id"),
+                    rs.getLong("item_id"),
+                    rs.getLong("variant_id"),
+                    rs.getInt("quantity"),
+                    rs.getString("sku"),
+                    rs.getBigDecimal("unit_price"),
+                    rs.getString("media_id"),
+                    rs.getString("product_name"),
+                    rs.getString("product_slug")
+                )
+            )
             .list();
 
         if (rows.isEmpty()) {
-            return CartDto.empty(userId);
+            return new CartView(null, userId, List.of(), 0, BigDecimal.ZERO);
         }
 
         Long cartId = rows.get(0).cartId();
-        List<CartItemDto> items = new ArrayList<>();
+        List<CartItemView> items = new ArrayList<>(rows.size());
         BigDecimal subtotal = BigDecimal.ZERO;
         int totalQuantity = 0;
 
         for (CartRow row : rows) {
-            if (row.itemId() == null) {
-                continue;
-            }
+            BigDecimal totalPrice = row.unitPrice().multiply(BigDecimal.valueOf(row.quantity()));
 
-            BigDecimal unitPrice = row.unitPrice() != null ? row.unitPrice() : BigDecimal.ZERO;
-            int quantity = row.quantity() != null ? row.quantity() : 0;
-            BigDecimal totalPrice = unitPrice.multiply(BigDecimal.valueOf(quantity));
-            String mediaUrl = mediaUrlResolver.resolveUrl(row.mediaId());
-
-            items.add(new CartItemDto(
-                row.itemId(),
-                row.variantId(),
-                row.sku() != null ? row.sku() : "UNKNOWN",
-                row.productName() != null ? row.productName() : "Unknown Product",
-                row.productSlug() != null ? row.productSlug() : "",
-                mediaUrl,
-                unitPrice,
-                quantity,
-                totalPrice
-            ));
+            items.add(
+                new CartItemView(
+                    row.itemId(),
+                    row.variantId(),
+                    row.sku(),
+                    row.productName(),
+                    row.productSlug(),
+                    mediaUrlResolver.resolveUrl(row.mediaId()),
+                    row.unitPrice(),
+                    row.quantity(),
+                    totalPrice
+                )
+            );
 
             subtotal = subtotal.add(totalPrice);
-            totalQuantity += quantity;
+            totalQuantity += row.quantity();
         }
 
-        return new CartDto(cartId, userId, items, totalQuantity, subtotal);
+        return new CartView(cartId, userId, items, totalQuantity, subtotal);
     }
 }

@@ -1,5 +1,6 @@
 package io.d4tzz.ecommerce.application.catalog.product;
 
+import io.d4tzz.ecommerce.application.catalog.product.command.UpdateProductCommand;
 import io.d4tzz.ecommerce.common.exception.NotFoundException;
 import io.d4tzz.ecommerce.domain.catalog.category.Attribute;
 import io.d4tzz.ecommerce.domain.catalog.category.Category;
@@ -27,7 +28,7 @@ public class UpdateProductUseCase {
         this.categoryRepository = categoryRepository;
     }
 
-    public ProductDto execute(UpdateProductCommand command) {
+    public void execute(UpdateProductCommand command) {
         Product product = productRepository
             .find(ProductId.of(command.productId()))
             .orElseThrow(() -> new NotFoundException("Product not found with id: " + command.productId()));
@@ -47,7 +48,6 @@ public class UpdateProductUseCase {
             product.updateAttributes(command.attributes(), schema);
         }
 
-        Product saved = productRepository.save(product);
-        return ProductDto.simple(saved);
+        productRepository.save(product);
     }
 }

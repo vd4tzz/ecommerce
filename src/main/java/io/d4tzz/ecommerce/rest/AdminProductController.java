@@ -1,25 +1,24 @@
 package io.d4tzz.ecommerce.rest;
 
-import io.d4tzz.ecommerce.application.catalog.product.ChangeProductStatusCommand;
 import io.d4tzz.ecommerce.application.catalog.product.ChangeProductStatusUseCase;
-import io.d4tzz.ecommerce.application.catalog.product.CreateProductCommand;
 import io.d4tzz.ecommerce.application.catalog.product.CreateProductUseCase;
 import io.d4tzz.ecommerce.application.catalog.product.DeleteProductUseCase;
-import io.d4tzz.ecommerce.application.catalog.product.ProductDto;
-import io.d4tzz.ecommerce.application.catalog.product.UpdateProductCommand;
 import io.d4tzz.ecommerce.application.catalog.product.UpdateProductUseCase;
+import io.d4tzz.ecommerce.application.catalog.product.command.ChangeProductStatusCommand;
+import io.d4tzz.ecommerce.application.catalog.product.command.CreateProductCommand;
+import io.d4tzz.ecommerce.application.catalog.product.command.UpdateProductCommand;
 import io.d4tzz.ecommerce.common.exception.NotFoundException;
 import io.d4tzz.ecommerce.domain.catalog.product.ProductStatus;
 import io.d4tzz.ecommerce.query.PageResponse;
-import io.d4tzz.ecommerce.query.catalog.AdminProductSearchCriteria;
-import io.d4tzz.ecommerce.query.catalog.AdminProductTableRowView;
-import io.d4tzz.ecommerce.query.catalog.ProductDetailView;
-import io.d4tzz.ecommerce.query.catalog.ProductQueryService;
-import io.d4tzz.ecommerce.query.catalog.ProductVariantSummaryView;
+import io.d4tzz.ecommerce.query.catalog.product.AdminProductSearchCriteria;
+import io.d4tzz.ecommerce.query.catalog.product.AdminProductTableRowView;
+import io.d4tzz.ecommerce.query.catalog.product.ProductDetailView;
+import io.d4tzz.ecommerce.query.catalog.product.ProductQueryService;
 import java.net.URI;
 import java.util.List;
 import java.util.Map;
 import org.springframework.http.ResponseEntity;
+import org.springframework.validation.Validator;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PatchMapping;
@@ -41,29 +40,40 @@ public class AdminProductController {
     private final UpdateProductUseCase updateProductUseCase;
     private final ChangeProductStatusUseCase changeProductStatusUseCase;
     private final DeleteProductUseCase deleteProductUseCase;
+    private final Validator validator;
 
     public AdminProductController(
         ProductQueryService productQueryService,
         CreateProductUseCase createProductUseCase,
         UpdateProductUseCase updateProductUseCase,
         ChangeProductStatusUseCase changeProductStatusUseCase,
-        DeleteProductUseCase deleteProductUseCase
+        DeleteProductUseCase deleteProductUseCase,
+        Validator validator
     ) {
         this.productQueryService = productQueryService;
         this.createProductUseCase = createProductUseCase;
         this.updateProductUseCase = updateProductUseCase;
         this.changeProductStatusUseCase = changeProductStatusUseCase;
         this.deleteProductUseCase = deleteProductUseCase;
+        this.validator = validator;
     }
 
     @PostMapping
-    public ResponseEntity<ProductDto> createProduct(@RequestBody CreateProductCommand command) {
-        ProductDto response = createProductUseCase.execute(command);
+    public ResponseEntity<CreateProductResponse> createProduct(@RequestBody CreateProductRequest request) {
+        var command = new CreateProductCommand(
+            request.name(),
+            request.slug(),
+            request.description(),
+            request.categoryId(),
+            request.attributes() != null ? request.attributes() : Map.of()
+        );
+        ValidationHelper.validate(command, validator);
+        Long productId = createProductUseCase.execute(command);
         URI location = ServletUriComponentsBuilder.fromCurrentRequest()
             .path("/{id}")
-            .buildAndExpand(response.id())
+            .buildAndExpand(productId)
             .toUri();
-        return ResponseEntity.created(location).body(response);
+        return ResponseEntity.created(location).body(new CreateProductResponse(productId));
     }
 
     @GetMapping
@@ -84,13 +94,6 @@ public class AdminProductController {
         return ResponseEntity.ok(productQueryService.getAdminProductStatusCounts());
     }
 
-    @GetMapping("/variants")
-    public ResponseEntity<List<ProductVariantSummaryView>> getVariants(
-        @RequestParam(required = false) String keyword,
-        @RequestParam(defaultValue = "20") int limit
-    ) {
-        return ResponseEntity.ok(productQueryService.getVariants(keyword, limit));
-    }
 
     @GetMapping("/{id}")
     public ResponseEntity<ProductDetailView> getProductDetail(@PathVariable Long id) {
@@ -101,21 +104,24 @@ public class AdminProductController {
     }
 
     @PutMapping("/{id}")
-    public ResponseEntity<ProductDto> updateProduct(@PathVariable Long id, @RequestBody UpdateProductRequest request) {
+    public ResponseEntity<Void> updateProduct(@PathVariable Long id, @RequestBody UpdateProductRequest request) {
         var command = new UpdateProductCommand(
             id,
             request.name(),
             request.slug(),
             request.description(),
             request.categoryId(),
-            request.attributes()
+            request.attributes() != null ? request.attributes() : Map.of()
         );
-        return ResponseEntity.ok(updateProductUseCase.execute(command));
+        ValidationHelper.validate(command, validator);
+        updateProductUseCase.execute(command);
+        return ResponseEntity.noContent().build();
     }
 
     @PatchMapping("/{id}/status")
-    public ResponseEntity<?> changeStatus(@PathVariable Long id, @RequestBody ChangeProductStatusRequest request) {
+    public ResponseEntity<Void> changeStatus(@PathVariable Long id, @RequestBody ChangeProductStatusRequest request) {
         var command = new ChangeProductStatusCommand(id, request.status());
+        ValidationHelper.validate(command, validator);
         changeProductStatusUseCase.execute(command);
         return ResponseEntity.noContent().build();
     }
@@ -127,12 +133,22 @@ public class AdminProductController {
     }
 }
 
+record CreateProductRequest(
+    String name,
+    String slug,
+    String description,
+    Long categoryId,
+    Map<String, List<String>> attributes
+) {}
+
+record CreateProductResponse(Long id) {}
+
 record UpdateProductRequest(
     String name,
     String slug,
     String description,
     Long categoryId,
-    Map<String, Object> attributes
+    Map<String, List<String>> attributes
 ) {}
 
 record ChangeProductStatusRequest(ProductStatus status) {}

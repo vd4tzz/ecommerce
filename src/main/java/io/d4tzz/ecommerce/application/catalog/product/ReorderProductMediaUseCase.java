@@ -1,5 +1,6 @@
 package io.d4tzz.ecommerce.application.catalog.product;
 
+import io.d4tzz.ecommerce.application.catalog.product.command.ReorderProductMediaCommand;
 import io.d4tzz.ecommerce.common.exception.NotFoundException;
 import io.d4tzz.ecommerce.domain.catalog.product.MediaId;
 import io.d4tzz.ecommerce.domain.catalog.product.Product;
@@ -19,7 +20,7 @@ public class ReorderProductMediaUseCase {
         this.productRepository = productRepository;
     }
 
-    public List<String> execute(ReorderProductMediaCommand command) {
+    public void execute(ReorderProductMediaCommand command) {
         Product product = productRepository
             .find(ProductId.of(command.productId()))
             .orElseThrow(() -> new NotFoundException("Product not found with id: " + command.productId()));
@@ -27,7 +28,6 @@ public class ReorderProductMediaUseCase {
         List<MediaId> newOrder = command.mediaIds().stream().map(MediaId::of).toList();
         product.reorderMedia(newOrder);
 
-        Product saved = productRepository.save(product);
-        return ProductDto.from(saved).media();
+        productRepository.save(product);
     }
 }

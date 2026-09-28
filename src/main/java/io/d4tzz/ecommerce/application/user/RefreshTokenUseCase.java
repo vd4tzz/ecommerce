@@ -1,5 +1,6 @@
 package io.d4tzz.ecommerce.application.user;
 
+import io.d4tzz.ecommerce.application.user.command.RefreshTokenCommand;
 import io.d4tzz.ecommerce.common.exception.InvalidArgumentException;
 import io.d4tzz.ecommerce.common.exception.InvalidOperationException;
 import io.d4tzz.ecommerce.common.exception.NotFoundException;
@@ -17,8 +18,6 @@ import org.springframework.transaction.annotation.Transactional;
 @Transactional
 public class RefreshTokenUseCase {
 
-    public record Command(String refreshToken) {}
-
     public record Response(String accessToken, String refreshToken) {}
 
     private final RefreshTokenRepository refreshTokenRepository;
@@ -35,7 +34,7 @@ public class RefreshTokenUseCase {
         this.tokenProvider = tokenProvider;
     }
 
-    public Response execute(Command command) {
+    public Response execute(RefreshTokenCommand command) {
         if (command.refreshToken() == null || command.refreshToken().isBlank()) {
             throw new InvalidArgumentException("Refresh token must not be blank");
         }

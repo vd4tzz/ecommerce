@@ -1,5 +1,6 @@
 package io.d4tzz.ecommerce.application.catalog.option;
 
+import io.d4tzz.ecommerce.application.catalog.option.command.UpdateOptionCommand;
 import io.d4tzz.ecommerce.common.exception.NotFoundException;
 import io.d4tzz.ecommerce.domain.catalog.option.Option;
 import io.d4tzz.ecommerce.domain.catalog.option.OptionId;
@@ -18,14 +19,13 @@ public class UpdateOptionUseCase {
         this.optionRepository = optionRepository;
     }
 
-    public OptionDto execute(UpdateOptionCommand command) {
+    public void execute(UpdateOptionCommand command) {
         Option option = optionRepository
             .find(OptionId.of(command.optionId()))
             .orElseThrow(() -> new NotFoundException("Option not found with id: " + command.optionId()));
 
         option.rename(OptionName.of(command.name()), optionRepository::existsByName);
 
-        Option saved = optionRepository.save(option);
-        return OptionDto.from(saved);
+        optionRepository.save(option);
     }
 }

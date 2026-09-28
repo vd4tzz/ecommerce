@@ -1,5 +1,6 @@
 package io.d4tzz.ecommerce.application.catalog.product;
 
+import io.d4tzz.ecommerce.application.catalog.product.command.AddProductOptionValueCommand;
 import io.d4tzz.ecommerce.common.exception.InvalidArgumentException;
 import io.d4tzz.ecommerce.common.exception.NotFoundException;
 import io.d4tzz.ecommerce.domain.catalog.option.OptionId;
@@ -24,7 +25,7 @@ public class AddProductOptionValueUseCase {
         this.optionRepository = optionRepository;
     }
 
-    public List<ProductDto.ProductOptionDto> execute(AddProductOptionValueCommand command) {
+    public void execute(AddProductOptionValueCommand command) {
         Product product = productRepository
             .find(ProductId.of(command.productId()))
             .orElseThrow(() -> new NotFoundException("Product not found with id: " + command.productId()));
@@ -40,7 +41,6 @@ public class AddProductOptionValueUseCase {
             product.addValue(optId, valId);
         }
 
-        Product saved = productRepository.save(product);
-        return ProductDto.from(saved).options();
+        productRepository.save(product);
     }
 }

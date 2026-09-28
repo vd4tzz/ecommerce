@@ -1,15 +1,16 @@
 package io.d4tzz.ecommerce.rest;
 
-import io.d4tzz.ecommerce.application.catalog.product.AddProductMediaCommand;
 import io.d4tzz.ecommerce.application.catalog.product.AddProductMediaUseCase;
 import io.d4tzz.ecommerce.application.catalog.product.RemoveProductMediaUseCase;
-import io.d4tzz.ecommerce.application.catalog.product.ReorderProductMediaCommand;
 import io.d4tzz.ecommerce.application.catalog.product.ReorderProductMediaUseCase;
+import io.d4tzz.ecommerce.application.catalog.product.command.AddProductMediaCommand;
+import io.d4tzz.ecommerce.application.catalog.product.command.ReorderProductMediaCommand;
 import io.d4tzz.ecommerce.storage.PresignedUploadRequest;
 import io.d4tzz.ecommerce.storage.PresignedUploadResponse;
 import io.d4tzz.ecommerce.storage.ProductMediaService;
 import java.util.List;
 import org.springframework.http.ResponseEntity;
+import org.springframework.validation.Validator;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -27,17 +28,20 @@ public class AdminProductMediaController {
     private final AddProductMediaUseCase addProductMediaUseCase;
     private final RemoveProductMediaUseCase removeProductMediaUseCase;
     private final ReorderProductMediaUseCase reorderProductMediaUseCase;
+    private final Validator validator;
 
     public AdminProductMediaController(
         ProductMediaService productMediaService,
         AddProductMediaUseCase addProductMediaUseCase,
         RemoveProductMediaUseCase removeProductMediaUseCase,
-        ReorderProductMediaUseCase reorderProductMediaUseCase
+        ReorderProductMediaUseCase reorderProductMediaUseCase,
+        Validator validator
     ) {
         this.productMediaService = productMediaService;
         this.addProductMediaUseCase = addProductMediaUseCase;
         this.removeProductMediaUseCase = removeProductMediaUseCase;
         this.reorderProductMediaUseCase = reorderProductMediaUseCase;
+        this.validator = validator;
     }
 
     @PostMapping("/media/presign")
@@ -47,27 +51,25 @@ public class AdminProductMediaController {
     }
 
     @PostMapping("/{id}/media")
-    public ResponseEntity<?> addMedia(@PathVariable Long id, @RequestBody AddProductMediaRequest request) {
+    public ResponseEntity<Void> addMedia(@PathVariable Long id, @RequestBody AddProductMediaRequest request) {
         var command = new AddProductMediaCommand(id, request.mediaIds());
-        return ResponseEntity.ok(addProductMediaUseCase.execute(command));
+        ValidationHelper.validate(command, validator);
+        addProductMediaUseCase.execute(command);
+        return ResponseEntity.noContent().build();
     }
 
     @DeleteMapping("/{id}/media")
-    public ResponseEntity<?> removeMedia(@PathVariable Long id, @RequestParam(name = "mediaId") String mediaId) {
+    public ResponseEntity<Void> removeMedia(@PathVariable Long id, @RequestParam(name = "mediaId") String mediaId) {
         removeProductMediaUseCase.execute(id, mediaId);
         return ResponseEntity.noContent().build();
     }
 
-    // @DeleteMapping("/{id}/media/{mediaId}")
-    // public ResponseEntity<?> removeMediaByPath(@PathVariable Long id, @PathVariable String mediaId) {
-    //     removeProductMediaUseCase.execute(id, mediaId);
-    //     return ResponseEntity.noContent().build();
-    // }
-
     @PutMapping("/{id}/media/reorder")
-    public ResponseEntity<?> reorderMedia(@PathVariable Long id, @RequestBody ReorderProductMediaRequest request) {
+    public ResponseEntity<Void> reorderMedia(@PathVariable Long id, @RequestBody ReorderProductMediaRequest request) {
         var command = new ReorderProductMediaCommand(id, request.mediaIds());
-        return ResponseEntity.ok(reorderProductMediaUseCase.execute(command));
+        ValidationHelper.validate(command, validator);
+        reorderProductMediaUseCase.execute(command);
+        return ResponseEntity.noContent().build();
     }
 }
 

@@ -1,5 +1,6 @@
 package io.d4tzz.ecommerce.application.catalog.option;
 
+import io.d4tzz.ecommerce.application.catalog.option.command.DeleteOptionValueCommand;
 import io.d4tzz.ecommerce.common.exception.NotFoundException;
 import io.d4tzz.ecommerce.domain.catalog.option.Option;
 import io.d4tzz.ecommerce.domain.catalog.option.OptionId;
@@ -18,11 +19,11 @@ public class DeleteOptionValueUseCase {
         this.optionRepository = optionRepository;
     }
 
-    public OptionDto execute(DeleteOptionValueCommand command) {
-        return execute(command.optionId(), command.valueId());
+    public void execute(DeleteOptionValueCommand command) {
+        execute(command.optionId(), command.valueId());
     }
 
-    public OptionDto execute(Long optionId, Long valueId) {
+    public void execute(Long optionId, Long valueId) {
         Option option = optionRepository
             .find(OptionId.of(optionId))
             .orElseThrow(() -> new NotFoundException("Option not found with id: " + optionId));
@@ -30,7 +31,6 @@ public class DeleteOptionValueUseCase {
         ValueId valId = ValueId.of(valueId);
         option.removeValue(valId, optionRepository::isValueReferenced);
 
-        Option saved = optionRepository.save(option);
-        return OptionDto.from(saved);
+        optionRepository.save(option);
     }
 }

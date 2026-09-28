@@ -1,5 +1,6 @@
 package io.d4tzz.ecommerce.application.cart;
 
+import io.d4tzz.ecommerce.application.cart.command.RemoveCartItemCommand;
 import io.d4tzz.ecommerce.common.exception.NotFoundException;
 import io.d4tzz.ecommerce.domain.cart.Cart;
 import io.d4tzz.ecommerce.domain.cart.CartRepository;
@@ -12,15 +13,13 @@ import org.springframework.transaction.annotation.Transactional;
 @Transactional
 public class RemoveCartItemUseCase {
 
-    public record Command(Long userId, Long variantId) {}
-
     private final CartRepository cartRepository;
 
     public RemoveCartItemUseCase(CartRepository cartRepository) {
         this.cartRepository = cartRepository;
     }
 
-    public void execute(Command command) {
+    public void execute(RemoveCartItemCommand command) {
         UserId userId = UserId.of(command.userId());
         Cart cart = cartRepository.findByUserId(userId)
             .orElseThrow(() -> new NotFoundException("Cart not found for user: " + command.userId()));

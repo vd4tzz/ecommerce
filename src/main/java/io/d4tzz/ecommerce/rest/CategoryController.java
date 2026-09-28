@@ -1,7 +1,7 @@
 package io.d4tzz.ecommerce.rest;
 
-import io.d4tzz.ecommerce.query.catalog.CategoryQueryService;
-import io.d4tzz.ecommerce.query.catalog.CategoryTreeNode;
+import io.d4tzz.ecommerce.query.catalog.category.CategoryQueryService;
+import io.d4tzz.ecommerce.query.catalog.category.CategoryTreeNode;
 import java.util.List;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;

@@ -17,7 +17,6 @@ import java.util.LinkedHashMap;
 import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Map;
-import java.util.Objects;
 import java.util.Optional;
 import java.util.Set;
 
@@ -32,9 +31,9 @@ public class Product {
     private LinkedHashMap<OptionId, LinkedHashSet<ValueId>> options;
     private LinkedHashSet<MediaId> media;
     private List<Variant> variants;
-    private Map<String, Object> attributes;
+    private Map<String, List<String>> attributes;
 
-    private Product(
+    public Product(
         ProductId id,
         ProductName name,
         ProductSlug slug,
@@ -44,14 +43,14 @@ public class Product {
         Map<OptionId, Set<ValueId>> options,
         Set<MediaId> media,
         List<Variant> variants,
-        Map<String, Object> attributes
+        Map<String, List<String>> attributes
     ) {
         this.id = id;
         this.name = name;
         this.slug = slug;
-        this.description = description != null ? description : Description.of("");
-        this.categoryId = Objects.requireNonNull(categoryId, "CategoryId cannot be null");
-        this.status = status != null ? status : ProductStatus.DRAFT;
+        this.description = description;
+        this.categoryId = categoryId;
+        this.status = status;
 
         this.options = new LinkedHashMap<>();
         if (options != null) {
@@ -61,30 +60,30 @@ public class Product {
         }
 
         this.media = media != null ? new LinkedHashSet<>(media) : new LinkedHashSet<>();
-        this.variants = variants != null ? new ArrayList<>(variants) : new ArrayList<>();
-        this.attributes = attributes != null ? new LinkedHashMap<>(attributes) : new LinkedHashMap<>();
+        this.variants = variants;
+        this.attributes = new LinkedHashMap<>(attributes);
     }
 
     public static Product create(
         ProductName name,
         ProductSlug slug,
-        SlugUniquenessChecker checker,
+        SlugUniqueChecker checker,
         Description description,
         CategoryId categoryId,
-        Map<String, Object> attributes,
+        Map<String, List<String>> attributes,
         List<Attribute> schema
     ) {
         if (checker.exists(slug)) {
             throw new ConflictException("Product slug '" + slug.value() + "' already exists");
         }
 
-        Map<String, Object> validatedAttributes = validateAttributes(attributes, schema);
+        Map<String, List<String>> validatedAttributes = validateAttributes(attributes, schema);
 
         return new Product(
             null,
             name,
             slug,
-            description != null ? description : Description.of(""),
+            description,
             categoryId,
             ProductStatus.DRAFT,
             new LinkedHashMap<>(),
@@ -104,7 +103,7 @@ public class Product {
         Map<OptionId, Set<ValueId>> options,
         Set<MediaId> media,
         List<Variant> variants,
-        Map<String, Object> attributes
+        Map<String, List<String>> attributes
     ) {
         return new Product(id, name, slug, description, categoryId, status, options, media, variants, attributes);
     }
@@ -113,7 +112,7 @@ public class Product {
         this.name = name;
     }
 
-    public void changeSlug(ProductSlug newSlug, SlugUniquenessChecker checker) {
+    public void changeSlug(ProductSlug newSlug, SlugUniqueChecker checker) {
         if (this.slug.equals(newSlug)) {
             return;
         }
@@ -129,7 +128,7 @@ public class Product {
         this.description = description != null ? description : Description.of("");
     }
 
-    public void changeCategory(CategoryId categoryId, Map<String, Object> attributes, List<Attribute> schema) {
+    public void changeCategory(CategoryId categoryId, Map<String, List<String>> attributes, List<Attribute> schema) {
         this.attributes = validateAttributes(attributes, schema);
         this.categoryId = categoryId;
     }
@@ -280,7 +279,7 @@ public class Product {
         Dimensions dimensions,
         Weight weight,
         Map<OptionId, ValueId> combination,
-        SkuChecker checker
+        SkuUniqueChecker checker
     ) {
         if (mediaId != null && !this.media.contains(mediaId)) {
             throw new NotFoundException("Media '" + mediaId.value() + "' is not in product gallery");
@@ -327,7 +326,9 @@ public class Product {
     public void removeVariant(VariantId variantId) {
         if (this.status != ProductStatus.DRAFT) {
             throw new InvalidOperationException(
-                "Cannot remove variant when product is in " + this.status + " status. Only DRAFT products allow variant removal."
+                "Cannot remove variant when product is in " +
+                    this.status +
+                    " status. Only DRAFT products allow variant removal."
             );
         }
         this.variants.removeIf(v -> variantId.equals(v.getId()));
@@ -339,7 +340,7 @@ public class Product {
         return variant;
     }
 
-    public void updateVariantSku(VariantId variantId, Sku newSku, SkuChecker checker) {
+    public void updateVariantSku(VariantId variantId, Sku newSku, SkuUniqueChecker checker) {
         Variant variant = findVariantById(variantId);
         if (variant.getSku().equals(newSku)) {
             return;
@@ -352,18 +353,21 @@ public class Product {
         variant.changeSku(newSku);
     }
 
-    public void updateAttributes(Map<String, Object> attributes, List<Attribute> schema) {
+    public void updateAttributes(Map<String, List<String>> attributes, List<Attribute> schema) {
         this.attributes = validateAttributes(attributes, schema);
     }
 
-    private static Map<String, Object> validateAttributes(Map<String, Object> attributes, List<Attribute> schema) {
+    private static Map<String, List<String>> validateAttributes(
+        Map<String, List<String>> attributes,
+        List<Attribute> schema
+    ) {
         if (attributes == null) {
             attributes = Collections.emptyMap();
         }
 
         if (schema.isEmpty()) {
             if (!attributes.isEmpty()) {
-                throw new InvalidArgumentException("Category has yes attributes, cannot provide attributes");
+                throw new InvalidArgumentException("Category has no attributes, cannot provide attributes");
             }
             return Collections.emptyMap();
         }
@@ -373,7 +377,7 @@ public class Product {
             schemaMap.put(attr.getCode(), attr);
         }
 
-        for (Map.Entry<String, Object> entry : attributes.entrySet()) {
+        for (Map.Entry<String, List<String>> entry : attributes.entrySet()) {
             Attribute attr = schemaMap.get(entry.getKey());
             if (attr == null) {
                 throw new InvalidArgumentException("Unknown attribute: " + entry.getKey());
@@ -483,7 +487,7 @@ public class Product {
         return this.variants.stream().map(Variant::getPrice).max(Comparator.naturalOrder());
     }
 
-    public Map<String, Object> getAttributes() {
+    public Map<String, List<String>> getAttributes() {
         return Collections.unmodifiableMap(attributes);
     }
 }

@@ -1,5 +1,6 @@
 package io.d4tzz.ecommerce.application.user;
 
+import io.d4tzz.ecommerce.application.user.command.LoginCommand;
 import io.d4tzz.ecommerce.common.exception.InvalidArgumentException;
 import io.d4tzz.ecommerce.domain.security.RefreshTokenRepository;
 import io.d4tzz.ecommerce.domain.security.TokenPair;
@@ -14,8 +15,6 @@ import org.springframework.transaction.annotation.Transactional;
 @Service
 @Transactional
 public class LoginUseCase {
-
-    public record Command(String email, String password) {}
 
     public record Response(String accessToken, String refreshToken, UserDto user) {}
 
@@ -36,7 +35,7 @@ public class LoginUseCase {
         this.refreshTokenRepository = refreshTokenRepository;
     }
 
-    public Response execute(Command command) {
+    public Response execute(LoginCommand command) {
         Email email = Email.of(command.email());
         User user = userRepository
             .findByEmail(email)

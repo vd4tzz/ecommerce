@@ -2,11 +2,11 @@ package io.d4tzz.ecommerce.rest;
 
 import io.d4tzz.ecommerce.common.exception.NotFoundException;
 import io.d4tzz.ecommerce.query.PageResponse;
-import io.d4tzz.ecommerce.query.catalog.FilterSidebarView;
-import io.d4tzz.ecommerce.query.catalog.ProductCardView;
-import io.d4tzz.ecommerce.query.catalog.ProductDetailView;
-import io.d4tzz.ecommerce.query.catalog.ProductQueryService;
-import io.d4tzz.ecommerce.query.catalog.ProductSearchCriteria;
+import io.d4tzz.ecommerce.query.catalog.product.FilterSidebarView;
+import io.d4tzz.ecommerce.query.catalog.product.ProductCardView;
+import io.d4tzz.ecommerce.query.catalog.product.ProductDetailView;
+import io.d4tzz.ecommerce.query.catalog.product.ProductQueryService;
+import io.d4tzz.ecommerce.query.catalog.product.ProductSearchCriteria;
 import java.math.BigDecimal;
 import java.util.ArrayList;
 import java.util.HashMap;

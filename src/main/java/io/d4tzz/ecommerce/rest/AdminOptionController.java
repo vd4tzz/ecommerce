@@ -1,21 +1,21 @@
 package io.d4tzz.ecommerce.rest;
 
-import io.d4tzz.ecommerce.application.catalog.option.AddOptionValueCommand;
 import io.d4tzz.ecommerce.application.catalog.option.AddOptionValueUseCase;
-import io.d4tzz.ecommerce.application.catalog.option.CreateOptionCommand;
 import io.d4tzz.ecommerce.application.catalog.option.CreateOptionUseCase;
 import io.d4tzz.ecommerce.application.catalog.option.DeleteOptionUseCase;
 import io.d4tzz.ecommerce.application.catalog.option.DeleteOptionValueUseCase;
-import io.d4tzz.ecommerce.application.catalog.option.UpdateOptionCommand;
 import io.d4tzz.ecommerce.application.catalog.option.UpdateOptionUseCase;
-import io.d4tzz.ecommerce.application.catalog.option.UpdateOptionValueCommand;
 import io.d4tzz.ecommerce.application.catalog.option.UpdateOptionValueUseCase;
+import io.d4tzz.ecommerce.application.catalog.option.command.AddOptionValueCommand;
+import io.d4tzz.ecommerce.application.catalog.option.command.CreateOptionCommand;
+import io.d4tzz.ecommerce.application.catalog.option.command.UpdateOptionCommand;
+import io.d4tzz.ecommerce.application.catalog.option.command.UpdateOptionValueCommand;
 import io.d4tzz.ecommerce.common.exception.NotFoundException;
 import io.d4tzz.ecommerce.query.PageResponse;
-import io.d4tzz.ecommerce.query.catalog.OptionDetailView;
-import io.d4tzz.ecommerce.query.catalog.OptionQueryService;
-import io.d4tzz.ecommerce.query.catalog.OptionSearchCriteria;
-import io.d4tzz.ecommerce.query.catalog.OptionTableRowView;
+import io.d4tzz.ecommerce.query.catalog.option.OptionDetailView;
+import io.d4tzz.ecommerce.query.catalog.option.OptionQueryService;
+import io.d4tzz.ecommerce.query.catalog.option.OptionSearchCriteria;
+import io.d4tzz.ecommerce.query.catalog.option.OptionTableRowView;
 import java.net.URI;
 import java.util.List;
 import org.springframework.http.ResponseEntity;
@@ -65,15 +65,15 @@ public class AdminOptionController {
     }
 
     @PostMapping
-    public ResponseEntity<?> createOption(@RequestBody CreateOptionRequest request) {
+    public ResponseEntity<CreateOptionResponse> createOption(@RequestBody CreateOptionRequest request) {
         var command = new CreateOptionCommand(request.name(), request.values());
         ValidationHelper.validate(command, validator);
-        var response = createOptionUseCase.execute(command);
+        Long optionId = createOptionUseCase.execute(command);
         URI location = ServletUriComponentsBuilder.fromCurrentRequest()
             .path("/{id}")
-            .buildAndExpand(response.id())
+            .buildAndExpand(optionId)
             .toUri();
-        return ResponseEntity.created(location).body(response);
+        return ResponseEntity.created(location).body(new CreateOptionResponse(optionId));
     }
 
     @GetMapping
@@ -95,28 +95,31 @@ public class AdminOptionController {
     }
 
     @PutMapping("/{id}")
-    public ResponseEntity<?> updateOption(@PathVariable Long id, @RequestBody UpdateOptionRequest request) {
+    public ResponseEntity<Void> updateOption(@PathVariable Long id, @RequestBody UpdateOptionRequest request) {
         var command = new UpdateOptionCommand(id, request.name());
         ValidationHelper.validate(command, validator);
-        return ResponseEntity.ok(updateOptionUseCase.execute(command));
+        updateOptionUseCase.execute(command);
+        return ResponseEntity.noContent().build();
     }
 
     @PostMapping("/{id}/values")
-    public ResponseEntity<?> addOptionValue(@PathVariable Long id, @RequestBody AddOptionValueRequest request) {
+    public ResponseEntity<Void> addOptionValue(@PathVariable Long id, @RequestBody AddOptionValueRequest request) {
         var command = new AddOptionValueCommand(id, request.name());
         ValidationHelper.validate(command, validator);
-        return ResponseEntity.ok(addOptionValueUseCase.execute(command));
+        addOptionValueUseCase.execute(command);
+        return ResponseEntity.noContent().build();
     }
 
     @PutMapping("/{optionId}/values/{valueId}")
-    public ResponseEntity<?> updateOptionValue(
+    public ResponseEntity<Void> updateOptionValue(
         @PathVariable Long optionId,
         @PathVariable Long valueId,
         @RequestBody UpdateOptionValueRequest request
     ) {
         var command = new UpdateOptionValueCommand(optionId, valueId, request.name());
         ValidationHelper.validate(command, validator);
-        return ResponseEntity.ok(updateOptionValueUseCase.execute(command));
+        updateOptionValueUseCase.execute(command);
+        return ResponseEntity.noContent().build();
     }
 
     @DeleteMapping("/{optionId}/values/{valueId}")
@@ -133,6 +136,8 @@ public class AdminOptionController {
 }
 
 record CreateOptionRequest(String name, List<String> values) {}
+
+record CreateOptionResponse(Long id) {}
 
 record UpdateOptionRequest(String name) {}
 

@@ -1,5 +1,6 @@
 package io.d4tzz.ecommerce.application.catalog.product;
 
+import io.d4tzz.ecommerce.application.catalog.product.command.ReorderProductOptionsCommand;
 import io.d4tzz.ecommerce.common.exception.NotFoundException;
 import io.d4tzz.ecommerce.domain.catalog.option.OptionId;
 import io.d4tzz.ecommerce.domain.catalog.product.Product;
@@ -19,7 +20,7 @@ public class ReorderProductOptionsUseCase {
         this.productRepository = productRepository;
     }
 
-    public List<ProductDto.ProductOptionDto> execute(ReorderProductOptionsCommand command) {
+    public void execute(ReorderProductOptionsCommand command) {
         Product product = productRepository
             .find(ProductId.of(command.productId()))
             .orElseThrow(() -> new NotFoundException("Product not found with id: " + command.productId()));
@@ -27,7 +28,6 @@ public class ReorderProductOptionsUseCase {
         List<OptionId> newOrder = command.optionIds().stream().map(OptionId::of).toList();
         product.reorderOptions(newOrder);
 
-        Product saved = productRepository.save(product);
-        return ProductDto.from(saved).options();
+        productRepository.save(product);
     }
 }

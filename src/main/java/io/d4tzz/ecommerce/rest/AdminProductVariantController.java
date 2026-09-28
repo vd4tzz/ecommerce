@@ -1,10 +1,10 @@
 package io.d4tzz.ecommerce.rest;
 
-import io.d4tzz.ecommerce.application.catalog.product.AddProductVariantCommand;
 import io.d4tzz.ecommerce.application.catalog.product.AddProductVariantUseCase;
 import io.d4tzz.ecommerce.application.catalog.product.RemoveProductVariantUseCase;
-import io.d4tzz.ecommerce.application.catalog.product.UpdateProductVariantCommand;
 import io.d4tzz.ecommerce.application.catalog.product.UpdateProductVariantUseCase;
+import io.d4tzz.ecommerce.application.catalog.product.command.AddProductVariantCommand;
+import io.d4tzz.ecommerce.application.catalog.product.command.UpdateProductVariantCommand;
 import java.math.BigDecimal;
 import java.util.List;
 import java.util.Map;
@@ -40,7 +40,7 @@ public class AdminProductVariantController {
     }
 
     @PostMapping
-    public ResponseEntity<?> addVariant(@PathVariable Long productId, @RequestBody AddProductVariantRequest request) {
+    public ResponseEntity<Void> addVariant(@PathVariable Long productId, @RequestBody AddProductVariantRequest request) {
         var command = new AddProductVariantCommand(
             productId,
             request
@@ -61,11 +61,12 @@ public class AdminProductVariantController {
                 .toList()
         );
         ValidationHelper.validate(command, validator);
-        return ResponseEntity.ok(addProductVariantUseCase.execute(command));
+        addProductVariantUseCase.execute(command);
+        return ResponseEntity.noContent().build();
     }
 
     @PutMapping("/{variantId}")
-    public ResponseEntity<?> updateVariant(
+    public ResponseEntity<Void> updateVariant(
         @PathVariable Long productId,
         @PathVariable Long variantId,
         @RequestBody UpdateProductVariantRequest request
@@ -82,11 +83,12 @@ public class AdminProductVariantController {
             request.weight()
         );
         ValidationHelper.validate(command, validator);
-        return ResponseEntity.ok(updateProductVariantUseCase.execute(command));
+        updateProductVariantUseCase.execute(command);
+        return ResponseEntity.noContent().build();
     }
 
     @DeleteMapping("/{variantId}")
-    public ResponseEntity<?> removeVariant(@PathVariable Long productId, @PathVariable Long variantId) {
+    public ResponseEntity<Void> removeVariant(@PathVariable Long productId, @PathVariable Long variantId) {
         removeProductVariantUseCase.execute(productId, variantId);
         return ResponseEntity.noContent().build();
     }

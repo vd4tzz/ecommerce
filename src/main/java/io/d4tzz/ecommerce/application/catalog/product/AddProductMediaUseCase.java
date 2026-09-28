@@ -1,11 +1,11 @@
 package io.d4tzz.ecommerce.application.catalog.product;
 
+import io.d4tzz.ecommerce.application.catalog.product.command.AddProductMediaCommand;
 import io.d4tzz.ecommerce.common.exception.NotFoundException;
 import io.d4tzz.ecommerce.domain.catalog.product.MediaId;
 import io.d4tzz.ecommerce.domain.catalog.product.Product;
 import io.d4tzz.ecommerce.domain.catalog.product.ProductId;
 import io.d4tzz.ecommerce.domain.catalog.product.ProductRepository;
-import java.util.List;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -19,7 +19,7 @@ public class AddProductMediaUseCase {
         this.productRepository = productRepository;
     }
 
-    public List<String> execute(AddProductMediaCommand command) {
+    public void execute(AddProductMediaCommand command) {
         Product product = productRepository
             .find(ProductId.of(command.productId()))
             .orElseThrow(() -> new NotFoundException("Product not found with id: " + command.productId()));
@@ -28,7 +28,6 @@ public class AddProductMediaUseCase {
             product.addMedia(MediaId.of(mediaId));
         }
 
-        Product saved = productRepository.save(product);
-        return ProductDto.from(saved).media();
+        productRepository.save(product);
     }
 }

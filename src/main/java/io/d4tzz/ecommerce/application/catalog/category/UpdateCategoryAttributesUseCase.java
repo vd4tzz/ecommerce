@@ -1,5 +1,6 @@
 package io.d4tzz.ecommerce.application.catalog.category;
 
+import io.d4tzz.ecommerce.application.catalog.category.command.UpdateCategoryAttributesCommand;
 import io.d4tzz.ecommerce.common.exception.NotFoundException;
 import io.d4tzz.ecommerce.domain.catalog.category.Attribute;
 import io.d4tzz.ecommerce.domain.catalog.category.AttributeValue;
@@ -14,26 +15,13 @@ import org.springframework.transaction.annotation.Transactional;
 @Transactional
 public class UpdateCategoryAttributesUseCase {
 
-    public record Response(
-        Long id,
-        String name,
-        String slug,
-        Long parentId,
-        String path,
-        List<AttributeResponse> attributes
-    ) {
-        public record AttributeResponse(String code, String label, String type, List<AttributeValueResponse> values) {
-            public record AttributeValueResponse(String code, String label) {}
-        }
-    }
-
     private final CategoryRepository categoryRepository;
 
     public UpdateCategoryAttributesUseCase(CategoryRepository categoryRepository) {
         this.categoryRepository = categoryRepository;
     }
 
-    public List<CategoryDto.AttributeDto> execute(UpdateCategoryAttributesCommand command) {
+    public void execute(UpdateCategoryAttributesCommand command) {
         CategoryId categoryId = CategoryId.of(command.categoryId());
         Category category = categoryRepository
             .find(categoryId)
@@ -62,8 +50,6 @@ public class UpdateCategoryAttributesUseCase {
         List<Attribute> descendantSchema = categoryRepository.findDescendantAttributes(categoryId);
 
         category.updateAttributes(newAttributes, ancestorSchema, descendantSchema);
-        Category saved = categoryRepository.save(category);
-
-        return CategoryDto.from(saved).attributes();
+        categoryRepository.save(category);
     }
 }
