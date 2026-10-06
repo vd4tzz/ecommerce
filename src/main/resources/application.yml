@@ -45,6 +45,12 @@ app:
       secret-key: any
       public-base-url: http://localhost:8333/ecommerce
       presigned-duration-minutes: 15
+  payment:
+    sepay:
+      merchant: ${SEPAY_MERCHANT:SP-TEST-NV575945}
+      secret-key: ${SEPAY_SECRET_KEY:spsk_test_9hLmPRpG5V1VM1yP1Agmt1kAShnJcAWh}
+      checkout-url: ${SEPAY_CHECKOUT_URL:https://pay-sandbox.sepay.vn/v1/checkout/init}
+      return-url: ${SEPAY_RETURN_URL:http://localhost:3000/orders}
 
 springdoc:
   api-docs:
