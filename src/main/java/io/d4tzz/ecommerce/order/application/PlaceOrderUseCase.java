@@ -95,7 +95,7 @@ public class PlaceOrderUseCase {
             ProductId.of(item.productId()),
             item.productName(),
             item.sku(),
-            item.attributesDescription(),
+            item.optionsDescription(),
             item.thumbnailUrl(),
             Money.of(item.unitPrice()),
             item.quantity()

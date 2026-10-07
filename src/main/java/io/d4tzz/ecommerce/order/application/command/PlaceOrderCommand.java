@@ -40,7 +40,7 @@ public record PlaceOrderCommand(
         @NotNull Long productId,
         @NotBlank String productName,
         @NotBlank String sku,
-        @NotNull String attributesDescription,
+        @NotNull String optionsDescription,
         String thumbnailUrl,
         @NotNull @PositiveOrZero BigDecimal unitPrice,
         @Positive int quantity

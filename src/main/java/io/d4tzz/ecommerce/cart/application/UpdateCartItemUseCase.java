@@ -1,0 +1,40 @@
+package io.d4tzz.ecommerce.cart.application;
+
+import io.d4tzz.ecommerce.cart.application.command.UpdateCartItemCommand;
+import io.d4tzz.ecommerce.cart.application.port.VariantCatalog;
+import io.d4tzz.ecommerce.cart.domain.Cart;
+import io.d4tzz.ecommerce.cart.domain.CartRepository;
+import io.d4tzz.ecommerce.common.exception.InvalidOperationException;
+import io.d4tzz.ecommerce.domain.catalog.product.VariantId;
+import io.d4tzz.ecommerce.domain.user.UserId;
+import java.util.List;
+import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
+
+/** Sets the quantity of a variant in the user's cart, adding it (and the cart) when missing. */
+@Service
+@Transactional
+public class UpdateCartItemUseCase {
+
+    private final CartRepository cartRepository;
+    private final VariantCatalog variantCatalog;
+
+    public UpdateCartItemUseCase(CartRepository cartRepository, VariantCatalog variantCatalog) {
+        this.cartRepository = cartRepository;
+        this.variantCatalog = variantCatalog;
+    }
+
+    public void execute(UpdateCartItemCommand command) {
+        VariantId variantId = VariantId.of(command.variantId());
+        if (!variantCatalog.findNotForSale(List.of(variantId)).isEmpty()) {
+            throw new InvalidOperationException("Variant " + variantId + " is not for sale");
+        }
+
+        UserId userId = UserId.of(command.userId());
+        cartRepository.lockForUser(userId);
+        Cart cart = cartRepository.findByUserId(userId).orElseGet(() -> Cart.create(userId));
+
+        cart.updateQuantity(variantId, command.quantity());
+        cartRepository.save(cart);
+    }
+}

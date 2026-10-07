@@ -135,7 +135,7 @@ public class JdbcOrderQueryService implements OrderQueryService {
         return jdbcClient
             .sql(
                 """
-                SELECT id, variant_id, product_id, product_name, sku, attributes_description, thumbnail_url,
+                SELECT id, variant_id, product_id, product_name, sku, options_description, thumbnail_url,
                        unit_price, quantity, total_price
                 FROM order_items
                 WHERE order_id = :orderId
@@ -150,7 +150,7 @@ public class JdbcOrderQueryService implements OrderQueryService {
                     rs.getLong("product_id"),
                     rs.getString("product_name"),
                     rs.getString("sku"),
-                    rs.getString("attributes_description"),
+                    rs.getString("options_description"),
                     rs.getString("thumbnail_url"),
                     rs.getBigDecimal("unit_price"),
                     rs.getInt("quantity"),

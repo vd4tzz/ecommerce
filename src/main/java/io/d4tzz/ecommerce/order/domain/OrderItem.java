@@ -13,7 +13,7 @@ public class OrderItem {
     private final ProductId productId;
     private final String productName;
     private final String sku;
-    private final String attributesDescription;
+    private final String optionsDescription;
     private final String thumbnailUrl;
     private final Money unitPrice;
     private final int quantity;
@@ -25,7 +25,7 @@ public class OrderItem {
         ProductId productId,
         String productName,
         String sku,
-        String attributesDescription,
+        String optionsDescription,
         String thumbnailUrl,
         Money unitPrice,
         int quantity,
@@ -46,7 +46,7 @@ public class OrderItem {
         this.productId = productId;
         this.productName = productName.trim();
         this.sku = sku.trim();
-        this.attributesDescription = attributesDescription.trim();
+        this.optionsDescription = optionsDescription.trim();
         this.thumbnailUrl = thumbnailUrl;
         this.unitPrice = unitPrice;
         this.quantity = quantity;
@@ -58,7 +58,7 @@ public class OrderItem {
         ProductId productId,
         String productName,
         String sku,
-        String attributesDescription,
+        String optionsDescription,
         String thumbnailUrl,
         Money unitPrice,
         int quantity
@@ -69,7 +69,7 @@ public class OrderItem {
             productId,
             productName,
             sku,
-            attributesDescription,
+            optionsDescription,
             thumbnailUrl,
             unitPrice,
             quantity,
@@ -83,7 +83,7 @@ public class OrderItem {
         ProductId productId,
         String productName,
         String sku,
-        String attributesDescription,
+        String optionsDescription,
         String thumbnailUrl,
         Money unitPrice,
         int quantity,
@@ -95,7 +95,7 @@ public class OrderItem {
             productId,
             productName,
             sku,
-            attributesDescription,
+            optionsDescription,
             thumbnailUrl,
             unitPrice,
             quantity,
@@ -128,7 +128,7 @@ public class OrderItem {
     }
 
     public String getAttributesDescription() {
-        return attributesDescription;
+        return optionsDescription;
     }
 
     public String getThumbnailUrl() {

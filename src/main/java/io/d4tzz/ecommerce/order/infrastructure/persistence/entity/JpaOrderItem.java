@@ -43,8 +43,8 @@ public class JpaOrderItem {
     @Column(name = "sku", nullable = false, length = 100)
     private String sku;
 
-    @Column(name = "attributes_description", nullable = false)
-    private String attributesDescription;
+    @Column(name = "options_description", nullable = false)
+    private String optionsDescription;
 
     @Column(name = "thumbnail_url", length = 1000)
     private String thumbnailUrl;
@@ -109,11 +109,11 @@ public class JpaOrderItem {
     }
 
     public String getAttributesDescription() {
-        return attributesDescription;
+        return optionsDescription;
     }
 
-    public void setAttributesDescription(String attributesDescription) {
-        this.attributesDescription = attributesDescription;
+    public void setAttributesDescription(String optionsDescription) {
+        this.optionsDescription = optionsDescription;
     }
 
     public String getThumbnailUrl() {

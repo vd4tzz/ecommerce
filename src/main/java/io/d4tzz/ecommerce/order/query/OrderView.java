@@ -40,7 +40,7 @@ public record OrderView(
         Long productId,
         String productName,
         String sku,
-        String attributesDescription,
+        String optionsDescription,
         String thumbnailUrl,
         BigDecimal unitPrice,
         int quantity,
