@@ -1,12 +1,12 @@
 package io.d4tzz.ecommerce.checkout.application;
 
+import io.d4tzz.ecommerce.catalog.domain.product.VariantId;
+import io.d4tzz.ecommerce.catalog.published.SellableVariantFinder;
+import io.d4tzz.ecommerce.catalog.published.SellableVariantFinder.SellableVariant;
 import io.d4tzz.ecommerce.checkout.application.command.CheckoutCommand;
-import io.d4tzz.ecommerce.checkout.application.port.VariantCatalog;
-import io.d4tzz.ecommerce.checkout.application.port.VariantCatalog.VariantSnapshot;
+import io.d4tzz.ecommerce.common.Address;
 import io.d4tzz.ecommerce.common.Money;
 import io.d4tzz.ecommerce.common.exception.InvalidOperationException;
-import io.d4tzz.ecommerce.catalog.domain.product.VariantId;
-import io.d4tzz.ecommerce.common.Address;
 import io.d4tzz.ecommerce.inventory.application.AllocateStockUseCase;
 import io.d4tzz.ecommerce.inventory.application.ReserveStockUseCase;
 import io.d4tzz.ecommerce.inventory.application.command.AllocateStockCommand;
@@ -42,7 +42,7 @@ public class CheckoutUseCase {
 
     static final Duration PAYMENT_WINDOW = Duration.ofMinutes(15);
 
-    private final VariantCatalog variantCatalog;
+    private final SellableVariantFinder sellableVariantFinder;
     private final AllocateStockUseCase allocateStockUseCase;
     private final ShippingFeeCalculator shippingFeeCalculator;
     private final PlaceOrderUseCase placeOrderUseCase;
@@ -50,14 +50,14 @@ public class CheckoutUseCase {
     private final TransactionTemplate transactionTemplate;
 
     public CheckoutUseCase(
-        VariantCatalog variantCatalog,
+        SellableVariantFinder sellableVariantFinder,
         AllocateStockUseCase allocateStockUseCase,
         ShippingFeeCalculator shippingFeeCalculator,
         PlaceOrderUseCase placeOrderUseCase,
         ReserveStockUseCase reserveStockUseCase,
         TransactionTemplate transactionTemplate
     ) {
-        this.variantCatalog = variantCatalog;
+        this.sellableVariantFinder = sellableVariantFinder;
         this.allocateStockUseCase = allocateStockUseCase;
         this.shippingFeeCalculator = shippingFeeCalculator;
         this.placeOrderUseCase = placeOrderUseCase;
@@ -72,7 +72,7 @@ public class CheckoutUseCase {
             quantities.merge(VariantId.of(item.variantId()), item.quantity(), Integer::sum);
         }
 
-        Map<VariantId, VariantSnapshot> snapshots = variantCatalog.findForSale(quantities.keySet());
+        Map<VariantId, SellableVariant> snapshots = sellableVariantFinder.findSellable(quantities.keySet());
         for (VariantId variantId : quantities.keySet()) {
             if (!snapshots.containsKey(variantId)) {
                 throw new InvalidOperationException("Variant " + variantId + " is not for sale");
@@ -155,7 +155,7 @@ public class CheckoutUseCase {
         );
     }
 
-    private static PlaceOrderCommand.Item toOrderItem(VariantId variantId, int quantity, VariantSnapshot snapshot) {
+    private static PlaceOrderCommand.Item toOrderItem(VariantId variantId, int quantity, SellableVariant snapshot) {
         return new PlaceOrderCommand.Item(
             variantId.value(),
             snapshot.productId(),
