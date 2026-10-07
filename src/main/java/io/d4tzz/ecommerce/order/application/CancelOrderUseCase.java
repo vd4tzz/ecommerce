@@ -2,8 +2,10 @@ package io.d4tzz.ecommerce.order.application;
 
 import io.d4tzz.ecommerce.common.exception.NotFoundException;
 import io.d4tzz.ecommerce.order.application.command.CancelOrderCommand;
-import io.d4tzz.ecommerce.order.application.port.PaymentRefunds;
-import io.d4tzz.ecommerce.order.application.port.StockReservations;
+import io.d4tzz.ecommerce.payment.application.RequestRefundUseCase;
+import io.d4tzz.ecommerce.payment.application.command.RequestRefundCommand;
+import io.d4tzz.ecommerce.inventory.application.ReleaseStockUseCase;
+import io.d4tzz.ecommerce.inventory.application.command.ReleaseStockCommand;
 import io.d4tzz.ecommerce.order.domain.Order;
 import io.d4tzz.ecommerce.order.domain.OrderId;
 import io.d4tzz.ecommerce.order.domain.OrderRepository;
@@ -19,19 +21,19 @@ import org.springframework.transaction.annotation.Transactional;
 public class CancelOrderUseCase {
 
     private final OrderRepository orderRepository;
-    private final StockReservations stockReservations;
-    private final PaymentRefunds paymentRefunds;
+    private final ReleaseStockUseCase releaseStockUseCase;
+    private final RequestRefundUseCase requestRefundUseCase;
     private final ApplicationEventPublisher eventPublisher;
 
     public CancelOrderUseCase(
         OrderRepository orderRepository,
-        StockReservations stockReservations,
-        PaymentRefunds paymentRefunds,
+        ReleaseStockUseCase releaseStockUseCase,
+        RequestRefundUseCase requestRefundUseCase,
         ApplicationEventPublisher eventPublisher
     ) {
         this.orderRepository = orderRepository;
-        this.stockReservations = stockReservations;
-        this.paymentRefunds = paymentRefunds;
+        this.releaseStockUseCase = releaseStockUseCase;
+        this.requestRefundUseCase = requestRefundUseCase;
         this.eventPublisher = eventPublisher;
     }
 
@@ -45,13 +47,13 @@ public class CancelOrderUseCase {
         }
 
         orderRepository.save(order);
-        stockReservations.release(order.getId());
+        releaseStockUseCase.execute(new ReleaseStockCommand(order.getId().value()));
         // If the customer had already paid: ask for the money to be given back
         if (order.qualifiesForRefund()) {
-            paymentRefunds.requestRefund(
+            requestRefundUseCase.execute(new RequestRefundCommand(
                 Long.valueOf(order.getPaymentReference()),
                 "Order " + order.getOrderCode() + " was cancelled after it was paid: " + order.getCancelReason()
-            );
+            ));
         }
         eventPublisher.publishEvent(OrderCancelledEvent.of(order));
     }

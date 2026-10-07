@@ -2,8 +2,10 @@ package io.d4tzz.ecommerce.order.application;
 
 import io.d4tzz.ecommerce.common.exception.NotFoundException;
 import io.d4tzz.ecommerce.order.application.command.ReturnOrderCommand;
-import io.d4tzz.ecommerce.order.application.port.PaymentRefunds;
-import io.d4tzz.ecommerce.order.application.port.StockReservations;
+import io.d4tzz.ecommerce.payment.application.RequestRefundUseCase;
+import io.d4tzz.ecommerce.payment.application.command.RequestRefundCommand;
+import io.d4tzz.ecommerce.inventory.application.RestockReturnedUseCase;
+import io.d4tzz.ecommerce.inventory.application.command.RestockReturnedCommand;
 import io.d4tzz.ecommerce.order.domain.Order;
 import io.d4tzz.ecommerce.order.domain.OrderId;
 import io.d4tzz.ecommerce.order.domain.OrderRepository;
@@ -19,19 +21,19 @@ import org.springframework.transaction.annotation.Transactional;
 public class ReturnOrderUseCase {
 
     private final OrderRepository orderRepository;
-    private final StockReservations stockReservations;
-    private final PaymentRefunds paymentRefunds;
+    private final RestockReturnedUseCase restockReturnedUseCase;
+    private final RequestRefundUseCase requestRefundUseCase;
     private final ApplicationEventPublisher eventPublisher;
 
     public ReturnOrderUseCase(
         OrderRepository orderRepository,
-        StockReservations stockReservations,
-        PaymentRefunds paymentRefunds,
+        RestockReturnedUseCase restockReturnedUseCase,
+        RequestRefundUseCase requestRefundUseCase,
         ApplicationEventPublisher eventPublisher
     ) {
         this.orderRepository = orderRepository;
-        this.stockReservations = stockReservations;
-        this.paymentRefunds = paymentRefunds;
+        this.restockReturnedUseCase = restockReturnedUseCase;
+        this.requestRefundUseCase = requestRefundUseCase;
         this.eventPublisher = eventPublisher;
     }
 
@@ -46,13 +48,13 @@ public class ReturnOrderUseCase {
         }
 
         orderRepository.save(order);
-        stockReservations.restock(order.getId());
+        restockReturnedUseCase.execute(new RestockReturnedCommand(order.getId().value()));
         // The customer had already paid: ask for the money to be given back
         if (order.qualifiesForRefund()) {
-            paymentRefunds.requestRefund(
+            requestRefundUseCase.execute(new RequestRefundCommand(
                 Long.valueOf(order.getPaymentReference()),
                 "Order " + order.getOrderCode() + " was returned after it was paid"
-            );
+            ));
         }
         eventPublisher.publishEvent(new OrderReturnedEvent(order.getId(), order.getOrderCode(), order.getUserId(), now));
     }

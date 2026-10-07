@@ -3,12 +3,12 @@ package io.d4tzz.ecommerce.order.application;
 import io.d4tzz.ecommerce.common.exception.NotFoundException;
 import io.d4tzz.ecommerce.user.domain.UserId;
 import io.d4tzz.ecommerce.order.application.command.PayMyOrderCommand;
-import io.d4tzz.ecommerce.order.application.port.PaymentGateway;
-import io.d4tzz.ecommerce.order.application.port.PaymentGateway.PaymentRedirect;
-import io.d4tzz.ecommerce.order.application.port.PaymentGateway.PaymentRequest;
 import io.d4tzz.ecommerce.order.domain.Order;
 import io.d4tzz.ecommerce.order.domain.OrderCode;
 import io.d4tzz.ecommerce.order.domain.OrderRepository;
+import io.d4tzz.ecommerce.payment.application.RequestPaymentUseCase;
+import io.d4tzz.ecommerce.payment.application.command.RequestPaymentCommand;
+import io.d4tzz.ecommerce.payment.application.port.PaymentRedirect;
 import java.time.Instant;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -24,11 +24,11 @@ import org.springframework.transaction.annotation.Transactional;
 public class PayMyOrderUseCase {
 
     private final OrderRepository orderRepository;
-    private final PaymentGateway paymentGateway;
+    private final RequestPaymentUseCase requestPaymentUseCase;
 
-    public PayMyOrderUseCase(OrderRepository orderRepository, PaymentGateway paymentGateway) {
+    public PayMyOrderUseCase(OrderRepository orderRepository, RequestPaymentUseCase requestPaymentUseCase) {
         this.orderRepository = orderRepository;
-        this.paymentGateway = paymentGateway;
+        this.requestPaymentUseCase = requestPaymentUseCase;
     }
 
     public PaymentRedirect execute(PayMyOrderCommand command) {
@@ -41,10 +41,10 @@ public class PayMyOrderUseCase {
         }
 
         order.ensureAwaitingPayment(Instant.now());
-        return paymentGateway.request(
-            new PaymentRequest(
+        return requestPaymentUseCase.execute(
+            new RequestPaymentCommand(
                 order.getOrderCode().toString(),
-                order.getTotalAmount(),
+                order.getTotalAmount().amount(),
                 order.getPaymentExpiresAt(),
                 command.clientIp(),
                 command.gateway()

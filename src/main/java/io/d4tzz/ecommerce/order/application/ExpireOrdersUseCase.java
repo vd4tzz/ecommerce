@@ -1,6 +1,7 @@
 package io.d4tzz.ecommerce.order.application;
 
-import io.d4tzz.ecommerce.order.application.port.StockReservations;
+import io.d4tzz.ecommerce.inventory.application.ReleaseStockUseCase;
+import io.d4tzz.ecommerce.inventory.application.command.ReleaseStockCommand;
 import io.d4tzz.ecommerce.order.domain.Order;
 import io.d4tzz.ecommerce.order.domain.OrderId;
 import io.d4tzz.ecommerce.order.domain.OrderRepository;
@@ -25,18 +26,18 @@ public class ExpireOrdersUseCase {
     private static final Logger log = LoggerFactory.getLogger(ExpireOrdersUseCase.class);
 
     private final OrderRepository orderRepository;
-    private final StockReservations stockReservations;
+    private final ReleaseStockUseCase releaseStockUseCase;
     private final ApplicationEventPublisher eventPublisher;
     private final TransactionTemplate transactionTemplate;
 
     public ExpireOrdersUseCase(
         OrderRepository orderRepository,
-        StockReservations stockReservations,
+        ReleaseStockUseCase releaseStockUseCase,
         ApplicationEventPublisher eventPublisher,
         TransactionTemplate transactionTemplate
     ) {
         this.orderRepository = orderRepository;
-        this.stockReservations = stockReservations;
+        this.releaseStockUseCase = releaseStockUseCase;
         this.eventPublisher = eventPublisher;
         this.transactionTemplate = transactionTemplate;
     }
@@ -66,7 +67,7 @@ public class ExpireOrdersUseCase {
         }
 
         orderRepository.save(order);
-        stockReservations.release(order.getId());
+        releaseStockUseCase.execute(new ReleaseStockCommand(order.getId().value()));
         eventPublisher.publishEvent(OrderCancelledEvent.of(order));
         return true;
     }

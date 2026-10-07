@@ -2,12 +2,14 @@ package io.d4tzz.ecommerce.order.application;
 
 import io.d4tzz.ecommerce.common.exception.NotFoundException;
 import io.d4tzz.ecommerce.order.application.command.DeliverOrderCommand;
-import io.d4tzz.ecommerce.order.application.port.CashOnDeliveryPayments;
 import io.d4tzz.ecommerce.order.domain.Order;
 import io.d4tzz.ecommerce.order.domain.OrderId;
 import io.d4tzz.ecommerce.order.domain.OrderRepository;
 import io.d4tzz.ecommerce.order.domain.PaymentStatus;
 import io.d4tzz.ecommerce.order.domain.event.OrderDeliveredEvent;
+import io.d4tzz.ecommerce.payment.application.RecordPaymentUseCase;
+import io.d4tzz.ecommerce.payment.application.command.RecordPaymentCommand;
+import io.d4tzz.ecommerce.payment.domain.PaymentMethod;
 import java.time.Instant;
 import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.stereotype.Service;
@@ -24,17 +26,17 @@ import org.springframework.transaction.annotation.Transactional;
 public class DeliverOrderUseCase {
 
     private final OrderRepository orderRepository;
-    private final CashOnDeliveryPayments cashOnDeliveryPayments;
     private final ApplicationEventPublisher eventPublisher;
+    private final RecordPaymentUseCase recordPaymentUseCase;
 
     public DeliverOrderUseCase(
         OrderRepository orderRepository,
-        CashOnDeliveryPayments cashOnDeliveryPayments,
+        RecordPaymentUseCase recordPaymentUseCase,
         ApplicationEventPublisher eventPublisher
     ) {
         this.orderRepository = orderRepository;
-        this.cashOnDeliveryPayments = cashOnDeliveryPayments;
         this.eventPublisher = eventPublisher;
+        this.recordPaymentUseCase = recordPaymentUseCase;
     }
 
     public void execute(DeliverOrderCommand command) {
@@ -51,7 +53,17 @@ public class DeliverOrderUseCase {
 
         // COD with something to collect (a free order is already PAID)
         if (!order.requiresPrepayment() && order.getPaymentStatus() == PaymentStatus.UNPAID) {
-            cashOnDeliveryPayments.recordCollected(order.getOrderCode().toString(), order.getTotalAmount());
+            // Cash has no shop account and no transaction number
+            recordPaymentUseCase.execute(
+                new RecordPaymentCommand(
+                    order.getOrderCode().toString(),
+                    PaymentMethod.COD,
+                    null,
+                    order.getTotalAmount().amount(),
+                    null,
+                    "Collected on delivery"
+                )
+            );
         }
 
         eventPublisher.publishEvent(

@@ -2,7 +2,8 @@ package io.d4tzz.ecommerce.order.application;
 
 import io.d4tzz.ecommerce.common.exception.NotFoundException;
 import io.d4tzz.ecommerce.order.application.command.ShipOrderCommand;
-import io.d4tzz.ecommerce.order.application.port.StockReservations;
+import io.d4tzz.ecommerce.inventory.application.CommitStockUseCase;
+import io.d4tzz.ecommerce.inventory.application.command.CommitStockCommand;
 import io.d4tzz.ecommerce.order.domain.Order;
 import io.d4tzz.ecommerce.order.domain.OrderId;
 import io.d4tzz.ecommerce.order.domain.OrderRepository;
@@ -18,16 +19,16 @@ import org.springframework.transaction.annotation.Transactional;
 public class ShipOrderUseCase {
 
     private final OrderRepository orderRepository;
-    private final StockReservations stockReservations;
+    private final CommitStockUseCase commitStockUseCase;
     private final ApplicationEventPublisher eventPublisher;
 
     public ShipOrderUseCase(
         OrderRepository orderRepository,
-        StockReservations stockReservations,
+        CommitStockUseCase commitStockUseCase,
         ApplicationEventPublisher eventPublisher
     ) {
         this.orderRepository = orderRepository;
-        this.stockReservations = stockReservations;
+        this.commitStockUseCase = commitStockUseCase;
         this.eventPublisher = eventPublisher;
     }
 
@@ -42,7 +43,7 @@ public class ShipOrderUseCase {
         }
 
         orderRepository.save(order);
-        stockReservations.commit(order.getId());
+        commitStockUseCase.execute(new CommitStockCommand(order.getId().value()));
         eventPublisher.publishEvent(new OrderShippedEvent(order.getId(), order.getOrderCode(), order.getUserId(), now));
     }
 }

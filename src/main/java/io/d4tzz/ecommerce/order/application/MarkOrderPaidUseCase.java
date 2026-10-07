@@ -2,7 +2,8 @@ package io.d4tzz.ecommerce.order.application;
 
 import io.d4tzz.ecommerce.common.Money;
 import io.d4tzz.ecommerce.order.application.command.MarkOrderPaidCommand;
-import io.d4tzz.ecommerce.order.application.port.PaymentRefunds;
+import io.d4tzz.ecommerce.payment.application.RequestRefundUseCase;
+import io.d4tzz.ecommerce.payment.application.command.RequestRefundCommand;
 import io.d4tzz.ecommerce.order.domain.MarkPaidResult;
 import io.d4tzz.ecommerce.order.domain.Order;
 import io.d4tzz.ecommerce.order.domain.OrderCode;
@@ -23,7 +24,7 @@ import org.springframework.transaction.annotation.Transactional;
  * is not treated as an error, because the customer has already paid. Instead, the payment is sent back for a
  * refund. We return a result rather than throw, since throwing would also undo the refund request.
  *
- * <p>Called by {@link io.d4tzz.ecommerce.order.infrastructure.listener.MarkOrderPaidOnPaymentReceivedListener}
+ * <p>Called by {@link io.d4tzz.ecommerce.order.inbound.listener.MarkOrderPaidOnPaymentReceivedListener}
  * when the payment module reports money received for an order.
  */
 @Service
@@ -33,16 +34,16 @@ public class MarkOrderPaidUseCase {
     private static final Logger log = LoggerFactory.getLogger(MarkOrderPaidUseCase.class);
 
     private final OrderRepository orderRepository;
-    private final PaymentRefunds paymentRefunds;
+    private final RequestRefundUseCase requestRefundUseCase;
     private final ApplicationEventPublisher eventPublisher;
 
     public MarkOrderPaidUseCase(
         OrderRepository orderRepository,
-        PaymentRefunds paymentRefunds,
+        RequestRefundUseCase requestRefundUseCase,
         ApplicationEventPublisher eventPublisher
     ) {
         this.orderRepository = orderRepository;
-        this.paymentRefunds = paymentRefunds;
+        this.requestRefundUseCase = requestRefundUseCase;
         this.eventPublisher = eventPublisher;
     }
 
@@ -64,10 +65,10 @@ public class MarkOrderPaidUseCase {
                 new OrderPaidEvent(order.getId(), order.getOrderCode(), order.getUserId(), now)
             );
         } else if (result.isRejected()) {
-            paymentRefunds.requestRefund(
+            requestRefundUseCase.execute(new RequestRefundCommand(
                 command.paymentId(),
                 "Order " + order.getOrderCode() + " did not accept the payment: " + result
-            );
+            ));
         }
         return result;
     }
