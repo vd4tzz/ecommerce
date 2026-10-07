@@ -4,7 +4,7 @@ import io.d4tzz.ecommerce.common.exception.ConflictException;
 import io.d4tzz.ecommerce.common.exception.NotFoundException;
 import io.d4tzz.ecommerce.catalog.domain.product.VariantId;
 import io.d4tzz.ecommerce.inventory.application.command.ReceiveGoodsCommand;
-import io.d4tzz.ecommerce.inventory.application.port.VariantCatalog;
+import io.d4tzz.ecommerce.catalog.published.VariantExistenceChecker;
 import io.d4tzz.ecommerce.inventory.domain.InventoryItem;
 import io.d4tzz.ecommerce.inventory.domain.InventoryItemRepository;
 import io.d4tzz.ecommerce.inventory.domain.StockLedgerEntry;
@@ -30,18 +30,18 @@ public class ReceiveGoodsUseCase {
     private final WarehouseRepository warehouseRepository;
     private final InventoryItemRepository inventoryItemRepository;
     private final StockLedgerRepository stockLedgerRepository;
-    private final VariantCatalog variantCatalog;
+    private final VariantExistenceChecker variantExistenceChecker;
 
     public ReceiveGoodsUseCase(
         WarehouseRepository warehouseRepository,
         InventoryItemRepository inventoryItemRepository,
         StockLedgerRepository stockLedgerRepository,
-        VariantCatalog variantCatalog
+        VariantExistenceChecker variantExistenceChecker
     ) {
         this.warehouseRepository = warehouseRepository;
         this.inventoryItemRepository = inventoryItemRepository;
         this.stockLedgerRepository = stockLedgerRepository;
-        this.variantCatalog = variantCatalog;
+        this.variantExistenceChecker = variantExistenceChecker;
     }
 
     /** Returns the ids of the ledger entries recorded for this receipt. */
@@ -58,7 +58,7 @@ public class ReceiveGoodsUseCase {
         }
 
         // ensure variants must exist in catalog
-        Set<VariantId> missing = variantCatalog.findMissing(quantities.keySet());
+        Set<VariantId> missing = variantExistenceChecker.findMissing(quantities.keySet());
         if (!missing.isEmpty()) {
             throw new NotFoundException("Variants not found: " + missing);
         }

@@ -1,7 +1,7 @@
-package io.d4tzz.ecommerce.inventory.infrastructure.catalog;
+package io.d4tzz.ecommerce.catalog.infrastructure.published;
 
 import io.d4tzz.ecommerce.catalog.domain.product.VariantId;
-import io.d4tzz.ecommerce.inventory.application.port.VariantCatalog;
+import io.d4tzz.ecommerce.catalog.published.VariantExistenceChecker;
 import java.util.Collection;
 import java.util.HashSet;
 import java.util.List;
@@ -10,11 +10,11 @@ import org.springframework.jdbc.core.simple.JdbcClient;
 import org.springframework.stereotype.Component;
 
 @Component
-public class JdbcVariantCatalog implements VariantCatalog {
+public class JdbcVariantExistenceChecker implements VariantExistenceChecker {
 
     private final JdbcClient jdbcClient;
 
-    public JdbcVariantCatalog(JdbcClient jdbcClient) {
+    public JdbcVariantExistenceChecker(JdbcClient jdbcClient) {
         this.jdbcClient = jdbcClient;
     }
 
