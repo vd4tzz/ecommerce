@@ -1,7 +1,7 @@
 package io.d4tzz.ecommerce.shipping.application.port;
 
 import io.d4tzz.ecommerce.common.Money;
-import io.d4tzz.ecommerce.domain.user.Address;
+import io.d4tzz.ecommerce.common.Address;
 import java.util.List;
 
 /** One carrier (GHN, GHTK...). Each carrier is its own adapter; {@link #code()} is how a request picks it. */

@@ -1,6 +1,6 @@
 package io.d4tzz.ecommerce.order.domain.event;
 
-import io.d4tzz.ecommerce.domain.user.UserId;
+import io.d4tzz.ecommerce.user.domain.UserId;
 import io.d4tzz.ecommerce.order.domain.Order;
 import io.d4tzz.ecommerce.order.domain.OrderCode;
 import io.d4tzz.ecommerce.order.domain.OrderId;

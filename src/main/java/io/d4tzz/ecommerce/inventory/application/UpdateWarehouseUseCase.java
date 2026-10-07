@@ -1,7 +1,7 @@
 package io.d4tzz.ecommerce.inventory.application;
 
 import io.d4tzz.ecommerce.common.exception.NotFoundException;
-import io.d4tzz.ecommerce.domain.user.Address;
+import io.d4tzz.ecommerce.common.Address;
 import io.d4tzz.ecommerce.inventory.application.command.UpdateWarehouseCommand;
 import io.d4tzz.ecommerce.inventory.domain.Warehouse;
 import io.d4tzz.ecommerce.inventory.domain.WarehouseId;

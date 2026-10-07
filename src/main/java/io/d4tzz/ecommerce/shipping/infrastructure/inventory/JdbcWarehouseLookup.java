@@ -1,6 +1,6 @@
 package io.d4tzz.ecommerce.shipping.infrastructure.inventory;
 
-import io.d4tzz.ecommerce.domain.user.Address;
+import io.d4tzz.ecommerce.common.Address;
 import io.d4tzz.ecommerce.shipping.application.port.WarehouseLookup;
 import java.util.Collection;
 import java.util.HashMap;

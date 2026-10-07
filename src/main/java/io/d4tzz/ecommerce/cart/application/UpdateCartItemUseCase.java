@@ -6,7 +6,7 @@ import io.d4tzz.ecommerce.cart.domain.Cart;
 import io.d4tzz.ecommerce.cart.domain.CartRepository;
 import io.d4tzz.ecommerce.common.exception.InvalidOperationException;
 import io.d4tzz.ecommerce.domain.catalog.product.VariantId;
-import io.d4tzz.ecommerce.domain.user.UserId;
+import io.d4tzz.ecommerce.user.domain.UserId;
 import java.util.List;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;

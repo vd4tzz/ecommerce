@@ -1,6 +1,6 @@
 package io.d4tzz.ecommerce.shipping.application;
 
-import io.d4tzz.ecommerce.domain.user.Address;
+import io.d4tzz.ecommerce.common.Address;
 import jakarta.validation.Valid;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotEmpty;

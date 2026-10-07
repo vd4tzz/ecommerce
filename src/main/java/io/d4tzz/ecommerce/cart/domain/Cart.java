@@ -1,7 +1,7 @@
 package io.d4tzz.ecommerce.cart.domain;
 
 import io.d4tzz.ecommerce.domain.catalog.product.VariantId;
-import io.d4tzz.ecommerce.domain.user.UserId;
+import io.d4tzz.ecommerce.user.domain.UserId;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;

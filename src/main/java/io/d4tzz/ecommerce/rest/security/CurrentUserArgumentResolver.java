@@ -1,7 +1,7 @@
 package io.d4tzz.ecommerce.rest.security;
 
 import io.d4tzz.ecommerce.common.exception.InvalidArgumentException;
-import io.d4tzz.ecommerce.infrastructure.security.JwtTokenParser;
+import io.d4tzz.ecommerce.user.infrastructure.security.JwtTokenParser;
 import org.springframework.core.MethodParameter;
 import org.springframework.stereotype.Component;
 import org.springframework.web.bind.support.WebDataBinderFactory;

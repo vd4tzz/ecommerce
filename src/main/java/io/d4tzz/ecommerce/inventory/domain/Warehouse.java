@@ -3,7 +3,7 @@ package io.d4tzz.ecommerce.inventory.domain;
 import io.d4tzz.ecommerce.common.exception.ConflictException;
 import io.d4tzz.ecommerce.common.exception.InvalidArgumentException;
 import io.d4tzz.ecommerce.common.exception.InvalidOperationException;
-import io.d4tzz.ecommerce.domain.user.Address;
+import io.d4tzz.ecommerce.common.Address;
 import java.time.Instant;
 
 public class Warehouse {

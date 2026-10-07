@@ -1,7 +1,7 @@
 package io.d4tzz.ecommerce.shipping.infrastructure.carrier;
 
 import io.d4tzz.ecommerce.common.Money;
-import io.d4tzz.ecommerce.domain.user.Address;
+import io.d4tzz.ecommerce.common.Address;
 import io.d4tzz.ecommerce.shipping.application.port.PackageItem;
 import io.d4tzz.ecommerce.shipping.application.port.ShippingCarrier;
 import java.text.Normalizer;

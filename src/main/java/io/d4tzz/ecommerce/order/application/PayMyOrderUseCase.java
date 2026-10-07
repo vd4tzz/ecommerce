@@ -1,7 +1,7 @@
 package io.d4tzz.ecommerce.order.application;
 
 import io.d4tzz.ecommerce.common.exception.NotFoundException;
-import io.d4tzz.ecommerce.domain.user.UserId;
+import io.d4tzz.ecommerce.user.domain.UserId;
 import io.d4tzz.ecommerce.order.application.command.PayMyOrderCommand;
 import io.d4tzz.ecommerce.order.application.port.PaymentGateway;
 import io.d4tzz.ecommerce.order.application.port.PaymentGateway.PaymentRedirect;

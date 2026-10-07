@@ -2,7 +2,7 @@ package io.d4tzz.ecommerce.cart.infrastructure.listener;
 
 import io.d4tzz.ecommerce.cart.domain.Cart;
 import io.d4tzz.ecommerce.cart.domain.CartRepository;
-import io.d4tzz.ecommerce.domain.user.event.EmailVerifiedEvent;
+import io.d4tzz.ecommerce.user.domain.event.EmailVerifiedEvent;
 import org.springframework.modulith.events.ApplicationModuleListener;
 import org.springframework.stereotype.Component;
 

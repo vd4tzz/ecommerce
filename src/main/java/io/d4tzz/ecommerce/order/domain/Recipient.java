@@ -1,7 +1,7 @@
 package io.d4tzz.ecommerce.order.domain;
 
 import io.d4tzz.ecommerce.common.exception.InvalidArgumentException;
-import io.d4tzz.ecommerce.domain.user.PhoneNumber;
+import io.d4tzz.ecommerce.user.domain.PhoneNumber;
 
 public record Recipient(String fullName, PhoneNumber phoneNumber) {
     public Recipient {

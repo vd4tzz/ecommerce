@@ -1,6 +1,6 @@
 package io.d4tzz.ecommerce.shipping.application.port;
 
-import io.d4tzz.ecommerce.domain.user.Address;
+import io.d4tzz.ecommerce.common.Address;
 import java.util.Collection;
 import java.util.Map;
 

@@ -6,7 +6,7 @@ import io.d4tzz.ecommerce.cart.domain.CartItem;
 import io.d4tzz.ecommerce.cart.domain.CartItemId;
 import io.d4tzz.ecommerce.cart.domain.CartRepository;
 import io.d4tzz.ecommerce.domain.catalog.product.VariantId;
-import io.d4tzz.ecommerce.domain.user.UserId;
+import io.d4tzz.ecommerce.user.domain.UserId;
 import io.d4tzz.ecommerce.cart.infrastructure.persistence.entity.JpaCart;
 import io.d4tzz.ecommerce.cart.infrastructure.persistence.entity.JpaCartItem;
 import java.util.ArrayList;

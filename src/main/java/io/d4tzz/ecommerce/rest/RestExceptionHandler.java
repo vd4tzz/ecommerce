@@ -4,6 +4,12 @@ import io.d4tzz.ecommerce.common.exception.ConflictException;
 import io.d4tzz.ecommerce.common.exception.InvalidArgumentException;
 import io.d4tzz.ecommerce.common.exception.InvalidOperationException;
 import io.d4tzz.ecommerce.common.exception.NotFoundException;
+import io.d4tzz.ecommerce.user.domain.AccountBlockedException;
+import io.d4tzz.ecommerce.user.domain.EmailAlreadyExistsException;
+import io.d4tzz.ecommerce.user.domain.InvalidCredentialsException;
+import io.d4tzz.ecommerce.user.domain.auth.OtpInvalidCodeException;
+import io.d4tzz.ecommerce.user.domain.auth.OtpInvalidException;
+import io.d4tzz.ecommerce.user.domain.auth.OtpRateLimitedException;
 import java.util.List;
 import java.util.Map;
 import org.springframework.http.HttpStatus;
@@ -58,9 +64,31 @@ public class RestExceptionHandler {
         IllegalStateException.class
     })
     public ProblemDetail handleBadRequest(RuntimeException ex) {
-        return ProblemDetail.forStatusAndDetail(
-            HttpStatus.BAD_REQUEST,
-            ex.getMessage()
-        );
+        return ProblemDetail.forStatusAndDetail(HttpStatus.BAD_REQUEST, ex.getMessage());
+    }
+
+    @ExceptionHandler(EmailAlreadyExistsException.class)
+    public ProblemDetail handleEmailConflict(EmailAlreadyExistsException ex) {
+        return ProblemDetail.forStatusAndDetail(HttpStatus.CONFLICT, ex.getMessage());
+    }
+
+    @ExceptionHandler(InvalidCredentialsException.class)
+    public ProblemDetail handleInvalidCredentials(InvalidCredentialsException ex) {
+        return ProblemDetail.forStatusAndDetail(HttpStatus.UNAUTHORIZED, ex.getMessage());
+    }
+
+    @ExceptionHandler(AccountBlockedException.class)
+    public ProblemDetail handleAccountBlocked(AccountBlockedException ex) {
+        return ProblemDetail.forStatusAndDetail(HttpStatus.FORBIDDEN, ex.getMessage());
+    }
+
+    @ExceptionHandler({OtpInvalidCodeException.class, OtpInvalidException.class})
+    public ProblemDetail handleOtpInvalid(RuntimeException ex) {
+        return ProblemDetail.forStatusAndDetail(HttpStatus.BAD_REQUEST, ex.getMessage());
+    }
+
+    @ExceptionHandler(OtpRateLimitedException.class)
+    public ProblemDetail handleOtpRateLimit(OtpRateLimitedException ex) {
+        return ProblemDetail.forStatusAndDetail(HttpStatus.TOO_MANY_REQUESTS, ex.getMessage());
     }
 }

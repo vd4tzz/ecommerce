@@ -1,7 +1,7 @@
 package io.d4tzz.ecommerce.cart.domain;
 
 import io.d4tzz.ecommerce.common.Repository;
-import io.d4tzz.ecommerce.domain.user.UserId;
+import io.d4tzz.ecommerce.user.domain.UserId;
 import java.util.Optional;
 
 public interface CartRepository extends Repository<Cart, CartId> {

@@ -1,6 +1,6 @@
 package io.d4tzz.ecommerce.inventory.infrastructure.persistence.repository;
 
-import io.d4tzz.ecommerce.domain.user.Address;
+import io.d4tzz.ecommerce.common.Address;
 import io.d4tzz.ecommerce.inventory.domain.Warehouse;
 import io.d4tzz.ecommerce.inventory.domain.WarehouseCode;
 import io.d4tzz.ecommerce.inventory.domain.WarehouseId;
