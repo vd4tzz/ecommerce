@@ -1,7 +1,7 @@
-package io.d4tzz.ecommerce.cart.infrastructure.catalog;
+package io.d4tzz.ecommerce.catalog.infrastructure.published;
 
-import io.d4tzz.ecommerce.cart.application.port.VariantCatalog;
 import io.d4tzz.ecommerce.catalog.domain.product.VariantId;
+import io.d4tzz.ecommerce.catalog.published.VariantSaleChecker;
 import java.util.Collection;
 import java.util.HashSet;
 import java.util.List;
@@ -9,17 +9,17 @@ import java.util.Set;
 import org.springframework.jdbc.core.simple.JdbcClient;
 import org.springframework.stereotype.Component;
 
-@Component("cartVariantCatalog")
-public class JdbcVariantCatalog implements VariantCatalog {
+@Component
+public class JdbcVariantSaleChecker implements VariantSaleChecker {
 
     private final JdbcClient jdbcClient;
 
-    public JdbcVariantCatalog(JdbcClient jdbcClient) {
+    public JdbcVariantSaleChecker(JdbcClient jdbcClient) {
         this.jdbcClient = jdbcClient;
     }
 
     @Override
-    public Set<VariantId> findNotForSale(Collection<VariantId> variantIds) {
+    public Set<VariantId> checkNotForSale(Collection<VariantId> variantIds) {
         if (variantIds.isEmpty()) {
             return Set.of();
         }

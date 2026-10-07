@@ -1,10 +1,10 @@
 package io.d4tzz.ecommerce.cart.application;
 
 import io.d4tzz.ecommerce.cart.application.command.MergeCartCommand;
-import io.d4tzz.ecommerce.cart.application.port.VariantCatalog;
 import io.d4tzz.ecommerce.cart.domain.Cart;
 import io.d4tzz.ecommerce.cart.domain.CartRepository;
 import io.d4tzz.ecommerce.catalog.domain.product.VariantId;
+import io.d4tzz.ecommerce.catalog.published.VariantSaleChecker;
 import io.d4tzz.ecommerce.user.domain.UserId;
 import java.util.Set;
 import org.springframework.stereotype.Service;
@@ -19,16 +19,20 @@ import org.springframework.transaction.annotation.Transactional;
 public class MergeCartUseCase {
 
     private final CartRepository cartRepository;
-    private final VariantCatalog variantCatalog;
+    private final VariantSaleChecker variantSaleChecker;
 
-    public MergeCartUseCase(CartRepository cartRepository, VariantCatalog variantCatalog) {
+    public MergeCartUseCase(CartRepository cartRepository, VariantSaleChecker variantSaleChecker) {
         this.cartRepository = cartRepository;
-        this.variantCatalog = variantCatalog;
+        this.variantSaleChecker = variantSaleChecker;
     }
 
     public void execute(MergeCartCommand command) {
-        Set<VariantId> notForSale = variantCatalog.findNotForSale(
-            command.items().stream().map(item -> VariantId.of(item.variantId())).toList()
+        Set<VariantId> notForSale = variantSaleChecker.checkNotForSale(
+            command
+                .items()
+                .stream()
+                .map(item -> VariantId.of(item.variantId()))
+                .toList()
         );
 
         UserId userId = UserId.of(command.userId());
