@@ -1,7 +1,7 @@
 package io.d4tzz.ecommerce.inventory.domain;
 
 import io.d4tzz.ecommerce.common.exception.InvalidOperationException;
-import io.d4tzz.ecommerce.domain.catalog.product.VariantId;
+import io.d4tzz.ecommerce.catalog.domain.product.VariantId;
 import java.time.Instant;
 import java.util.ArrayList;
 import java.util.List;

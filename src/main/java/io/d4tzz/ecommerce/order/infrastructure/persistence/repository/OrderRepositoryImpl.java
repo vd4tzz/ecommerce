@@ -1,8 +1,8 @@
 package io.d4tzz.ecommerce.order.infrastructure.persistence.repository;
 
 import io.d4tzz.ecommerce.common.Money;
-import io.d4tzz.ecommerce.domain.catalog.product.ProductId;
-import io.d4tzz.ecommerce.domain.catalog.product.VariantId;
+import io.d4tzz.ecommerce.catalog.domain.product.ProductId;
+import io.d4tzz.ecommerce.catalog.domain.product.VariantId;
 import io.d4tzz.ecommerce.common.Address;
 import io.d4tzz.ecommerce.user.domain.PhoneNumber;
 import io.d4tzz.ecommerce.user.domain.UserId;

@@ -2,8 +2,8 @@ package io.d4tzz.ecommerce.order.domain;
 
 import io.d4tzz.ecommerce.common.Money;
 import io.d4tzz.ecommerce.common.exception.InvalidArgumentException;
-import io.d4tzz.ecommerce.domain.catalog.product.ProductId;
-import io.d4tzz.ecommerce.domain.catalog.product.VariantId;
+import io.d4tzz.ecommerce.catalog.domain.product.ProductId;
+import io.d4tzz.ecommerce.catalog.domain.product.VariantId;
 import io.d4tzz.ecommerce.order.domain.event.OrderLine;
 
 public class OrderItem {

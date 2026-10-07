@@ -1,7 +1,7 @@
 package io.d4tzz.ecommerce.cart.domain;
 
 import io.d4tzz.ecommerce.common.exception.InvalidArgumentException;
-import io.d4tzz.ecommerce.domain.catalog.product.VariantId;
+import io.d4tzz.ecommerce.catalog.domain.product.VariantId;
 
 /** One variant in a cart. Its quantity is always between 1 and {@link #MAX_QUANTITY}. */
 public class CartItem {

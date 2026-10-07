@@ -5,7 +5,7 @@ import io.d4tzz.ecommerce.cart.domain.CartId;
 import io.d4tzz.ecommerce.cart.domain.CartItem;
 import io.d4tzz.ecommerce.cart.domain.CartItemId;
 import io.d4tzz.ecommerce.cart.domain.CartRepository;
-import io.d4tzz.ecommerce.domain.catalog.product.VariantId;
+import io.d4tzz.ecommerce.catalog.domain.product.VariantId;
 import io.d4tzz.ecommerce.user.domain.UserId;
 import io.d4tzz.ecommerce.cart.infrastructure.persistence.entity.JpaCart;
 import io.d4tzz.ecommerce.cart.infrastructure.persistence.entity.JpaCartItem;

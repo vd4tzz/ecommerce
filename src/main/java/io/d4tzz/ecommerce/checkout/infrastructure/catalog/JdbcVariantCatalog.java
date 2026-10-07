@@ -1,7 +1,7 @@
 package io.d4tzz.ecommerce.checkout.infrastructure.catalog;
 
 import io.d4tzz.ecommerce.checkout.application.port.VariantCatalog;
-import io.d4tzz.ecommerce.domain.catalog.product.VariantId;
+import io.d4tzz.ecommerce.catalog.domain.product.VariantId;
 import io.d4tzz.ecommerce.storage.MediaUrlResolver;
 import java.util.ArrayList;
 import java.util.Collection;

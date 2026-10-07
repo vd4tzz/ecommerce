@@ -95,11 +95,7 @@ public class SePayIpnController {
     }
 
     /** The parts of SePay's IPN body we use; other fields are ignored. */
-    record SePayIpn(
-        @JsonProperty("notification_type") String notificationType,
-        Order order,
-        Transaction transaction
-    ) {
+    record SePayIpn(@JsonProperty("notification_type") String notificationType, Order order, Transaction transaction) {
         record Order(@JsonProperty("order_invoice_number") String invoiceNumber) {}
 
         record Transaction(

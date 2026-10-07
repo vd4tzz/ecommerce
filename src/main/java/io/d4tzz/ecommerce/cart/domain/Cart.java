@@ -1,6 +1,6 @@
 package io.d4tzz.ecommerce.cart.domain;
 
-import io.d4tzz.ecommerce.domain.catalog.product.VariantId;
+import io.d4tzz.ecommerce.catalog.domain.product.VariantId;
 import io.d4tzz.ecommerce.user.domain.UserId;
 import java.util.ArrayList;
 import java.util.Collections;

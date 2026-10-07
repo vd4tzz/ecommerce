@@ -5,7 +5,7 @@ import io.d4tzz.ecommerce.checkout.application.port.VariantCatalog;
 import io.d4tzz.ecommerce.checkout.application.port.VariantCatalog.VariantSnapshot;
 import io.d4tzz.ecommerce.common.Money;
 import io.d4tzz.ecommerce.common.exception.InvalidOperationException;
-import io.d4tzz.ecommerce.domain.catalog.product.VariantId;
+import io.d4tzz.ecommerce.catalog.domain.product.VariantId;
 import io.d4tzz.ecommerce.common.Address;
 import io.d4tzz.ecommerce.inventory.application.AllocateStockUseCase;
 import io.d4tzz.ecommerce.inventory.application.ReserveStockUseCase;

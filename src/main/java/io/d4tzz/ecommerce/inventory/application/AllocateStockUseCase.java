@@ -1,6 +1,6 @@
 package io.d4tzz.ecommerce.inventory.application;
 
-import io.d4tzz.ecommerce.domain.catalog.product.VariantId;
+import io.d4tzz.ecommerce.catalog.domain.product.VariantId;
 import io.d4tzz.ecommerce.inventory.application.command.AllocateStockCommand;
 import io.d4tzz.ecommerce.inventory.application.result.StockAllocation;
 import io.d4tzz.ecommerce.inventory.domain.ReservationLine;

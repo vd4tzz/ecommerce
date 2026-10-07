@@ -2,7 +2,7 @@ package io.d4tzz.ecommerce.shipping.application;
 
 import io.d4tzz.ecommerce.common.Money;
 import io.d4tzz.ecommerce.common.exception.InvalidOperationException;
-import io.d4tzz.ecommerce.domain.catalog.product.VariantId;
+import io.d4tzz.ecommerce.catalog.domain.product.VariantId;
 import io.d4tzz.ecommerce.common.Address;
 import io.d4tzz.ecommerce.shipping.application.port.PackageItem;
 import io.d4tzz.ecommerce.shipping.application.port.ShippingCarrier;

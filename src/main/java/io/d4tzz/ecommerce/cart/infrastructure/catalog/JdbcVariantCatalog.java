@@ -1,7 +1,7 @@
 package io.d4tzz.ecommerce.cart.infrastructure.catalog;
 
 import io.d4tzz.ecommerce.cart.application.port.VariantCatalog;
-import io.d4tzz.ecommerce.domain.catalog.product.VariantId;
+import io.d4tzz.ecommerce.catalog.domain.product.VariantId;
 import java.util.Collection;
 import java.util.HashSet;
 import java.util.List;

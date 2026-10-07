@@ -2,7 +2,7 @@ package io.d4tzz.ecommerce.cart.application;
 
 import io.d4tzz.ecommerce.cart.application.command.RemoveCartItemCommand;
 import io.d4tzz.ecommerce.cart.domain.CartRepository;
-import io.d4tzz.ecommerce.domain.catalog.product.VariantId;
+import io.d4tzz.ecommerce.catalog.domain.product.VariantId;
 import io.d4tzz.ecommerce.user.domain.UserId;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;

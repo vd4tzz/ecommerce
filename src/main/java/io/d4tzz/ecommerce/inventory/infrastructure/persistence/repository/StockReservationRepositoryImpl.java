@@ -1,6 +1,6 @@
 package io.d4tzz.ecommerce.inventory.infrastructure.persistence.repository;
 
-import io.d4tzz.ecommerce.domain.catalog.product.VariantId;
+import io.d4tzz.ecommerce.catalog.domain.product.VariantId;
 import io.d4tzz.ecommerce.inventory.domain.ReservationLine;
 import io.d4tzz.ecommerce.inventory.domain.StockReservation;
 import io.d4tzz.ecommerce.inventory.domain.StockReservationId;
