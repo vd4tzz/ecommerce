@@ -6,8 +6,8 @@ import io.d4tzz.ecommerce.common.exception.NotFoundException;
 import io.d4tzz.ecommerce.order.application.command.PlaceOrderCommand.PaymentMode;
 import io.d4tzz.ecommerce.order.query.OrderQueryService;
 import io.d4tzz.ecommerce.order.query.OrderView;
-import io.d4tzz.ecommerce.rest.ValidationHelper;
-import io.d4tzz.ecommerce.rest.security.CurrentUser;
+import io.d4tzz.ecommerce.spring.SpringValidation;
+import io.d4tzz.ecommerce.spring.security.CurrentUser;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import java.util.List;
 import org.springframework.http.HttpStatus;
@@ -54,7 +54,7 @@ public class CheckoutController {
             request.paymentMode(),
             request.note()
         );
-        ValidationHelper.validate(command, validator);
+        SpringValidation.validate(command, validator);
         Long orderId = checkoutUseCase.execute(command);
         OrderView order = orderQueryService
             .getOrder(orderId)

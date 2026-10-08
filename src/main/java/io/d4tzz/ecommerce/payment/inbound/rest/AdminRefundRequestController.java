@@ -8,7 +8,7 @@ import io.d4tzz.ecommerce.payment.query.RefundRequestQueryService;
 import io.d4tzz.ecommerce.payment.query.RefundRequestSearchCriteria;
 import io.d4tzz.ecommerce.payment.query.RefundRequestView;
 import io.d4tzz.ecommerce.query.PageResponse;
-import io.d4tzz.ecommerce.rest.ValidationHelper;
+import io.d4tzz.ecommerce.spring.SpringValidation;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import org.springframework.http.ResponseEntity;
 import org.springframework.validation.Validator;
@@ -74,7 +74,7 @@ public class AdminRefundRequestController {
             request.transactionNo(),
             request.note()
         );
-        ValidationHelper.validate(command, validator);
+        SpringValidation.validate(command, validator);
         completeRefundRequestUseCase.execute(command);
         return ResponseEntity.ok(findRefundRequest(id));
     }

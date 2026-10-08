@@ -1,6 +1,7 @@
 package io.d4tzz.ecommerce.user.application;
 
 import io.d4tzz.ecommerce.user.application.command.RegisterUserCommand;
+import io.d4tzz.ecommerce.user.domain.EmailAlreadyExistsException;
 import io.d4tzz.ecommerce.user.domain.UserId;
 import io.d4tzz.ecommerce.user.domain.auth.Otp;
 import io.d4tzz.ecommerce.user.domain.auth.OtpGenerator;
@@ -15,7 +16,16 @@ import io.d4tzz.ecommerce.user.domain.event.UserRegisteredEvent;
 import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import io.d4tzz.ecommerce.common.exception.InvalidArgumentException;
 
+/**
+ * Registers a new customer account and starts email verification.
+ * <p>
+ * The account is created active but with an unverified email. An email-verification OTP is generated and saved, and a
+ * {@link UserRegisteredEvent} carrying the code is published. The user's password is stored hashed.
+ *
+ * @see VerifyEmailUseCase
+ */
 @Service
 @Transactional
 public class RegisterUserUseCase {
@@ -40,6 +50,12 @@ public class RegisterUserUseCase {
         this.eventPublisher = eventPublisher;
     }
 
+    /**
+     * @return the id of the new user
+     * @throws InvalidArgumentException if the email is blank or malformed, or the password is not 8-128 characters
+     *     with at least one uppercase letter, one lowercase letter and one digit
+     * @throws EmailAlreadyExistsException if the email is already registered
+     */
     public UserId execute(RegisterUserCommand command) {
         User user = User.register(
             Email.of(command.email()),

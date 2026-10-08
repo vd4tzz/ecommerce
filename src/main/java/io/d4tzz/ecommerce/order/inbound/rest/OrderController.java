@@ -11,8 +11,8 @@ import io.d4tzz.ecommerce.order.query.OrderSummaryView;
 import io.d4tzz.ecommerce.order.query.OrderView;
 import io.d4tzz.ecommerce.payment.application.port.PaymentRedirect;
 import io.d4tzz.ecommerce.query.PageResponse;
-import io.d4tzz.ecommerce.rest.ValidationHelper;
-import io.d4tzz.ecommerce.rest.security.CurrentUser;
+import io.d4tzz.ecommerce.spring.SpringValidation;
+import io.d4tzz.ecommerce.spring.security.CurrentUser;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.servlet.http.HttpServletRequest;
 import org.springframework.http.ResponseEntity;
@@ -77,7 +77,7 @@ public class OrderController {
                 ? request.reason()
                 : DEFAULT_CANCEL_REASON;
         var command = new CancelMyOrderCommand(userId, orderCode, reason);
-        ValidationHelper.validate(command, validator);
+        SpringValidation.validate(command, validator);
         cancelMyOrderUseCase.execute(command);
         return ResponseEntity.ok(getOrder(userId, orderCode));
     }
@@ -97,7 +97,7 @@ public class OrderController {
         // Behind a reverse proxy this is the proxy's address unless server.forward-headers-strategy is set
         String clientIp = httpRequest.getRemoteAddr();
         var command = new PayMyOrderCommand(userId, orderCode, request.gateway(), clientIp);
-        ValidationHelper.validate(command, validator);
+        SpringValidation.validate(command, validator);
         return ResponseEntity.ok(payMyOrderUseCase.execute(command));
     }
 

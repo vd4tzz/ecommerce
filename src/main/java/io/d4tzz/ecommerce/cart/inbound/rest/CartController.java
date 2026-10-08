@@ -12,8 +12,8 @@ import io.d4tzz.ecommerce.cart.application.command.RemoveCartItemCommand;
 import io.d4tzz.ecommerce.cart.application.command.UpdateCartItemCommand;
 import io.d4tzz.ecommerce.cart.query.CartQueryService;
 import io.d4tzz.ecommerce.cart.query.CartView;
-import io.d4tzz.ecommerce.rest.ValidationHelper;
-import io.d4tzz.ecommerce.rest.security.CurrentUser;
+import io.d4tzz.ecommerce.spring.SpringValidation;
+import io.d4tzz.ecommerce.spring.security.CurrentUser;
 import java.util.List;
 import org.springframework.http.ResponseEntity;
 import org.springframework.validation.Validator;
@@ -65,7 +65,7 @@ public class CartController {
     @PostMapping("/items")
     public ResponseEntity<CartView> addItem(@CurrentUser Long userId, @RequestBody AddToCartRequest request) {
         var command = new AddToCartCommand(userId, request.variantId(), request.quantity());
-        ValidationHelper.validate(command, validator);
+        SpringValidation.validate(command, validator);
         addToCartUseCase.execute(command);
         return ResponseEntity.ok(cartQueryService.getCart(userId));
     }
@@ -77,7 +77,7 @@ public class CartController {
         @RequestBody UpdateCartItemRequest request
     ) {
         var command = new UpdateCartItemCommand(userId, variantId, request.quantity());
-        ValidationHelper.validate(command, validator);
+        SpringValidation.validate(command, validator);
         updateCartItemUseCase.execute(command);
         return ResponseEntity.ok(cartQueryService.getCart(userId));
     }
@@ -106,7 +106,7 @@ public class CartController {
                 : List.of();
 
         var command = new MergeCartCommand(userId, domainItems);
-        ValidationHelper.validate(command, validator);
+        SpringValidation.validate(command, validator);
         mergeCartUseCase.execute(command);
         return ResponseEntity.ok(cartQueryService.getCart(userId));
     }

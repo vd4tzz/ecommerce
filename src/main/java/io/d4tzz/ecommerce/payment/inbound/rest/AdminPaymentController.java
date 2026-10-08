@@ -7,7 +7,7 @@ import io.d4tzz.ecommerce.payment.query.PaymentQueryService;
 import io.d4tzz.ecommerce.payment.query.PaymentSearchCriteria;
 import io.d4tzz.ecommerce.payment.query.PaymentView;
 import io.d4tzz.ecommerce.query.PageResponse;
-import io.d4tzz.ecommerce.rest.ValidationHelper;
+import io.d4tzz.ecommerce.spring.SpringValidation;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import java.time.Instant;
 import org.springframework.format.annotation.DateTimeFormat;
@@ -79,7 +79,7 @@ public class AdminPaymentController {
     @PostMapping("/{id}/assign")
     public ResponseEntity<PaymentView> assign(@PathVariable Long id, @RequestBody AssignPaymentRequest request) {
         var command = new AssignPaymentToOrderCommand(id, request.orderCode());
-        ValidationHelper.validate(command, validator);
+        SpringValidation.validate(command, validator);
         assignPaymentToOrderUseCase.execute(command);
         return ResponseEntity.ok(findPayment(id));
     }

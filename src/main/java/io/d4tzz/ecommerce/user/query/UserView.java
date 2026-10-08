@@ -15,12 +15,5 @@ public record UserView(
     Instant lastLoginAt,
     Instant createdAt
 ) {
-    public record Address(
-        String recipientName,
-        String phone,
-        String province,
-        String district,
-        String ward,
-        String detail
-    ) {}
+    public record Address(String province, String district, String ward, String detail) {}
 }

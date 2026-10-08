@@ -1,4 +1,4 @@
-package io.d4tzz.ecommerce.rest.security;
+package io.d4tzz.ecommerce.spring.security;
 
 import io.swagger.v3.oas.annotations.Parameter;
 import java.lang.annotation.Documented;
@@ -13,4 +13,5 @@ import java.lang.annotation.Target;
 @Parameter(hidden = true)
 public @interface CurrentUser {
     boolean required() default true;
+
 }

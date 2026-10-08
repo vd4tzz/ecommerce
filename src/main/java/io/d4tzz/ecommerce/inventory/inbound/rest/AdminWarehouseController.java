@@ -10,7 +10,7 @@ import io.d4tzz.ecommerce.inventory.application.command.UpdateWarehouseCommand;
 import io.d4tzz.ecommerce.inventory.domain.WarehouseStatus;
 import io.d4tzz.ecommerce.inventory.query.WarehouseQueryService;
 import io.d4tzz.ecommerce.inventory.query.WarehouseView;
-import io.d4tzz.ecommerce.rest.ValidationHelper;
+import io.d4tzz.ecommerce.spring.SpringValidation;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import java.net.URI;
 import java.util.List;
@@ -71,7 +71,7 @@ public class AdminWarehouseController {
             request.ward(),
             request.detailAddress()
         );
-        ValidationHelper.validate(command, validator);
+        SpringValidation.validate(command, validator);
         Long id = createWarehouseUseCase.execute(command);
         URI location = ServletUriComponentsBuilder.fromCurrentRequest().path("/{id}").buildAndExpand(id).toUri();
         return ResponseEntity.created(location).body(findWarehouse(id));
@@ -87,7 +87,7 @@ public class AdminWarehouseController {
             request.ward(),
             request.detailAddress()
         );
-        ValidationHelper.validate(command, validator);
+        SpringValidation.validate(command, validator);
         updateWarehouseUseCase.execute(command);
         return ResponseEntity.ok(findWarehouse(id));
     }
@@ -95,7 +95,7 @@ public class AdminWarehouseController {
     @PatchMapping("/{id}/status")
     public ResponseEntity<WarehouseView> changeStatus(@PathVariable Long id, @RequestBody ChangeWarehouseStatusRequest request) {
         var command = new ChangeWarehouseStatusCommand(id, request.status());
-        ValidationHelper.validate(command, validator);
+        SpringValidation.validate(command, validator);
         changeWarehouseStatusUseCase.execute(command);
         return ResponseEntity.ok(findWarehouse(id));
     }

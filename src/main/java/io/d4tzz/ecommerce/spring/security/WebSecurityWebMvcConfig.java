@@ -1,4 +1,4 @@
-package io.d4tzz.ecommerce.rest.security;
+package io.d4tzz.ecommerce.spring.security;
 
 import java.util.List;
 import org.springframework.context.annotation.Configuration;

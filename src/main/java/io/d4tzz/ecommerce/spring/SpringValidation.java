@@ -1,9 +1,9 @@
-package io.d4tzz.ecommerce.rest;
+package io.d4tzz.ecommerce.spring;
 
 import org.springframework.validation.BeanPropertyBindingResult;
 import org.springframework.validation.Validator;
 
-public class ValidationHelper {
+public class SpringValidation {
 
     public static void validate(Object obj, Validator validator) {
         var bindingResult = new BeanPropertyBindingResult(obj, "obj");

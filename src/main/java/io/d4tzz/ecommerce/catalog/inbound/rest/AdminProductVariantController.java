@@ -1,7 +1,7 @@
 package io.d4tzz.ecommerce.catalog.inbound.rest;
 
-import io.d4tzz.ecommerce.rest.ValidationHelper;
-import io.d4tzz.ecommerce.rest.ValidationException;
+import io.d4tzz.ecommerce.spring.SpringValidation;
+import io.d4tzz.ecommerce.spring.ValidationException;
 
 import io.d4tzz.ecommerce.catalog.application.product.AddProductVariantUseCase;
 import io.d4tzz.ecommerce.catalog.application.product.RemoveProductVariantUseCase;
@@ -63,7 +63,7 @@ public class AdminProductVariantController {
                 )
                 .toList()
         );
-        ValidationHelper.validate(command, validator);
+        SpringValidation.validate(command, validator);
         addProductVariantUseCase.execute(command);
         return ResponseEntity.noContent().build();
     }
@@ -85,7 +85,7 @@ public class AdminProductVariantController {
             request.height(),
             request.weight()
         );
-        ValidationHelper.validate(command, validator);
+        SpringValidation.validate(command, validator);
         updateProductVariantUseCase.execute(command);
         return ResponseEntity.noContent().build();
     }

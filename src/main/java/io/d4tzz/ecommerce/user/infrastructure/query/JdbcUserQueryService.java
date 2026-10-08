@@ -69,7 +69,8 @@ public class JdbcUserQueryService implements UserQueryService {
 
     private void bindParams(UserSearchCriteria criteria, JdbcClient.StatementSpec spec) {
         if (criteria.keyword() != null && !criteria.keyword().isBlank()) {
-            spec.param("keyword", "%" + criteria.keyword() + "%");
+            String escaped = criteria.keyword().replace("\\", "\\\\").replace("%", "\\%").replace("_", "\\_");
+            spec.param("keyword", "%" + escaped + "%");
         }
         if (criteria.role() != null) spec.param("role", criteria.role());
         if (criteria.status() != null) spec.param("status", criteria.status());
@@ -78,14 +79,12 @@ public class JdbcUserQueryService implements UserQueryService {
 
     private UserView mapRow(java.sql.ResultSet rs, int rowNum) throws java.sql.SQLException {
         UserView.Address address = null;
-        if (rs.getString("addr_province") != null) {
+        if (rs.getString("address_province") != null) {
             address = new UserView.Address(
-                rs.getString("addr_recipient_name"),
-                rs.getString("addr_phone"),
-                rs.getString("addr_province"),
-                rs.getString("addr_district"),
-                rs.getString("addr_ward"),
-                rs.getString("addr_detail")
+                rs.getString("address_province"),
+                rs.getString("address_district"),
+                rs.getString("address_ward"),
+                rs.getString("address_detail")
             );
         }
         return new UserView(
@@ -107,10 +106,7 @@ public class JdbcUserQueryService implements UserQueryService {
         SELECT
             u.id, u.email, u.full_name, u.phone_number, u.avatar_url,
             u.role, u.status, u.email_verified, u.last_login_at, u.created_at,
-            a.recipient_name AS addr_recipient_name, a.phone AS addr_phone,
-            a.province      AS addr_province,        a.district AS addr_district,
-            a.ward          AS addr_ward,             a.detail   AS addr_detail
+            u.address_province, u.address_district, u.address_ward, u.address_detail
         FROM users u
-        LEFT JOIN addresses a ON a.user_id = u.id
         """;
 }

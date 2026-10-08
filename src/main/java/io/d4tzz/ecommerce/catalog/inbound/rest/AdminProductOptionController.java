@@ -1,7 +1,7 @@
 package io.d4tzz.ecommerce.catalog.inbound.rest;
 
-import io.d4tzz.ecommerce.rest.ValidationHelper;
-import io.d4tzz.ecommerce.rest.ValidationException;
+import io.d4tzz.ecommerce.spring.SpringValidation;
+import io.d4tzz.ecommerce.spring.ValidationException;
 
 import io.d4tzz.ecommerce.catalog.application.product.AddProductOptionUseCase;
 import io.d4tzz.ecommerce.catalog.application.product.AddProductOptionValueUseCase;
@@ -57,7 +57,7 @@ public class AdminProductOptionController {
     @PostMapping
     public ResponseEntity<Void> addOption(@PathVariable Long productId, @RequestBody AddProductOptionRequest request) {
         var command = new AddProductOptionCommand(productId, request.optionId(), request.valueIds());
-        ValidationHelper.validate(command, validator);
+        SpringValidation.validate(command, validator);
         addProductOptionUseCase.execute(command);
         return ResponseEntity.noContent().build();
     }
@@ -74,7 +74,7 @@ public class AdminProductOptionController {
         @RequestBody ReorderProductOptionsRequest request
     ) {
         var command = new ReorderProductOptionsCommand(productId, request.optionIds());
-        ValidationHelper.validate(command, validator);
+        SpringValidation.validate(command, validator);
         reorderProductOptionsUseCase.execute(command);
         return ResponseEntity.noContent().build();
     }
@@ -86,7 +86,7 @@ public class AdminProductOptionController {
         @RequestBody AddProductOptionValuesRequest request
     ) {
         var command = new AddProductOptionValueCommand(productId, optionId, request.valueIds());
-        ValidationHelper.validate(command, validator);
+        SpringValidation.validate(command, validator);
         addProductOptionValueUseCase.execute(command);
         return ResponseEntity.noContent().build();
     }
@@ -108,7 +108,7 @@ public class AdminProductOptionController {
         @RequestBody ReorderProductOptionValuesRequest request
     ) {
         var command = new ReorderProductOptionValuesCommand(productId, optionId, request.valueIds());
-        ValidationHelper.validate(command, validator);
+        SpringValidation.validate(command, validator);
         reorderProductOptionValuesUseCase.execute(command);
         return ResponseEntity.noContent().build();
     }

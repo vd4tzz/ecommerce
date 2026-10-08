@@ -10,7 +10,7 @@ import io.d4tzz.ecommerce.inventory.query.StockReservationView;
 import io.d4tzz.ecommerce.inventory.query.StockSearchCriteria;
 import io.d4tzz.ecommerce.inventory.query.VariantAvailabilityView;
 import io.d4tzz.ecommerce.query.PageResponse;
-import io.d4tzz.ecommerce.rest.ValidationHelper;
+import io.d4tzz.ecommerce.spring.SpringValidation;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import java.time.Instant;
 import java.util.List;
@@ -66,7 +66,7 @@ public class AdminStockController {
             request.note() != null ? request.note() : "",
             items
         );
-        ValidationHelper.validate(command, validator);
+        SpringValidation.validate(command, validator);
         List<UUID> entryIds = receiveGoodsUseCase.execute(command);
         return ResponseEntity.status(HttpStatus.CREATED).body(stockQueryService.getLedgerEntries(entryIds));
     }

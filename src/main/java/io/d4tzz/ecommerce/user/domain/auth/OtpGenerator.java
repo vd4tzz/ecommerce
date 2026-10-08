@@ -32,7 +32,7 @@ public class OtpGenerator {
      * </ul>
      * On success, invalidates all previous OTPs for the user/type and returns a new one (not yet persisted).
      *
-     * @throws InvalidOperationException if any rate-limiting rule is violated
+     * @throws OtpRateLimitedException if any rate-limiting rule is violated
      */
     public Otp generateOtp(UserId userId, OtpType type) {
         Instant now = Instant.now();

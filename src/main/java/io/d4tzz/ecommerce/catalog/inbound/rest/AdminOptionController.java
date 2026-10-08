@@ -1,7 +1,7 @@
 package io.d4tzz.ecommerce.catalog.inbound.rest;
 
-import io.d4tzz.ecommerce.rest.ValidationHelper;
-import io.d4tzz.ecommerce.rest.ValidationException;
+import io.d4tzz.ecommerce.spring.SpringValidation;
+import io.d4tzz.ecommerce.spring.ValidationException;
 
 import io.d4tzz.ecommerce.catalog.application.option.AddOptionValueUseCase;
 import io.d4tzz.ecommerce.catalog.application.option.CreateOptionUseCase;
@@ -71,7 +71,7 @@ public class AdminOptionController {
     @PostMapping
     public ResponseEntity<CreateOptionResponse> createOption(@RequestBody CreateOptionRequest request) {
         var command = new CreateOptionCommand(request.name(), request.values());
-        ValidationHelper.validate(command, validator);
+        SpringValidation.validate(command, validator);
         Long optionId = createOptionUseCase.execute(command);
         URI location = ServletUriComponentsBuilder.fromCurrentRequest()
             .path("/{id}")
@@ -101,7 +101,7 @@ public class AdminOptionController {
     @PutMapping("/{id}")
     public ResponseEntity<Void> updateOption(@PathVariable Long id, @RequestBody UpdateOptionRequest request) {
         var command = new UpdateOptionCommand(id, request.name());
-        ValidationHelper.validate(command, validator);
+        SpringValidation.validate(command, validator);
         updateOptionUseCase.execute(command);
         return ResponseEntity.noContent().build();
     }
@@ -109,7 +109,7 @@ public class AdminOptionController {
     @PostMapping("/{id}/values")
     public ResponseEntity<Void> addOptionValue(@PathVariable Long id, @RequestBody AddOptionValueRequest request) {
         var command = new AddOptionValueCommand(id, request.name());
-        ValidationHelper.validate(command, validator);
+        SpringValidation.validate(command, validator);
         addOptionValueUseCase.execute(command);
         return ResponseEntity.noContent().build();
     }
@@ -121,7 +121,7 @@ public class AdminOptionController {
         @RequestBody UpdateOptionValueRequest request
     ) {
         var command = new UpdateOptionValueCommand(optionId, valueId, request.name());
-        ValidationHelper.validate(command, validator);
+        SpringValidation.validate(command, validator);
         updateOptionValueUseCase.execute(command);
         return ResponseEntity.noContent().build();
     }

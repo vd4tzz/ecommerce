@@ -13,7 +13,7 @@ import io.d4tzz.ecommerce.catalog.query.category.AdminCategoryTableRowView;
 import io.d4tzz.ecommerce.catalog.query.category.CategoryQueryService;
 import io.d4tzz.ecommerce.catalog.query.category.EffectiveAttributeView;
 import io.d4tzz.ecommerce.common.exception.NotFoundException;
-import io.d4tzz.ecommerce.rest.ValidationHelper;
+import io.d4tzz.ecommerce.spring.SpringValidation;
 import java.net.URI;
 import java.util.List;
 import org.springframework.http.ResponseEntity;
@@ -63,7 +63,7 @@ public class AdminCategoryController {
                 : List.of();
 
         var command = new CreateCategoryCommand(request.name(), request.slug(), request.parentId(), attributes);
-        ValidationHelper.validate(command, validator);
+        SpringValidation.validate(command, validator);
 
         Long categoryId = createCategoryUseCase.execute(command);
         URI location = ServletUriComponentsBuilder.fromCurrentRequest()
@@ -90,7 +90,7 @@ public class AdminCategoryController {
     @PutMapping("/{id}")
     public ResponseEntity<Void> updateCategory(@PathVariable Long id, @RequestBody UpdateCategoryRequest request) {
         var command = new UpdateCategoryCommand(id, request.name(), request.slug());
-        ValidationHelper.validate(command, validator);
+        SpringValidation.validate(command, validator);
         updateCategoryUseCase.execute(command);
         return ResponseEntity.noContent().build();
     }
@@ -109,7 +109,7 @@ public class AdminCategoryController {
             attributes != null ? attributes.stream().map(this::toUpdateCommandAttribute).toList() : List.of();
 
         var command = new UpdateCategoryAttributesCommand(id, commandAttributes);
-        ValidationHelper.validate(command, validator);
+        SpringValidation.validate(command, validator);
         updateCategoryAttributesUseCase.execute(command);
 
         return ResponseEntity.noContent().build();

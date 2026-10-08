@@ -1,7 +1,5 @@
 package io.d4tzz.ecommerce.user.domain.auth;
 
-import io.d4tzz.ecommerce.user.domain.*;
-
 import io.d4tzz.ecommerce.user.domain.UserId;
 import java.nio.charset.StandardCharsets;
 import java.security.MessageDigest;

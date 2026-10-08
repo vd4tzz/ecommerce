@@ -1,4 +1,4 @@
-package io.d4tzz.ecommerce.rest;
+package io.d4tzz.ecommerce.spring;
 
 import io.d4tzz.ecommerce.common.exception.ConflictException;
 import io.d4tzz.ecommerce.common.exception.InvalidArgumentException;
@@ -7,9 +7,11 @@ import io.d4tzz.ecommerce.common.exception.NotFoundException;
 import io.d4tzz.ecommerce.user.domain.AccountBlockedException;
 import io.d4tzz.ecommerce.user.domain.EmailAlreadyExistsException;
 import io.d4tzz.ecommerce.user.domain.InvalidCredentialsException;
+import io.d4tzz.ecommerce.user.domain.auth.InvalidRefreshTokenException;
 import io.d4tzz.ecommerce.user.domain.auth.OtpInvalidCodeException;
 import io.d4tzz.ecommerce.user.domain.auth.OtpInvalidException;
 import io.d4tzz.ecommerce.user.domain.auth.OtpRateLimitedException;
+import io.d4tzz.ecommerce.user.domain.auth.RefreshTokenReusedException;
 import java.util.List;
 import java.util.Map;
 import org.springframework.http.HttpStatus;
@@ -28,7 +30,7 @@ public class RestExceptionHandler {
         );
     }
 
-    /** Bean Validation errors from {@link ValidationHelper}, with one entry per invalid field. */
+    /** Bean Validation errors from {@link SpringValidation}, with one entry per invalid field. */
     @ExceptionHandler(ValidationException.class)
     public ProblemDetail handleValidation(ValidationException ex) {
         ProblemDetail problem = ProblemDetail.forStatusAndDetail(HttpStatus.BAD_REQUEST, "Validation failed");
@@ -74,6 +76,11 @@ public class RestExceptionHandler {
 
     @ExceptionHandler(InvalidCredentialsException.class)
     public ProblemDetail handleInvalidCredentials(InvalidCredentialsException ex) {
+        return ProblemDetail.forStatusAndDetail(HttpStatus.UNAUTHORIZED, ex.getMessage());
+    }
+
+    @ExceptionHandler({InvalidRefreshTokenException.class, RefreshTokenReusedException.class})
+    public ProblemDetail handleInvalidRefreshToken(RuntimeException ex) {
         return ProblemDetail.forStatusAndDetail(HttpStatus.UNAUTHORIZED, ex.getMessage());
     }
 

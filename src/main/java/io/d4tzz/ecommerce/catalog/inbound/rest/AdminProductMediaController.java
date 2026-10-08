@@ -1,7 +1,7 @@
 package io.d4tzz.ecommerce.catalog.inbound.rest;
 
-import io.d4tzz.ecommerce.rest.ValidationHelper;
-import io.d4tzz.ecommerce.rest.ValidationException;
+import io.d4tzz.ecommerce.spring.SpringValidation;
+import io.d4tzz.ecommerce.spring.ValidationException;
 
 import io.d4tzz.ecommerce.catalog.application.product.AddProductMediaUseCase;
 import io.d4tzz.ecommerce.catalog.application.product.RemoveProductMediaUseCase;
@@ -56,7 +56,7 @@ public class AdminProductMediaController {
     @PostMapping("/{id}/media")
     public ResponseEntity<Void> addMedia(@PathVariable Long id, @RequestBody AddProductMediaRequest request) {
         var command = new AddProductMediaCommand(id, request.mediaIds());
-        ValidationHelper.validate(command, validator);
+        SpringValidation.validate(command, validator);
         addProductMediaUseCase.execute(command);
         return ResponseEntity.noContent().build();
     }
@@ -70,7 +70,7 @@ public class AdminProductMediaController {
     @PutMapping("/{id}/media/reorder")
     public ResponseEntity<Void> reorderMedia(@PathVariable Long id, @RequestBody ReorderProductMediaRequest request) {
         var command = new ReorderProductMediaCommand(id, request.mediaIds());
-        ValidationHelper.validate(command, validator);
+        SpringValidation.validate(command, validator);
         reorderProductMediaUseCase.execute(command);
         return ResponseEntity.noContent().build();
     }

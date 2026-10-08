@@ -16,7 +16,7 @@ import io.d4tzz.ecommerce.order.query.OrderSearchCriteria;
 import io.d4tzz.ecommerce.order.query.OrderSummaryView;
 import io.d4tzz.ecommerce.order.query.OrderView;
 import io.d4tzz.ecommerce.query.PageResponse;
-import io.d4tzz.ecommerce.rest.ValidationHelper;
+import io.d4tzz.ecommerce.spring.SpringValidation;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import org.springframework.http.ResponseEntity;
 import org.springframework.validation.Validator;
@@ -111,7 +111,7 @@ public class AdminOrderController {
     @PostMapping("/{id}/cancel")
     public ResponseEntity<OrderView> cancel(@PathVariable Long id, @RequestBody CancelOrderRequest request) {
         var command = new CancelOrderCommand(id, request.reason());
-        ValidationHelper.validate(command, validator);
+        SpringValidation.validate(command, validator);
         cancelOrderUseCase.execute(command);
         return ResponseEntity.ok(findOrder(id));
     }

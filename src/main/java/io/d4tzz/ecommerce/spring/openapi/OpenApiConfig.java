@@ -1,4 +1,4 @@
-package io.d4tzz.ecommerce.infrastructure.openapi;
+package io.d4tzz.ecommerce.spring.openapi;
 
 import io.swagger.v3.oas.annotations.tags.Tag;
 import io.swagger.v3.oas.annotations.tags.Tags;

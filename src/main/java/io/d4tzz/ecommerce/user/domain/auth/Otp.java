@@ -43,6 +43,16 @@ public class Otp {
         return new Otp(null, userId, OtpCode.generate(), type, 0, maxAttempts, now.plus(validity), null, now);
     }
 
+    /**
+     * Verifies the submitted code against this OTP and marks it as used on success.
+     * <p>
+     * A wrong code increments the attempt counter before throwing, so the caller must persist this OTP even when
+     * the exception is thrown (and the transaction must not roll back on it), otherwise attempts are never counted.
+     *
+     * @throws OtpInvalidException if the OTP is already used, expired, or has no attempts left (including when this
+     *     very wrong code uses up the last attempt)
+     * @throws OtpInvalidCodeException if the code does not match and attempts remain
+     */
     public void verify(OtpCode inputCode) {
         if (isUsed()) {
             throw new OtpInvalidException("OTP has already been used");

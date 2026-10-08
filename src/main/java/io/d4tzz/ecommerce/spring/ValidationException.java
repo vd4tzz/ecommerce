@@ -1,4 +1,4 @@
-package io.d4tzz.ecommerce.rest;
+package io.d4tzz.ecommerce.spring;
 
 import org.springframework.validation.BindingResult;
 

@@ -1,7 +1,7 @@
 package io.d4tzz.ecommerce.catalog.inbound.rest;
 
-import io.d4tzz.ecommerce.rest.ValidationHelper;
-import io.d4tzz.ecommerce.rest.ValidationException;
+import io.d4tzz.ecommerce.spring.SpringValidation;
+import io.d4tzz.ecommerce.spring.ValidationException;
 
 import io.d4tzz.ecommerce.catalog.application.product.ChangeProductStatusUseCase;
 import io.d4tzz.ecommerce.catalog.application.product.CreateProductUseCase;
@@ -70,7 +70,7 @@ public class AdminProductController {
             request.categoryId(),
             request.attributes() != null ? request.attributes() : Map.of()
         );
-        ValidationHelper.validate(command, validator);
+        SpringValidation.validate(command, validator);
         Long productId = createProductUseCase.execute(command);
         URI location = ServletUriComponentsBuilder.fromCurrentRequest()
             .path("/{id}")
@@ -116,7 +116,7 @@ public class AdminProductController {
             request.categoryId(),
             request.attributes() != null ? request.attributes() : Map.of()
         );
-        ValidationHelper.validate(command, validator);
+        SpringValidation.validate(command, validator);
         updateProductUseCase.execute(command);
         return ResponseEntity.noContent().build();
     }
@@ -124,7 +124,7 @@ public class AdminProductController {
     @PatchMapping("/{id}/status")
     public ResponseEntity<Void> changeStatus(@PathVariable Long id, @RequestBody ChangeProductStatusRequest request) {
         var command = new ChangeProductStatusCommand(id, request.status());
-        ValidationHelper.validate(command, validator);
+        SpringValidation.validate(command, validator);
         changeProductStatusUseCase.execute(command);
         return ResponseEntity.noContent().build();
     }

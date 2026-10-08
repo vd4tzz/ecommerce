@@ -119,7 +119,7 @@ public class User {
     }
 
     private static void validateRawPassword(String rawPassword) {
-        if (!PASSWORD_PATTERN.matcher(rawPassword).matches()) {
+        if (rawPassword == null || !PASSWORD_PATTERN.matcher(rawPassword).matches()) {
             throw new InvalidArgumentException(
                 "Password must be between 8 and 128 characters, containing at least one uppercase letter, one lowercase letter, and one number"
             );
