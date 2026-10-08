@@ -1,5 +1,6 @@
 package io.d4tzz.ecommerce.order.application;
 
+import io.d4tzz.ecommerce.common.exception.InvalidOperationException;
 import io.d4tzz.ecommerce.common.exception.NotFoundException;
 import io.d4tzz.ecommerce.order.application.command.ShipOrderCommand;
 import io.d4tzz.ecommerce.inventory.application.CommitStockUseCase;
@@ -32,6 +33,13 @@ public class ShipOrderUseCase {
         this.eventPublisher = eventPublisher;
     }
 
+    /**
+     * Marks the order as shipping. If it was already shipping, nothing happens. Otherwise the reserved stock is
+     * deducted from the warehouse.
+     *
+     * @throws NotFoundException if the order does not exist
+     * @throws InvalidOperationException if the order is not CONFIRMED
+     */
     public void execute(ShipOrderCommand command) {
         Order order = orderRepository
             .findForUpdate(OrderId.of(command.orderId()))

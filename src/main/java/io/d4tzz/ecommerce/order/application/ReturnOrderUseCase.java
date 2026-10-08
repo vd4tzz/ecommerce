@@ -1,5 +1,6 @@
 package io.d4tzz.ecommerce.order.application;
 
+import io.d4tzz.ecommerce.common.exception.InvalidOperationException;
 import io.d4tzz.ecommerce.common.exception.NotFoundException;
 import io.d4tzz.ecommerce.order.application.command.ReturnOrderCommand;
 import io.d4tzz.ecommerce.payment.application.RequestRefundUseCase;
@@ -37,6 +38,13 @@ public class ReturnOrderUseCase {
         this.eventPublisher = eventPublisher;
     }
 
+    /**
+     * Marks the order as returned. If it was already returned, nothing happens. Otherwise the goods are put back in
+     * stock, and if the customer had already paid, a refund is requested.
+     *
+     * @throws NotFoundException if the order does not exist
+     * @throws InvalidOperationException if the order is not SHIPPING
+     */
     public void execute(ReturnOrderCommand command) {
         Order order = orderRepository
             .findForUpdate(OrderId.of(command.orderId()))

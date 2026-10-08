@@ -13,8 +13,14 @@ import io.d4tzz.ecommerce.payment.application.port.PaymentRedirect;
 import io.d4tzz.ecommerce.query.PageResponse;
 import io.d4tzz.ecommerce.spring.SpringValidation;
 import io.d4tzz.ecommerce.spring.security.CurrentUser;
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.media.Content;
+import io.swagger.v3.oas.annotations.media.Schema;
+import io.swagger.v3.oas.annotations.responses.ApiResponse;
+import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.servlet.http.HttpServletRequest;
+import org.springframework.http.ProblemDetail;
 import org.springframework.http.ResponseEntity;
 import org.springframework.validation.Validator;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -50,6 +56,13 @@ public class OrderController {
         this.validator = validator;
     }
 
+    @Operation(
+        summary = "List my orders",
+        description = "Paged list of the authenticated user's orders, newest first. Can be filtered by status."
+    )
+    @ApiResponses({
+        @ApiResponse(responseCode = "200", description = "A page of order summaries")
+    })
     @GetMapping
     public ResponseEntity<PageResponse<OrderSummaryView>> getMyOrders(
         @CurrentUser Long userId,
@@ -61,11 +74,40 @@ public class OrderController {
         return ResponseEntity.ok(orderQueryService.searchOrders(criteria));
     }
 
+    @Operation(
+        summary = "Get my order",
+        description = "Returns one of the authenticated user's orders by order code."
+    )
+    @ApiResponses({
+        @ApiResponse(responseCode = "200", description = "The order"),
+        @ApiResponse(
+            responseCode = "404",
+            description = "Order not found",
+            content = @Content(schema = @Schema(implementation = ProblemDetail.class))
+        )
+    })
     @GetMapping("/{orderCode}")
     public ResponseEntity<OrderView> getMyOrder(@CurrentUser Long userId, @PathVariable String orderCode) {
         return ResponseEntity.ok(getOrder(userId, orderCode));
     }
 
+    @Operation(
+        summary = "Cancel my order",
+        description = "Cancels the order while it is still PENDING. The reason is optional and defaults to a standard text. Reserved stock is released, and a refund is requested if the order was already paid. Cancelling an already cancelled order changes nothing."
+    )
+    @ApiResponses({
+        @ApiResponse(responseCode = "200", description = "The order after cancellation"),
+        @ApiResponse(
+            responseCode = "400",
+            description = "Invalid input, or the order can no longer be cancelled by the customer",
+            content = @Content(schema = @Schema(implementation = ProblemDetail.class))
+        ),
+        @ApiResponse(
+            responseCode = "404",
+            description = "Order not found",
+            content = @Content(schema = @Schema(implementation = ProblemDetail.class))
+        )
+    })
     @PostMapping("/{orderCode}/cancel")
     public ResponseEntity<OrderView> cancel(
         @CurrentUser Long userId,
@@ -87,6 +129,23 @@ public class OrderController {
      * {@code params} to {@code url} with {@code httpMethod} (e.g. by submitting a hidden form), which takes the
      * customer to the gateway's page.
      */
+    @Operation(
+        summary = "Start paying my order",
+        description = "Returns where to send the customer to pay a prepaid order through the chosen gateway. Changes nothing, so it can be called again until the order is paid or the time to pay is over. The order becomes paid only when the gateway reports the money."
+    )
+    @ApiResponses({
+        @ApiResponse(responseCode = "200", description = "Redirect instructions for the gateway"),
+        @ApiResponse(
+            responseCode = "400",
+            description = "Invalid input, or the order cannot be paid online now (paid on delivery, already paid, not pending, or time to pay is over)",
+            content = @Content(schema = @Schema(implementation = ProblemDetail.class))
+        ),
+        @ApiResponse(
+            responseCode = "404",
+            description = "Order not found",
+            content = @Content(schema = @Schema(implementation = ProblemDetail.class))
+        )
+    })
     @PostMapping("/{orderCode}/payment")
     public ResponseEntity<PaymentRedirect> pay(
         @CurrentUser Long userId,

@@ -1,5 +1,6 @@
 package io.d4tzz.ecommerce.order.application;
 
+import io.d4tzz.ecommerce.common.exception.InvalidOperationException;
 import io.d4tzz.ecommerce.common.exception.NotFoundException;
 import io.d4tzz.ecommerce.order.application.command.ConfirmOrderCommand;
 import io.d4tzz.ecommerce.order.domain.Order;
@@ -24,6 +25,12 @@ public class ConfirmOrderUseCase {
         this.eventPublisher = eventPublisher;
     }
 
+    /**
+     * Confirms the order. If it was already confirmed, nothing happens.
+     *
+     * @throws NotFoundException if the order does not exist
+     * @throws InvalidOperationException if the order is a prepaid order that is not paid yet, or is not PENDING
+     */
     public void execute(ConfirmOrderCommand command) {
         Order order = orderRepository
             .findForUpdate(OrderId.of(command.orderId()))

@@ -36,6 +36,12 @@ public class PlaceOrderUseCase {
         this.eventPublisher = eventPublisher;
     }
 
+    /**
+     * @return the id of the new order
+     * @throws InvalidArgumentException if the recipient, phone number or address is invalid, there are no items, an
+     *     item has a blank name or a quantity of zero, or a prepaid order has no payment expiry or one that is not
+     *     in the future
+     */
     public Long execute(PlaceOrderCommand command) {
         Instant now = Instant.now();
         UserId userId = UserId.of(command.userId());

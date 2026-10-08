@@ -17,7 +17,13 @@ import io.d4tzz.ecommerce.order.query.OrderSummaryView;
 import io.d4tzz.ecommerce.order.query.OrderView;
 import io.d4tzz.ecommerce.query.PageResponse;
 import io.d4tzz.ecommerce.spring.SpringValidation;
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.media.Content;
+import io.swagger.v3.oas.annotations.media.Schema;
+import io.swagger.v3.oas.annotations.responses.ApiResponse;
+import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.tags.Tag;
+import org.springframework.http.ProblemDetail;
 import org.springframework.http.ResponseEntity;
 import org.springframework.validation.Validator;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -63,6 +69,13 @@ public class AdminOrderController {
         this.validator = validator;
     }
 
+    @Operation(
+        summary = "Search orders",
+        description = "Paged order list. All filters are optional. readyToShip=true is the same as status=CONFIRMED and takes priority over status."
+    )
+    @ApiResponses({
+        @ApiResponse(responseCode = "200", description = "A page of order summaries")
+    })
     @GetMapping
     public ResponseEntity<PageResponse<OrderSummaryView>> searchOrders(
         @RequestParam(required = false) Long userId,
@@ -79,35 +92,132 @@ public class AdminOrderController {
         return ResponseEntity.ok(orderQueryService.searchOrders(criteria));
     }
 
+    @Operation(
+        summary = "Get an order",
+        description = "Returns one order by id."
+    )
+    @ApiResponses({
+        @ApiResponse(responseCode = "200", description = "The order"),
+        @ApiResponse(
+            responseCode = "404",
+            description = "Order not found",
+            content = @Content(schema = @Schema(implementation = ProblemDetail.class))
+        )
+    })
     @GetMapping("/{id}")
     public ResponseEntity<OrderView> getOrder(@PathVariable Long id) {
         return ResponseEntity.ok(findOrder(id));
     }
 
+    @Operation(
+        summary = "Confirm an order",
+        description = "Moves a PENDING order to CONFIRMED. A prepaid order must be paid first. Confirming an already confirmed order changes nothing."
+    )
+    @ApiResponses({
+        @ApiResponse(responseCode = "200", description = "The order after the change"),
+        @ApiResponse(
+            responseCode = "400",
+            description = "Invalid input, or the order is not in a state that allows this",
+            content = @Content(schema = @Schema(implementation = ProblemDetail.class))
+        ),
+        @ApiResponse(
+            responseCode = "404",
+            description = "Order not found",
+            content = @Content(schema = @Schema(implementation = ProblemDetail.class))
+        )
+    })
     @PostMapping("/{id}/confirm")
     public ResponseEntity<OrderView> confirm(@PathVariable Long id) {
         confirmOrderUseCase.execute(new ConfirmOrderCommand(id));
         return ResponseEntity.ok(findOrder(id));
     }
 
+    @Operation(
+        summary = "Ship an order",
+        description = "Moves a CONFIRMED order to SHIPPING and deducts the reserved stock from the warehouse. Calling it again changes nothing."
+    )
+    @ApiResponses({
+        @ApiResponse(responseCode = "200", description = "The order after the change"),
+        @ApiResponse(
+            responseCode = "400",
+            description = "Invalid input, or the order is not in a state that allows this",
+            content = @Content(schema = @Schema(implementation = ProblemDetail.class))
+        ),
+        @ApiResponse(
+            responseCode = "404",
+            description = "Order not found",
+            content = @Content(schema = @Schema(implementation = ProblemDetail.class))
+        )
+    })
     @PostMapping("/{id}/ship")
     public ResponseEntity<OrderView> ship(@PathVariable Long id) {
         shipOrderUseCase.execute(new ShipOrderCommand(id));
         return ResponseEntity.ok(findOrder(id));
     }
 
+    @Operation(
+        summary = "Mark an order as delivered",
+        description = "Moves a SHIPPING order to DELIVERED. For a cash-on-delivery order the cash is recorded as a payment. Calling it again changes nothing."
+    )
+    @ApiResponses({
+        @ApiResponse(responseCode = "200", description = "The order after the change"),
+        @ApiResponse(
+            responseCode = "400",
+            description = "Invalid input, or the order is not in a state that allows this",
+            content = @Content(schema = @Schema(implementation = ProblemDetail.class))
+        ),
+        @ApiResponse(
+            responseCode = "404",
+            description = "Order not found",
+            content = @Content(schema = @Schema(implementation = ProblemDetail.class))
+        )
+    })
     @PostMapping("/{id}/deliver")
     public ResponseEntity<OrderView> deliver(@PathVariable Long id) {
         deliverOrderUseCase.execute(new DeliverOrderCommand(id));
         return ResponseEntity.ok(findOrder(id));
     }
 
+    @Operation(
+        summary = "Mark an order as returned",
+        description = "Moves a SHIPPING order to RETURNED, puts the goods back in stock, and requests a refund if the order was paid. Calling it again changes nothing."
+    )
+    @ApiResponses({
+        @ApiResponse(responseCode = "200", description = "The order after the change"),
+        @ApiResponse(
+            responseCode = "400",
+            description = "Invalid input, or the order is not in a state that allows this",
+            content = @Content(schema = @Schema(implementation = ProblemDetail.class))
+        ),
+        @ApiResponse(
+            responseCode = "404",
+            description = "Order not found",
+            content = @Content(schema = @Schema(implementation = ProblemDetail.class))
+        )
+    })
     @PostMapping("/{id}/return")
     public ResponseEntity<OrderView> markReturned(@PathVariable Long id) {
         returnOrderUseCase.execute(new ReturnOrderCommand(id));
         return ResponseEntity.ok(findOrder(id));
     }
 
+    @Operation(
+        summary = "Cancel an order",
+        description = "Cancels an order that is not yet SHIPPING, with a required reason. Reserved stock is released, and a refund is requested if the order was paid. Cancelling an already cancelled order changes nothing."
+    )
+    @ApiResponses({
+        @ApiResponse(responseCode = "200", description = "The order after the change"),
+        @ApiResponse(
+            responseCode = "400",
+            description = "Invalid input, or the order is not in a state that allows this",
+            content = @Content(schema = @Schema(implementation = ProblemDetail.class))
+        ),
+        @ApiResponse(
+            responseCode = "404",
+            description = "Order not found",
+            content = @Content(schema = @Schema(implementation = ProblemDetail.class))
+        )
+    })
     @PostMapping("/{id}/cancel")
     public ResponseEntity<OrderView> cancel(@PathVariable Long id, @RequestBody CancelOrderRequest request) {
         var command = new CancelOrderCommand(id, request.reason());

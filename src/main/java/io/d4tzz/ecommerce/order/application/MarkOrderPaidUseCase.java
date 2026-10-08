@@ -1,5 +1,6 @@
 package io.d4tzz.ecommerce.order.application;
 
+import io.d4tzz.ecommerce.common.exception.InvalidArgumentException;
 import io.d4tzz.ecommerce.common.Money;
 import io.d4tzz.ecommerce.order.application.command.MarkOrderPaidCommand;
 import io.d4tzz.ecommerce.payment.application.RequestRefundUseCase;
@@ -47,6 +48,12 @@ public class MarkOrderPaidUseCase {
         this.eventPublisher = eventPublisher;
     }
 
+    /**
+     * @return what happened to the payment. A payment the order cannot accept is reported here (and refunded), not
+     *     thrown. {@link MarkPaidResult#ORDER_NOT_FOUND} means no order has this code, and the money is kept
+     *     unmatched for a person to assign.
+     * @throws InvalidArgumentException if the order code is blank
+     */
     public MarkPaidResult execute(MarkOrderPaidCommand command) {
         Optional<Order> found = orderRepository.findForUpdateByOrderCode(OrderCode.of(command.orderCode()));
         if (found.isEmpty()) {

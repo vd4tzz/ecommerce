@@ -1,5 +1,6 @@
 package io.d4tzz.ecommerce.order.application;
 
+import io.d4tzz.ecommerce.common.exception.InvalidOperationException;
 import io.d4tzz.ecommerce.common.exception.NotFoundException;
 import io.d4tzz.ecommerce.order.application.command.DeliverOrderCommand;
 import io.d4tzz.ecommerce.order.domain.Order;
@@ -39,6 +40,12 @@ public class DeliverOrderUseCase {
         this.recordPaymentUseCase = recordPaymentUseCase;
     }
 
+    /**
+     * Marks the order as delivered. If it was already delivered, nothing happens.
+     *
+     * @throws NotFoundException if the order does not exist
+     * @throws InvalidOperationException if the order is not SHIPPING
+     */
     public void execute(DeliverOrderCommand command) {
         Order order = orderRepository
             .findForUpdate(OrderId.of(command.orderId()))

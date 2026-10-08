@@ -42,6 +42,10 @@ public class ExpireOrdersUseCase {
         this.transactionTemplate = transactionTemplate;
     }
 
+    /**
+     * @return how many orders were cancelled in this run. An order that fails is logged and skipped, so this method
+     *     does not throw for a single order.
+     */
     public int execute() {
         Instant now = Instant.now();
         int expired = 0;

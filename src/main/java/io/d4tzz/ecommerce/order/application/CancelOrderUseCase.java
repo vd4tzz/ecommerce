@@ -1,5 +1,7 @@
 package io.d4tzz.ecommerce.order.application;
 
+import io.d4tzz.ecommerce.common.exception.InvalidArgumentException;
+import io.d4tzz.ecommerce.common.exception.InvalidOperationException;
 import io.d4tzz.ecommerce.common.exception.NotFoundException;
 import io.d4tzz.ecommerce.order.application.command.CancelOrderCommand;
 import io.d4tzz.ecommerce.payment.application.RequestRefundUseCase;
@@ -37,6 +39,14 @@ public class CancelOrderUseCase {
         this.eventPublisher = eventPublisher;
     }
 
+    /**
+     * Cancels the order. If it was already cancelled, nothing happens. Otherwise the reserved stock is released, and
+     * if the customer had already paid, a refund is requested.
+     *
+     * @throws NotFoundException if the order does not exist
+     * @throws InvalidArgumentException if the reason is blank
+     * @throws InvalidOperationException if the order is already SHIPPING, DELIVERED or RETURNED
+     */
     public void execute(CancelOrderCommand command) {
         Order order = orderRepository
             .findForUpdate(OrderId.of(command.orderId()))

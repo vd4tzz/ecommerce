@@ -1,5 +1,6 @@
 package io.d4tzz.ecommerce.order.application;
 
+import io.d4tzz.ecommerce.common.exception.InvalidArgumentException;
 import io.d4tzz.ecommerce.order.application.command.MarkOrderRefundedCommand;
 import io.d4tzz.ecommerce.order.domain.MarkRefundedResult;
 import io.d4tzz.ecommerce.order.domain.Order;
@@ -32,6 +33,11 @@ public class MarkOrderRefundedUseCase {
         this.eventPublisher = eventPublisher;
     }
 
+    /**
+     * @return what happened to the refund; an unexpected refund is reported here (and logged when a person should
+     *     look at it), not thrown
+     * @throws InvalidArgumentException if the order code is blank
+     */
     public MarkRefundedResult execute(MarkOrderRefundedCommand command) {
         Optional<Order> found = orderRepository.findForUpdateByOrderCode(OrderCode.of(command.orderCode()));
         if (found.isEmpty()) {

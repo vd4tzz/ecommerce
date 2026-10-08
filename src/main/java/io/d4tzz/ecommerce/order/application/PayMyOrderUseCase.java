@@ -1,5 +1,7 @@
 package io.d4tzz.ecommerce.order.application;
 
+import io.d4tzz.ecommerce.common.exception.InvalidArgumentException;
+import io.d4tzz.ecommerce.common.exception.InvalidOperationException;
 import io.d4tzz.ecommerce.common.exception.NotFoundException;
 import io.d4tzz.ecommerce.user.domain.UserId;
 import io.d4tzz.ecommerce.order.application.command.PayMyOrderCommand;
@@ -31,6 +33,12 @@ public class PayMyOrderUseCase {
         this.requestPaymentUseCase = requestPaymentUseCase;
     }
 
+    /**
+     * @throws InvalidArgumentException if the order code is blank
+     * @throws NotFoundException if there is no order with this code, or it belongs to another user
+     * @throws InvalidOperationException if the order is paid on delivery, is already paid or refunded, is not
+     *     PENDING, or its time to pay is over
+     */
     public PaymentRedirect execute(PayMyOrderCommand command) {
         NotFoundException notFound = new NotFoundException("Order not found with code: " + command.orderCode());
         Order order = orderRepository.findByOrderCode(OrderCode.of(command.orderCode())).orElseThrow(() -> notFound);
