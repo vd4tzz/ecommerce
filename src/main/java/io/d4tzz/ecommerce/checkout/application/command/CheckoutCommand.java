@@ -9,7 +9,10 @@ import jakarta.validation.constraints.Positive;
 import jakarta.validation.constraints.Size;
 import java.util.List;
 
-/** What the customer buys, where it goes, who delivers it and how it is paid. Prices come from the catalog. */
+/**
+ * What the customer buys, where it goes, who delivers it and how it is paid. Prices come from the catalog.
+ * {@code carrier} is the code of a shipping carrier, and {@code note} is optional (at most 500 characters).
+ */
 public record CheckoutCommand(
     @NotNull Long userId,
     @NotBlank String recipientName,
