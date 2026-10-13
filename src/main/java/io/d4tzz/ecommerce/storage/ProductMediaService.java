@@ -15,6 +15,10 @@ import software.amazon.awssdk.services.s3.presigner.S3Presigner;
 import software.amazon.awssdk.services.s3.presigner.model.PresignedPutObjectRequest;
 import software.amazon.awssdk.services.s3.presigner.model.PutObjectPresignRequest;
 
+/**
+ * Handles product images in the object store. The application never receives the image: it signs a URL, and the client
+ * uploads the file straight to the store.
+ */
 @Service
 public class ProductMediaService {
 
@@ -47,6 +51,17 @@ public class ProductMediaService {
         this.urlResolver = urlResolver;
     }
 
+    /**
+     * Validates an upload request and signs a URL to upload one image.
+     *
+     * <p>The image gets a new key, {@code products/{random UUID}{extension}}, where the extension comes from the content
+     * type. The URL is valid for {@code app.storage.s3.presigned-duration-minutes}. Nothing is written to the store yet.
+     *
+     * @param request the content type and size of the file
+     * @return the key, the signed upload URL, the public URL and the expiry
+     * @throws InvalidArgumentException if the file is larger than 10 MB, or the content type is not an allowed image
+     *                                  type (jpeg, png, webp, gif, svg or avif)
+     */
     public PresignedUploadResponse generatePresignedUploadUrl(PresignedUploadRequest request) {
         if (request.lengthByte() > MAX_FILE_SIZE_BYTES) {
             throw new InvalidArgumentException(
@@ -86,6 +101,13 @@ public class ProductMediaService {
         return new PresignedUploadResponse(mediaId, uploadUrl, publicUrl, duration.toSeconds(), expiresAt);
     }
 
+    /**
+     * Tells whether an object with this key exists in the bucket.
+     *
+     * @param key the media id, may be {@code null}
+     * @return {@code false} if the key is blank or the object is not found
+     * @throws software.amazon.awssdk.services.s3.model.S3Exception if the store fails for any other reason
+     */
     public boolean exists(String key) {
         if (key == null || key.isBlank()) {
             return false;

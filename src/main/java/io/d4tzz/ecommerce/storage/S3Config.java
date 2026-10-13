@@ -16,6 +16,10 @@ import software.amazon.awssdk.services.s3.model.NoSuchBucketException;
 import software.amazon.awssdk.services.s3.model.S3Exception;
 import software.amazon.awssdk.services.s3.presigner.S3Presigner;
 
+/**
+ * Connects to the S3-compatible object store described by {@link StorageProperties}. Path-style addresses
+ * ({@code endpoint/bucket/key}) are used because S3-compatible servers such as SeaweedFS expect them.
+ */
 @Configuration
 public class S3Config {
 
@@ -27,6 +31,7 @@ public class S3Config {
         this.properties = properties;
     }
 
+    /** Signs upload URLs without contacting the store. */
     @Bean
     public S3Presigner s3Presigner() {
         return S3Presigner.builder()
@@ -41,6 +46,7 @@ public class S3Config {
             .build();
     }
 
+    /** Talks to the store: checking buckets and objects. */
     @Bean
     public S3Client s3Client() {
         return S3Client.builder()
@@ -55,6 +61,10 @@ public class S3Config {
             .build();
     }
 
+    /**
+     * Creates the bucket at startup if it does not exist. A failure is logged and does not stop the application; uploads
+     * then fail until the store is available.
+     */
     @Bean
     public ApplicationRunner s3BucketInitializer(S3Client s3Client) {
         return args -> {
