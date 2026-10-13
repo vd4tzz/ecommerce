@@ -7,11 +7,18 @@ import io.d4tzz.ecommerce.catalog.query.product.ProductCardView;
 import io.d4tzz.ecommerce.catalog.query.product.ProductDetailView;
 import io.d4tzz.ecommerce.catalog.query.product.ProductQueryService;
 import io.d4tzz.ecommerce.catalog.query.product.ProductSearchCriteria;
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.media.Content;
+import io.swagger.v3.oas.annotations.media.Schema;
+import io.swagger.v3.oas.annotations.responses.ApiResponse;
+import io.swagger.v3.oas.annotations.responses.ApiResponses;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import java.math.BigDecimal;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import org.springframework.http.ProblemDetail;
 import org.springframework.http.ResponseEntity;
 import org.springframework.util.MultiValueMap;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -20,7 +27,11 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
+/**
+ * Public product browsing. Products in DRAFT status are never shown.
+ */
 @RestController
+@Tag(name = "Products", description = "Search and view products in the storefront")
 @RequestMapping("/products")
 public class ProductController {
 
@@ -30,6 +41,13 @@ public class ProductController {
         this.productQueryService = productQueryService;
     }
 
+    @Operation(
+        summary = "Search products",
+        description = "Paged product cards. All filters are optional. Besides the named filters, attribute filters are passed as attr_{code}=value (several values separated by commas or repeated, e.g. attr_material=cotton,wool). sortBy can be price_asc, price_desc or name_asc; the default is relevance when a keyword is given, otherwise newest first. fullFacets=true makes the facet counts ignore the filters already chosen."
+    )
+    @ApiResponses({
+        @ApiResponse(responseCode = "200", description = "A page of product cards")
+    })
     @GetMapping
     public ResponseEntity<PageResponse<ProductCardView>> searchProducts(
         @RequestParam(required = false) String keyword,
@@ -59,6 +77,13 @@ public class ProductController {
         return ResponseEntity.ok(productQueryService.searchProducts(criteria));
     }
 
+    @Operation(
+        summary = "Get product filters",
+        description = "Returns the filter options (price range, sub-categories, option values and attributes) for the products that match the given search, to build the filter sidebar. It takes the same filters as the product search."
+    )
+    @ApiResponses({
+        @ApiResponse(responseCode = "200", description = "The available filters")
+    })
     @GetMapping("/filters")
     public ResponseEntity<FilterSidebarView> getFilters(
         @RequestParam(required = false) String keyword,
@@ -85,6 +110,18 @@ public class ProductController {
         return ResponseEntity.ok(productQueryService.getFilterSidebar(criteria));
     }
 
+    @Operation(
+        summary = "Get a product",
+        description = "Returns one product by slug, with its options, media and variants."
+    )
+    @ApiResponses({
+        @ApiResponse(responseCode = "200", description = "The product"),
+        @ApiResponse(
+            responseCode = "404",
+            description = "Product not found, or it is still a draft",
+            content = @Content(schema = @Schema(implementation = ProblemDetail.class))
+        )
+    })
     @GetMapping("/{slug}")
     public ResponseEntity<ProductDetailView> getProductBySlug(@PathVariable String slug) {
         return productQueryService

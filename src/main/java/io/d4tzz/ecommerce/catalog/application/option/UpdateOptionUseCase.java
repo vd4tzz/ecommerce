@@ -1,5 +1,6 @@
 package io.d4tzz.ecommerce.catalog.application.option;
 
+import io.d4tzz.ecommerce.common.exception.ConflictException;
 import io.d4tzz.ecommerce.catalog.application.option.command.UpdateOptionCommand;
 import io.d4tzz.ecommerce.common.exception.NotFoundException;
 import io.d4tzz.ecommerce.catalog.domain.option.Option;
@@ -9,6 +10,7 @@ import io.d4tzz.ecommerce.catalog.domain.option.OptionRepository;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+/** Renames an option. */
 @Service
 @Transactional
 public class UpdateOptionUseCase {
@@ -19,6 +21,12 @@ public class UpdateOptionUseCase {
         this.optionRepository = optionRepository;
     }
 
+    /**
+     * Renames an option. Keeping the same name is allowed.
+     *
+     * @throws NotFoundException if the option does not exist
+     * @throws ConflictException if another option already uses the name
+     */
     public void execute(UpdateOptionCommand command) {
         Option option = optionRepository
             .find(OptionId.of(command.optionId()))

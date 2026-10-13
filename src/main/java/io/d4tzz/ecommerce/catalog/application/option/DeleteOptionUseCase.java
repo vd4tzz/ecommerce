@@ -7,6 +7,7 @@ import io.d4tzz.ecommerce.catalog.domain.option.OptionRepository;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+/** Deletes an option that no product uses. */
 @Service
 @Transactional
 public class DeleteOptionUseCase {
@@ -17,6 +18,12 @@ public class DeleteOptionUseCase {
         this.optionRepository = optionRepository;
     }
 
+    /**
+     * Deletes an option together with its values.
+     *
+     * @throws NotFoundException if the option does not exist
+     * @throws InvalidOperationException if a product uses the option
+     */
     public void execute(Long optionId) {
         OptionId id = OptionId.of(optionId);
         if (!optionRepository.existsById(id)) {

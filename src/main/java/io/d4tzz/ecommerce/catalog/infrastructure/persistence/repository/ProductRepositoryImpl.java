@@ -33,6 +33,7 @@ import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
+import java.util.SequencedSet;
 import java.util.Set;
 import java.util.stream.Collectors;
 import org.springframework.data.jpa.repository.JpaRepository;
@@ -341,11 +342,11 @@ public class ProductRepositoryImpl implements ProductRepository {
             .stream()
             .collect(Collectors.groupingBy(JpaProductOptionValue::getOptionId));
 
-        LinkedHashMap<OptionId, Set<ValueId>> options = new LinkedHashMap<>();
+        LinkedHashMap<OptionId, SequencedSet<ValueId>> options = new LinkedHashMap<>();
         if (!sortedOptions.isEmpty()) {
             for (JpaProductOption opt : sortedOptions) {
                 List<JpaProductOptionValue> optValues = valuesByOption.getOrDefault(opt.getOptionId(), List.of());
-                Set<ValueId> sortedValues = optValues
+                SequencedSet<ValueId> sortedValues = optValues
                     .stream()
                     .sorted(Comparator.comparingInt(JpaProductOptionValue::getPosition))
                     .map(ov -> ValueId.of(ov.getValueId()))
@@ -355,7 +356,7 @@ public class ProductRepositoryImpl implements ProductRepository {
         } else {
             // Defensive fallback if options table was not populated
             for (Map.Entry<Long, List<JpaProductOptionValue>> entry : valuesByOption.entrySet()) {
-                Set<ValueId> sortedValues = entry
+                SequencedSet<ValueId> sortedValues = entry
                     .getValue()
                     .stream()
                     .sorted(Comparator.comparingInt(JpaProductOptionValue::getPosition))
@@ -365,7 +366,7 @@ public class ProductRepositoryImpl implements ProductRepository {
             }
         }
 
-        Set<MediaId> media = jpaProduct
+        SequencedSet<MediaId> media = jpaProduct
             .getMedia()
             .stream()
             .sorted(Comparator.comparingInt(JpaProductMedia::getPosition))

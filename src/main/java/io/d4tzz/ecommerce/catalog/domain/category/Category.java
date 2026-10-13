@@ -12,8 +12,17 @@ import java.util.Optional;
 import java.util.Set;
 import java.util.stream.Collectors;
 
+/**
+ * A node in the product category tree.
+ *
+ * <p>The tree is stored as a materialized path: {@code path} holds the ids of all ancestors, each
+ * followed by {@link #PATH_DELIMITER} (for example {@code "1.5."}), and is {@code null} for a root
+ * category. Each category owns a schema of {@link Attribute}s; the full schema of a category is
+ * its own attributes plus those inherited from its ancestors.
+ */
 public class Category {
 
+    /** Separator between ids in {@code path}. */
     public static String PATH_DELIMITER = ".";
 
     private CategoryId id;
@@ -23,6 +32,16 @@ public class Category {
     private CategoryId parentId;
     private List<Attribute> attributes;
 
+    /**
+     * Rebuilds a category from persisted data without any validation.
+     *
+     * <p>To create a new category use {@link #create}.
+     *
+     * @param id         category id, {@code null} if not yet persisted
+     * @param path       ancestors' ids joined by {@link #PATH_DELIMITER}, {@code null} for a root category
+     * @param parentId   id of the parent category, {@code null} for a root category
+     * @param attributes attributes defined by this category itself, excluding inherited ones
+     */
     public Category(
         CategoryId id,
         CategoryName name,
@@ -39,6 +58,20 @@ public class Category {
         this.attributes = attributes;
     }
 
+    /**
+     * Creates a new, not yet persisted category.
+     *
+     * @param name           category name
+     * @param slug           URL slug, must be unused
+     * @param checker        tells whether a slug is already taken
+     * @param parent         parent category, {@code null} to create a root category; must already be persisted
+     * @param attributes     attributes defined by the new category
+     * @param ancestorSchema all attributes inherited from the parent and its ancestors, empty for a root category
+     * @return the new category, without an id
+     * @throws ConflictException         if the slug already exists, an attribute code duplicates another
+     *                                   or is already inherited from an ancestor
+     * @throws InvalidOperationException if {@code parent} has no id
+     */
     public static Category create(
         CategoryName name,
         CategorySlug slug,
@@ -61,6 +94,12 @@ public class Category {
         );
     }
 
+    /**
+     * Returns the path that this category's children have: this category's path followed by its own id
+     * and {@link #PATH_DELIMITER}, for example {@code "1.5."}.
+     *
+     * @throws InvalidOperationException if this category has no id yet
+     */
     public String prefix() {
         if (id == null) {
             throw new InvalidOperationException("Cannot generate prefix for category without ID");
@@ -68,6 +107,15 @@ public class Category {
         return (path == null ? "" : path) + id.toString() + PATH_DELIMITER;
     }
 
+    /**
+     * Moves this category under another parent.
+     *
+     * <p>Only this category's {@code path} and {@code parentId} change. The paths of its descendants
+     * are not updated here.
+     *
+     * @param parent the new parent category
+     * @throws InvalidOperationException if the parent is this category or one of its descendants
+     */
     public void move(Category parent) {
         if (this.id != null) {
             if (this.id.equals(parent.getId())) {
@@ -81,10 +129,18 @@ public class Category {
         this.parentId = parent.getId();
     }
 
+    /** Changes the name of this category. */
     public void rename(CategoryName name) {
         this.name = name;
     }
 
+    /**
+     * Changes the slug of this category. Does nothing if the slug is unchanged.
+     *
+     * @param newSlug the new slug
+     * @param checker tells whether a slug is already taken
+     * @throws ConflictException if another category already uses the new slug
+     */
     public void changeSlug(CategorySlug newSlug, CategorySlugChecker checker) {
         if (this.slug.equals(newSlug)) {
             return;
@@ -108,7 +164,13 @@ public class Category {
      *   <li>Existing attributes cannot be deleted.</li>
      * </ul>
      *
-     * @throws InvalidOperationException if any rule is violated
+     * @param newAttributes   the complete new attribute list of this category, including existing attributes
+     * @param ancestorSchema  all attributes inherited from the parent and its ancestors
+     * @param descendantSchema all attributes defined by descendant categories
+     * @throws ConflictException         if an attribute code is duplicated, inherited from an ancestor,
+     *                                   or already used by a descendant
+     * @throws InvalidOperationException if an existing attribute is removed, changes type,
+     *                                   or loses an existing value
      */
     public void updateAttributes(
         List<Attribute> newAttributes,
@@ -118,7 +180,7 @@ public class Category {
         // ensure newAttributes are different to ancestor and descendant
         List<Attribute> validated = validateAttributes(newAttributes, ancestorSchema, descendantSchema);
 
-        Map<String, Attribute> existingByCode = new HashMap<>(this.attributes.size());
+        Map<String, Attribute> existingByCode = HashMap.newHashMap(this.attributes.size());
         for (Attribute attr : this.attributes) {
             existingByCode.put(attr.getCode(), attr);
         }
@@ -146,6 +208,7 @@ public class Category {
             }
         }
 
+        // the new attributes do not contain all exsiting attributes, existingByCode will not empty
         if (!existingByCode.isEmpty()) {
             String missingCodes = String.join(", ", existingByCode.keySet());
             throw new InvalidOperationException("Attributes cannot be deleted once created. Missing: " + missingCodes);
@@ -171,7 +234,7 @@ public class Category {
             ? Collections.emptySet()
             : descendantSchema.stream().map(Attribute::getCode).collect(Collectors.toSet());
 
-        Set<String> seenCodes = new HashSet<>(attributes.size());
+        Set<String> seenCodes = HashSet.newHashSet(attributes.size());
         for (Attribute attr : attributes) {
             String code = attr.getCode();
             if (ancestorCodes.contains(code)) {

@@ -1,5 +1,7 @@
 package io.d4tzz.ecommerce.catalog.application.product;
 
+import io.d4tzz.ecommerce.common.exception.ConflictException;
+import io.d4tzz.ecommerce.common.exception.InvalidArgumentException;
 import io.d4tzz.ecommerce.catalog.application.product.command.UpdateProductCommand;
 import io.d4tzz.ecommerce.common.exception.NotFoundException;
 import io.d4tzz.ecommerce.catalog.domain.category.Attribute;
@@ -16,6 +18,7 @@ import java.util.List;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+/** Updates the basic details of a product, and moves it to another category when asked. */
 @Service
 @Transactional
 public class UpdateProductUseCase {
@@ -28,6 +31,14 @@ public class UpdateProductUseCase {
         this.categoryRepository = categoryRepository;
     }
 
+    /**
+     * Changes the name, slug, description, category and attributes of a product. When the category changes, the attributes
+     * are checked against the new category's schema and replace the old ones.
+     *
+     * @throws InvalidArgumentException if the name, the slug or the attributes are invalid for the category
+     * @throws NotFoundException if the product or the category does not exist
+     * @throws ConflictException if another product already uses the slug
+     */
     public void execute(UpdateProductCommand command) {
         Product product = productRepository
             .find(ProductId.of(command.productId()))

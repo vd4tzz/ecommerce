@@ -1,5 +1,6 @@
 package io.d4tzz.ecommerce.catalog.application.product;
 
+import io.d4tzz.ecommerce.common.exception.InvalidOperationException;
 import io.d4tzz.ecommerce.common.exception.NotFoundException;
 import io.d4tzz.ecommerce.catalog.domain.option.OptionId;
 import io.d4tzz.ecommerce.catalog.domain.option.ValueId;
@@ -9,6 +10,7 @@ import io.d4tzz.ecommerce.catalog.domain.product.ProductRepository;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+/** Removes a value from an option of a product. */
 @Service
 @Transactional
 public class RemoveProductOptionValueUseCase {
@@ -19,6 +21,12 @@ public class RemoveProductOptionValueUseCase {
         this.productRepository = productRepository;
     }
 
+    /**
+     * Removes a value from the option on the product. If it was the last value, the option is removed from the product too.
+     *
+     * @throws NotFoundException if the product does not exist, does not have the option, or the option does not have the value
+     * @throws InvalidOperationException if a variant uses the value
+     */
     public void execute(Long productId, Long optionId, Long valueId) {
         Product product = productRepository
             .find(ProductId.of(productId))

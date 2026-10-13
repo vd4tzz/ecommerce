@@ -7,6 +7,7 @@ import io.d4tzz.ecommerce.catalog.domain.category.CategoryRepository;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+/** Deletes a category that is no longer needed. */
 @Service
 @Transactional
 public class DeleteCategoryUseCase {
@@ -17,6 +18,12 @@ public class DeleteCategoryUseCase {
         this.categoryRepository = categoryRepository;
     }
 
+    /**
+     * Deletes a category that has no sub-categories and is not assigned to any product.
+     *
+     * @throws NotFoundException if the category does not exist
+     * @throws InvalidOperationException if the category has sub-categories or is assigned to products
+     */
     public void execute(Long categoryId) {
         CategoryId id = CategoryId.of(categoryId);
         if (!categoryRepository.exists(id)) {

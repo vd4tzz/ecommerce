@@ -1,5 +1,7 @@
 package io.d4tzz.ecommerce.catalog.application.category;
 
+import io.d4tzz.ecommerce.common.exception.ConflictException;
+import io.d4tzz.ecommerce.common.exception.InvalidArgumentException;
 import io.d4tzz.ecommerce.catalog.application.category.command.CreateCategoryCommand;
 import io.d4tzz.ecommerce.common.exception.NotFoundException;
 import io.d4tzz.ecommerce.catalog.domain.category.Attribute;
@@ -13,6 +15,7 @@ import java.util.List;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+/** Creates a category, either at the top level or under a parent. */
 @Service
 @Transactional
 public class CreateCategoryUseCase {
@@ -23,6 +26,14 @@ public class CreateCategoryUseCase {
         this.categoryRepository = categoryRepository;
     }
 
+    /**
+     * Creates a category and returns its id. A child category must not reuse an attribute code inherited from its parent
+     * or its ancestors.
+     *
+     * @throws InvalidArgumentException if the slug or an attribute is invalid
+     * @throws NotFoundException if the parent category does not exist
+     * @throws ConflictException if the slug is already used, or an attribute code is duplicated or already inherited from an ancestor
+     */
     public Long execute(CreateCategoryCommand command) {
         Category parent = null;
         List<Attribute> ancestorSchema = List.of();

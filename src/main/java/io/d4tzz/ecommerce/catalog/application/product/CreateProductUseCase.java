@@ -1,5 +1,7 @@
 package io.d4tzz.ecommerce.catalog.application.product;
 
+import io.d4tzz.ecommerce.common.exception.ConflictException;
+import io.d4tzz.ecommerce.common.exception.InvalidArgumentException;
 import io.d4tzz.ecommerce.catalog.application.product.command.CreateProductCommand;
 import io.d4tzz.ecommerce.common.exception.NotFoundException;
 import io.d4tzz.ecommerce.catalog.domain.category.Attribute;
@@ -15,6 +17,7 @@ import java.util.List;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+/** Creates a new product as a draft in a category. */
 @Service
 @Transactional
 public class CreateProductUseCase {
@@ -27,6 +30,13 @@ public class CreateProductUseCase {
         this.categoryRepository = categoryRepository;
     }
 
+    /**
+     * Creates a draft product and returns its id. It starts without options, media or variants; those are added afterwards.
+     *
+     * @throws InvalidArgumentException if the name, the slug or the attributes are invalid for the category
+     * @throws NotFoundException if the category does not exist
+     * @throws ConflictException if the slug is already used
+     */
     public Long execute(CreateProductCommand command) {
         Category category = categoryRepository
             .find(CategoryId.of(command.categoryId()))

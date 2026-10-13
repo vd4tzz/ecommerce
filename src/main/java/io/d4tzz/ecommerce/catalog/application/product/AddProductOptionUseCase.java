@@ -1,5 +1,6 @@
 package io.d4tzz.ecommerce.catalog.application.product;
 
+import io.d4tzz.ecommerce.common.exception.ConflictException;
 import io.d4tzz.ecommerce.catalog.application.product.command.AddProductOptionCommand;
 import io.d4tzz.ecommerce.common.exception.InvalidArgumentException;
 import io.d4tzz.ecommerce.common.exception.NotFoundException;
@@ -13,6 +14,7 @@ import java.util.List;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+/** Adds an option to a product, with the values the product offers for it. */
 @Service
 @Transactional
 public class AddProductOptionUseCase {
@@ -25,6 +27,14 @@ public class AddProductOptionUseCase {
         this.optionRepository = optionRepository;
     }
 
+    /**
+     * Adds an option with the given values, which must belong to the option. The first value becomes the value of every
+     * existing variant for this option.
+     *
+     * @throws NotFoundException if the product or the option does not exist
+     * @throws InvalidArgumentException if some values do not belong to the option
+     * @throws ConflictException if the product already has the option
+     */
     public void execute(AddProductOptionCommand command) {
         Product product = productRepository
             .find(ProductId.of(command.productId()))

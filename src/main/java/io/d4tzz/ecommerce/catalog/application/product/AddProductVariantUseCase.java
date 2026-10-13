@@ -1,5 +1,7 @@
 package io.d4tzz.ecommerce.catalog.application.product;
 
+import io.d4tzz.ecommerce.common.exception.ConflictException;
+import io.d4tzz.ecommerce.common.exception.InvalidArgumentException;
 import io.d4tzz.ecommerce.catalog.application.product.command.AddProductVariantCommand;
 import io.d4tzz.ecommerce.common.Money;
 import io.d4tzz.ecommerce.common.exception.NotFoundException;
@@ -17,6 +19,7 @@ import java.util.Map;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+/** Adds variants to a product. */
 @Service
 @Transactional
 public class AddProductVariantUseCase {
@@ -27,6 +30,13 @@ public class AddProductVariantUseCase {
         this.productRepository = productRepository;
     }
 
+    /**
+     * Adds the variants, each identified by one value for every option of the product. All variants are saved together.
+     *
+     * @throws InvalidArgumentException if a combination does not cover the product's options and values, or a price, size or weight is invalid
+     * @throws NotFoundException if the product does not exist, or a variant's media is not in the product's gallery
+     * @throws ConflictException if a SKU is already used, or another variant has the same combination
+     */
     public void execute(AddProductVariantCommand command) {
         Product product = productRepository
             .find(ProductId.of(command.productId()))

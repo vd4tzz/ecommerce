@@ -1,5 +1,6 @@
 package io.d4tzz.ecommerce.catalog.application.product;
 
+import io.d4tzz.ecommerce.common.exception.InvalidArgumentException;
 import io.d4tzz.ecommerce.catalog.application.product.command.ReorderProductMediaCommand;
 import io.d4tzz.ecommerce.common.exception.NotFoundException;
 import io.d4tzz.ecommerce.catalog.domain.product.MediaId;
@@ -10,6 +11,7 @@ import java.util.List;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+/** Changes the order of a product's gallery. */
 @Service
 @Transactional
 public class ReorderProductMediaUseCase {
@@ -20,6 +22,12 @@ public class ReorderProductMediaUseCase {
         this.productRepository = productRepository;
     }
 
+    /**
+     * Sets the gallery order. The list must contain every media of the gallery exactly once.
+     *
+     * @throws NotFoundException if the product does not exist
+     * @throws InvalidArgumentException if the list has duplicates or unknown media, or leaves out some media
+     */
     public void execute(ReorderProductMediaCommand command) {
         Product product = productRepository
             .find(ProductId.of(command.productId()))

@@ -9,6 +9,7 @@ import io.d4tzz.ecommerce.catalog.domain.product.ProductRepository;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+/** Adds media to a product's gallery. */
 @Service
 @Transactional
 public class AddProductMediaUseCase {
@@ -19,6 +20,11 @@ public class AddProductMediaUseCase {
         this.productRepository = productRepository;
     }
 
+    /**
+     * Appends the media to the end of the gallery, in the given order. Media already in the gallery are ignored.
+     *
+     * @throws NotFoundException if the product does not exist
+     */
     public void execute(AddProductMediaCommand command) {
         Product product = productRepository
             .find(ProductId.of(command.productId()))
