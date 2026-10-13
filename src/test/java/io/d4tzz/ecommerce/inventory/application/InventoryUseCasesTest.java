@@ -24,6 +24,7 @@ import io.d4tzz.ecommerce.inventory.application.result.StockAllocation;
 import io.d4tzz.ecommerce.inventory.domain.InventoryItem;
 import io.d4tzz.ecommerce.inventory.domain.InventoryItemId;
 import io.d4tzz.ecommerce.inventory.domain.InventoryItemRepository;
+import io.d4tzz.ecommerce.inventory.domain.OutOfStockException;
 import io.d4tzz.ecommerce.inventory.domain.ReservationLine;
 import io.d4tzz.ecommerce.inventory.domain.ReservationStatus;
 import io.d4tzz.ecommerce.inventory.domain.StockAllocator;
@@ -462,7 +463,7 @@ class InventoryUseCasesTest {
         itemsExist(item(A, 5, 0), item(B, 1, 1));
 
         assertThrows(
-            InvalidOperationException.class,
+            OutOfStockException.class,
             () -> reserveStock.execute(
                 reserveCommand(new ReserveStockCommand.Line(A, 2), new ReserveStockCommand.Line(B, 1))
             )
@@ -477,7 +478,7 @@ class InventoryUseCasesTest {
         existingWarehouse(WarehouseStatus.ACTIVE);
 
         assertThrows(
-            InvalidOperationException.class,
+            OutOfStockException.class,
             () -> reserveStock.execute(reserveCommand(new ReserveStockCommand.Line(A, 2)))
         );
     }
@@ -691,7 +692,7 @@ class InventoryUseCasesTest {
         warehousesAre(warehouseView(1, "Ha Noi"));
 
         assertThrows(
-            InvalidOperationException.class,
+            OutOfStockException.class,
             () -> allocateStock.execute(new AllocateStockCommand("Ha Noi", List.of(new AllocateStockCommand.Line(A, 2))))
         );
     }

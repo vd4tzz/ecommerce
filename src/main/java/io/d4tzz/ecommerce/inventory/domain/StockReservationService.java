@@ -27,8 +27,8 @@ public class StockReservationService {
     /**
      * Holds the lines for an order in one warehouse. {@code lockedItems} may hold more variants than the lines need.
      *
-     * @throws InvalidOperationException if the warehouse is inactive, or a variant has no item or too little
-     *                                   available stock
+     * @throws InvalidOperationException if the warehouse is inactive
+     * @throws OutOfStockException       if a variant has no item or too little available stock
      */
     public ReservationResult reserve(
         Long orderId,
@@ -44,9 +44,7 @@ public class StockReservationService {
         for (ReservationLine line : reservation.getLines()) {
             InventoryItem item = lockedItems.get(line.variantId());
             if (item == null) {
-                throw new InvalidOperationException(
-                    "Variant " + line.variantId() + " is out of stock in warehouse " + warehouse.getCode()
-                );
+                throw new OutOfStockException(line.variantId(), line.quantity(), 0);
             }
             entries.add(item.reserve(line.quantity(), reference, now));
         }

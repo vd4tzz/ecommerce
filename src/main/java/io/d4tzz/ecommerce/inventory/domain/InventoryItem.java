@@ -81,15 +81,13 @@ public class InventoryItem {
     /**
      * Holds {@code quantity} units.
      *
-     * @throws InvalidArgumentException  if the quantity is not above zero
-     * @throws InvalidOperationException if fewer than {@code quantity} units are {@link #available()}
+     * @throws InvalidArgumentException if the quantity is not above zero
+     * @throws OutOfStockException      if fewer than {@code quantity} units are {@link #available()}
      */
     StockLedgerEntry reserve(int quantity, StockLedgerReference reference, Instant now) {
         requirePositive(quantity);
         if (available() < quantity) {
-            throw new InvalidOperationException(
-                "Insufficient stock for variant " + variantId + ": available " + available() + ", requested " + quantity
-            );
+            throw new OutOfStockException(variantId, quantity, available());
         }
         this.reserved += quantity;
         return recordChange(StockLedgerEntryType.RESERVE, quantity, reference, "", now);

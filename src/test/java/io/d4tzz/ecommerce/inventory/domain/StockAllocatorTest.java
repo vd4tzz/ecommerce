@@ -4,7 +4,6 @@ import static org.junit.jupiter.api.Assertions.*;
 
 import io.d4tzz.ecommerce.catalog.domain.product.VariantId;
 import io.d4tzz.ecommerce.common.exception.InvalidArgumentException;
-import io.d4tzz.ecommerce.common.exception.InvalidOperationException;
 import java.util.List;
 import java.util.Map;
 import org.junit.jupiter.api.Test;
@@ -154,7 +153,7 @@ class StockAllocatorTest {
     @Test
     void failsWhenAllWarehousesTogetherHaveTooLittle() {
         var thrown = assertThrows(
-            InvalidOperationException.class,
+            OutOfStockException.class,
             () -> allocator.allocate(
                 List.of(line(A, 5)),
                 List.of(warehouse(1, false, Map.of(A, 2)), warehouse(2, false, Map.of(A, 2)))
@@ -166,7 +165,7 @@ class StockAllocatorTest {
 
     @Test
     void failsWhenThereAreNoWarehouses() {
-        assertThrows(InvalidOperationException.class, () -> allocator.allocate(List.of(line(A, 1)), List.of()));
+        assertThrows(OutOfStockException.class, () -> allocator.allocate(List.of(line(A, 1)), List.of()));
     }
 
     @Test

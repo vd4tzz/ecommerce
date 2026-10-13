@@ -1,9 +1,9 @@
 package io.d4tzz.ecommerce.inventory.application;
 
 import io.d4tzz.ecommerce.catalog.domain.product.VariantId;
-import io.d4tzz.ecommerce.common.exception.InvalidOperationException;
 import io.d4tzz.ecommerce.inventory.application.command.AllocateStockCommand;
 import io.d4tzz.ecommerce.inventory.application.result.StockAllocation;
+import io.d4tzz.ecommerce.inventory.domain.OutOfStockException;
 import io.d4tzz.ecommerce.inventory.domain.ReservationLine;
 import io.d4tzz.ecommerce.inventory.domain.StockAllocator;
 import io.d4tzz.ecommerce.inventory.domain.WarehouseAllocation;
@@ -43,7 +43,7 @@ public class AllocateStockUseCase {
      * reserve. Only reads: call {@link ReserveStockUseCase} once per returned warehouse, in the returned order, to
      * actually hold the stock. Returns one entry per warehouse, in ascending warehouse id order.
      *
-     * @throws InvalidOperationException if a variant has too little stock in all active warehouses together
+     * @throws OutOfStockException if a variant has too little stock in all active warehouses together
      */
     public List<StockAllocation> execute(AllocateStockCommand command) {
         List<ReservationLine> lines = command

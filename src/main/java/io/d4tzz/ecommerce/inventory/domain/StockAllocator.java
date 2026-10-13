@@ -2,7 +2,6 @@ package io.d4tzz.ecommerce.inventory.domain;
 
 import io.d4tzz.ecommerce.catalog.domain.product.VariantId;
 import io.d4tzz.ecommerce.common.exception.InvalidArgumentException;
-import io.d4tzz.ecommerce.common.exception.InvalidOperationException;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
@@ -30,8 +29,8 @@ public class StockAllocator {
     /**
      * One allocation per warehouse, in ascending warehouse id order (the order reservations must be made in).
      *
-     * @throws InvalidArgumentException  if there are no lines
-     * @throws InvalidOperationException if a variant has too little available stock in all warehouses together
+     * @throws InvalidArgumentException if there are no lines
+     * @throws OutOfStockException       if a variant has too little available stock in all warehouses together
      */
     public List<WarehouseAllocation> allocate(List<ReservationLine> lines, List<WarehouseStock> warehouses) {
         if (lines.isEmpty()) {
@@ -78,15 +77,7 @@ public class StockAllocator {
                 .mapToInt(warehouse -> warehouse.availableOf(entry.getKey()))
                 .sum();
             if (available < entry.getValue()) {
-                throw new InvalidOperationException(
-                    "Variant " +
-                        entry.getKey() +
-                        " is out of stock: " +
-                        entry.getValue() +
-                        " wanted, " +
-                        available +
-                        " available"
-                );
+                throw new OutOfStockException(entry.getKey(), entry.getValue(), available);
             }
         }
     }

@@ -6,6 +6,7 @@ import io.d4tzz.ecommerce.catalog.domain.product.VariantId;
 import io.d4tzz.ecommerce.inventory.application.command.ReserveStockCommand;
 import io.d4tzz.ecommerce.inventory.domain.InventoryItem;
 import io.d4tzz.ecommerce.inventory.domain.InventoryItemRepository;
+import io.d4tzz.ecommerce.inventory.domain.OutOfStockException;
 import io.d4tzz.ecommerce.inventory.domain.ReservationLine;
 import io.d4tzz.ecommerce.inventory.domain.StockLedgerRepository;
 import io.d4tzz.ecommerce.inventory.domain.StockReservationRepository;
@@ -51,8 +52,8 @@ public class ReserveStockUseCase {
      * order spans several warehouses, call it once per warehouse in ascending warehouse id order.
      *
      * @throws NotFoundException         if the warehouse does not exist
-     * @throws InvalidOperationException if the warehouse is inactive, or a variant has no item or too little
-     *                                   available stock
+     * @throws InvalidOperationException if the warehouse is inactive
+     * @throws OutOfStockException       if a variant has no item or too little available stock
      */
     public void execute(ReserveStockCommand command) {
         Long orderId = command.orderId();

@@ -100,7 +100,7 @@ class InventoryItemTest {
     void reserve_failsWhenFewerUnitsAreAvailable() {
         InventoryItem item = item(5, 3);
 
-        assertThrows(InvalidOperationException.class, () -> item.reserve(3, ORDER, T1));
+        assertThrows(OutOfStockException.class, () -> item.reserve(3, ORDER, T1));
         assertEquals(3, item.getReserved());
         assertEquals(T0, item.getUpdatedAt());
     }

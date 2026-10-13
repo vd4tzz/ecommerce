@@ -85,14 +85,14 @@ class StockReservationServiceTest {
 
     @Test
     void reserve_failsWhenAVariantHasNoItemInTheWarehouse() {
-        var thrown = assertThrows(InvalidOperationException.class, () -> reserve(items(item(A, 5, 0))));
+        var thrown = assertThrows(OutOfStockException.class, () -> reserve(items(item(A, 5, 0))));
 
         assertTrue(thrown.getMessage().contains("out of stock"));
     }
 
     @Test
     void reserve_failsWhenAVariantHasTooLittleAvailable() {
-        assertThrows(InvalidOperationException.class, () -> reserve(items(item(A, 5, 0), item(B, 1, 1))));
+        assertThrows(OutOfStockException.class, () -> reserve(items(item(A, 5, 0), item(B, 1, 1))));
     }
 
     @Test

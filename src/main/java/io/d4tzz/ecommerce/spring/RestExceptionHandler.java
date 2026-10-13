@@ -4,6 +4,7 @@ import io.d4tzz.ecommerce.common.exception.ConflictException;
 import io.d4tzz.ecommerce.common.exception.InvalidArgumentException;
 import io.d4tzz.ecommerce.common.exception.InvalidOperationException;
 import io.d4tzz.ecommerce.common.exception.NotFoundException;
+import io.d4tzz.ecommerce.inventory.domain.OutOfStockException;
 import io.d4tzz.ecommerce.user.domain.AccountBlockedException;
 import io.d4tzz.ecommerce.user.domain.EmailAlreadyExistsException;
 import io.d4tzz.ecommerce.user.domain.InvalidCredentialsException;
@@ -67,6 +68,11 @@ public class RestExceptionHandler {
     })
     public ProblemDetail handleBadRequest(RuntimeException ex) {
         return ProblemDetail.forStatusAndDetail(HttpStatus.BAD_REQUEST, ex.getMessage());
+    }
+
+    @ExceptionHandler(OutOfStockException.class)
+    public ProblemDetail handleOutOfStock(OutOfStockException ex) {
+        return ProblemDetail.forStatusAndDetail(HttpStatus.CONFLICT, ex.getMessage());
     }
 
     @ExceptionHandler(EmailAlreadyExistsException.class)
