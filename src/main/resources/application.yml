@@ -3,9 +3,9 @@ spring:
     name: ecommerce
 
   datasource:
-    url: jdbc:postgresql://localhost:5432/ecommerce
-    username: postgres
-    password: "1"
+    url: ${SPRING_DATASOURCE_URL:jdbc:postgresql://localhost:5432/ecommerce}
+    username: ${SPRING_DATASOURCE_USERNAME:postgres}
+    password: ${SPRING_DATASOURCE_PASSWORD:1}
     driver-class-name: org.postgresql.Driver
 
   jpa:
@@ -38,13 +38,13 @@ app:
       refresh-token-validity: ${JWT_REFRESH_TOKEN_VALIDITY:7d}
   storage:
     s3:
-      bucket: ecommerce
-      region: vietnam
-      endpoint: http://localhost:8333
-      access-key: any
-      secret-key: any
-      public-base-url: http://localhost:8333/ecommerce
-      presigned-duration-minutes: 15
+      bucket: ${APP_STORAGE_S3_BUCKET:ecommerce}
+      region: ${APP_STORAGE_S3_REGION:vietnam}
+      endpoint: ${APP_STORAGE_S3_ENDPOINT:http://localhost:8333}
+      access-key: ${APP_STORAGE_S3_ACCESS_KEY:any}
+      secret-key: ${APP_STORAGE_S3_SECRET_KEY:any}
+      public-base-url: ${APP_STORAGE_S3_PUBLIC_BASE_URL:http://localhost:8333/ecommerce}
+      presigned-duration-minutes: ${APP_STORAGE_S3_PRESIGNED_DURATION_MINUTES:15}
   payment:
     sepay:
       merchant: ${SEPAY_MERCHANT:SP-TEST-NV575945}

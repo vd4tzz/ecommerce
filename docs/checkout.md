@@ -37,8 +37,7 @@ sequenceDiagram
     Checkout->>Catalog: Details and price of each variant
     Checkout->>Inventory: Which warehouses send it?
     Checkout->>Shipping: Fee of each package, with the carrier
-    rect rgb(240, 240, 240)
-        note over Checkout,Order: One transaction
+    critical One transaction
         Checkout->>Order: Place the order
         Checkout->>Inventory: Hold the stock, once per warehouse
     end
