@@ -31,7 +31,7 @@ password reset and the profile. For endpoint details (parameters, bodies, errors
 - **A password has 8 to 128 characters** with at least one uppercase letter, one lowercase letter and one digit. It is stored only as a hash.
 - **A phone number is 9 to 11 digits** with an optional country prefix. Spaces, dots and dashes are ignored.
 - **A blocked account cannot log in or refresh tokens.** An admin account cannot be blocked.
-- **Email verification does not stop login.** An unverified account can log in; verifying the email is what creates the user's cart.
+- **An unverified account can log in, but cannot buy.** Cart, checkout and orders need a verified email (see [Roles and access](#roles-and-access)). Verifying the email also creates the user's cart.
 - **Nothing reveals which emails exist at login.** An unknown email and a wrong password give the same answer.
 
 ## Registration and email verification
@@ -76,6 +76,9 @@ stateDiagram-v2
 - Using a token that was already revoked, or losing a race to revoke it, is treated as theft: the whole family is
   revoked, so every session descended from that login is signed out. The answer is an error, but the revocation is kept.
 - Refresh tokens are stored only as a SHA-256 hash, so a leaked table cannot be used to sign in.
+- The access token says whether the email was verified when the token was issued. A customer who verifies their email
+  keeps an "unverified" token until it expires, so the client refreshes the tokens right after verifying to get one that says
+  "verified".
 - Changing or resetting the password revokes all of the user's refresh tokens. Access tokens already issued stay valid until
   they expire, so lifetimes should be short. They are set by `JWT_ACCESS_TOKEN_VALIDITY` and `JWT_REFRESH_TOKEN_VALIDITY`.
 
@@ -110,12 +113,15 @@ A signed-in user who knows the current password can change it directly, which al
 | Who | Can use |
 |---|---|
 | Anyone | `/auth/**`, the API docs, product and category reads, and the list of payment gateways |
-| Any signed-in user | Everything else, such as their own profile, cart and orders |
+| Any signed-in user | Their own account: profile, password change |
+| A signed-in user with a verified email | `/cart/**`, `/checkout/**` and `/orders/**` |
 | `ROLE_STAFF` and `ROLE_ADMIN` | `/admin/**` |
 | `ROLE_ADMIN` only | `/admin/users/**` |
 
-Requests are authenticated by the access token alone, with no session. A missing or invalid token is answered with 401,
-and a signed-in user without the right role with 403.
+Requests are authenticated by the access token alone, with no session. For each request the token is turned into a set of
+authorities: the user's role, plus `EMAIL_VERIFIED` when the token says the email is verified. Routes then require the role
+or the authority they need. A missing or invalid token is answered with 401, and a signed-in user without the right role or
+a verified email with 403.
 
 ## Events
 

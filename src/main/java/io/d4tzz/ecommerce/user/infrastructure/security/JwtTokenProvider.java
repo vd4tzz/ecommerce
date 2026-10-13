@@ -19,6 +19,7 @@ public class JwtTokenProvider implements TokenProvider {
 
     public static final String TOKEN_TYPE_CLAIM = "type";
     public static final String ACCESS_TOKEN_TYPE = "access";
+    public static final String EMAIL_VERIFIED_CLAIM = "emailVerified";
     private static final String REFRESH_TOKEN_TYPE = "refresh";
 
     private final SecretKey key;
@@ -51,6 +52,7 @@ public class JwtTokenProvider implements TokenProvider {
             .subject(user.getId().value().toString())
             .claim("email", user.getEmail().value())
             .claim("role", user.getRole().name())
+            .claim(EMAIL_VERIFIED_CLAIM, user.isEmailVerified())
             .claim(TOKEN_TYPE_CLAIM, ACCESS_TOKEN_TYPE)
             .issuedAt(Date.from(now))
             .expiration(Date.from(expiresAt))

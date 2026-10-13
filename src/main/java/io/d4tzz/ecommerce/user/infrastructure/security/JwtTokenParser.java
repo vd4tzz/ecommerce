@@ -11,7 +11,8 @@ import org.springframework.stereotype.Component;
 @Component
 public class JwtTokenParser {
 
-    public record TokenClaims(Long userId, UserRole role) {}
+    /** {@code emailVerified} is as of the moment the token was issued, so it stays the same until the token expires. */
+    public record TokenClaims(Long userId, UserRole role, boolean emailVerified) {}
 
     private final SecretKey key;
 
@@ -33,7 +34,11 @@ public class JwtTokenParser {
                 return Optional.empty();
             }
             UserRole role = UserRole.valueOf(claims.get("role", String.class));
-            return Optional.of(new TokenClaims(Long.parseLong(claims.getSubject()), role));
+            // A token without the claim (issued before it existed) counts as not verified
+            boolean emailVerified = Boolean.TRUE.equals(
+                claims.get(JwtTokenProvider.EMAIL_VERIFIED_CLAIM, Boolean.class)
+            );
+            return Optional.of(new TokenClaims(Long.parseLong(claims.getSubject()), role, emailVerified));
         } catch (Exception e) {
             return Optional.empty();
         }

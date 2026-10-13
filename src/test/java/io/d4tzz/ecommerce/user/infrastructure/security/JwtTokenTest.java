@@ -4,6 +4,8 @@ import static org.junit.jupiter.api.Assertions.*;
 
 import io.d4tzz.ecommerce.user.domain.User;
 import io.d4tzz.ecommerce.user.domain.UserFixtures;
+import io.d4tzz.ecommerce.user.domain.UserRole;
+import io.d4tzz.ecommerce.user.domain.UserStatus;
 import io.d4tzz.ecommerce.user.domain.auth.TokenPair;
 import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.security.Keys;
@@ -27,6 +29,49 @@ class JwtTokenTest {
         TokenPair pair = provider.generateTokens(user);
 
         assertEquals(Optional.of(1L), parser.extractUserId(pair.accessToken().value()));
+    }
+
+    @Test
+    void parser_readsUserRoleAndVerifiedEmailFromTheToken() {
+        TokenPair pair = provider.generateTokens(user);
+
+        JwtTokenParser.TokenClaims claims = parser.parse(pair.accessToken().value()).orElseThrow();
+
+        assertEquals(1L, claims.userId());
+        assertEquals(UserRole.ROLE_CUSTOMER, claims.role());
+        assertTrue(claims.emailVerified());
+    }
+
+    @Test
+    void parser_readsAnUnverifiedEmailAsFalse() {
+        User unverified = UserFixtures.user(UserRole.ROLE_CUSTOMER, UserStatus.ACTIVE, false);
+        TokenPair pair = provider.generateTokens(unverified);
+
+        assertFalse(parser.parse(pair.accessToken().value()).orElseThrow().emailVerified());
+    }
+
+    @Test
+    void parser_treatsATokenWithoutTheClaimAsUnverified() {
+        String oldToken = Jwts.builder()
+            .subject("1")
+            .claim("role", UserRole.ROLE_CUSTOMER.name())
+            .claim(JwtTokenProvider.TOKEN_TYPE_CLAIM, JwtTokenProvider.ACCESS_TOKEN_TYPE)
+            .expiration(new Date(System.currentTimeMillis() + 60_000))
+            .signWith(Keys.hmacShaKeyFor(SECRET.getBytes(StandardCharsets.UTF_8)))
+            .compact();
+
+        assertFalse(parser.parse(oldToken).orElseThrow().emailVerified());
+    }
+
+    @Test
+    void rotate_readsTheCurrentVerifiedStateOfTheUser() {
+        User unverified = UserFixtures.user(UserRole.ROLE_CUSTOMER, UserStatus.ACTIVE, false);
+        TokenPair first = provider.generateTokens(unverified);
+
+        TokenPair second = provider.rotate(first.refreshToken(), user);
+
+        assertFalse(parser.parse(first.accessToken().value()).orElseThrow().emailVerified());
+        assertTrue(parser.parse(second.accessToken().value()).orElseThrow().emailVerified());
     }
 
     @Test
