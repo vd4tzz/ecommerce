@@ -3,7 +3,7 @@ package io.d4tzz.ecommerce.payment.infrastructure.query;
 import io.d4tzz.ecommerce.payment.query.RefundRequestQueryService;
 import io.d4tzz.ecommerce.payment.query.RefundRequestSearchCriteria;
 import io.d4tzz.ecommerce.payment.query.RefundRequestView;
-import io.d4tzz.ecommerce.query.PageResponse;
+import io.d4tzz.ecommerce.common.PageResponse;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Timestamp;

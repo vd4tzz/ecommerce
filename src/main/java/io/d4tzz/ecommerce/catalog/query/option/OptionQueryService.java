@@ -1,6 +1,6 @@
 package io.d4tzz.ecommerce.catalog.query.option;
 
-import io.d4tzz.ecommerce.query.PageResponse;
+import io.d4tzz.ecommerce.common.PageResponse;
 import java.util.Optional;
 
 public interface OptionQueryService {

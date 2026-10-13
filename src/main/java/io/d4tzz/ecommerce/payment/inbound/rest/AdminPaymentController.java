@@ -6,7 +6,7 @@ import io.d4tzz.ecommerce.payment.application.command.AssignPaymentToOrderComman
 import io.d4tzz.ecommerce.payment.query.PaymentQueryService;
 import io.d4tzz.ecommerce.payment.query.PaymentSearchCriteria;
 import io.d4tzz.ecommerce.payment.query.PaymentView;
-import io.d4tzz.ecommerce.query.PageResponse;
+import io.d4tzz.ecommerce.common.PageResponse;
 import io.d4tzz.ecommerce.spring.SpringValidation;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import java.time.Instant;

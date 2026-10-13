@@ -1,6 +1,6 @@
 package io.d4tzz.ecommerce.catalog.infrastructure.query.product;
 
-import io.d4tzz.ecommerce.query.PageResponse;
+import io.d4tzz.ecommerce.common.PageResponse;
 import io.d4tzz.ecommerce.catalog.query.product.ProductCardView;
 import io.d4tzz.ecommerce.catalog.query.product.ProductSearchCriteria;
 import io.d4tzz.ecommerce.storage.MediaUrlResolver;

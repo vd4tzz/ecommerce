@@ -9,7 +9,7 @@ import io.d4tzz.ecommerce.inventory.query.StockQueryService;
 import io.d4tzz.ecommerce.inventory.query.StockReservationView;
 import io.d4tzz.ecommerce.inventory.query.StockSearchCriteria;
 import io.d4tzz.ecommerce.inventory.query.VariantAvailabilityView;
-import io.d4tzz.ecommerce.query.PageResponse;
+import io.d4tzz.ecommerce.common.PageResponse;
 import io.d4tzz.ecommerce.spring.SpringValidation;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.media.Content;

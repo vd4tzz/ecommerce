@@ -1,6 +1,6 @@
 package io.d4tzz.ecommerce.order.query;
 
-import io.d4tzz.ecommerce.query.PageResponse;
+import io.d4tzz.ecommerce.common.PageResponse;
 import java.util.Optional;
 
 public interface OrderQueryService {

@@ -7,7 +7,7 @@ import io.d4tzz.ecommerce.payment.domain.PaymentMethod;
 import io.d4tzz.ecommerce.payment.query.RefundRequestQueryService;
 import io.d4tzz.ecommerce.payment.query.RefundRequestSearchCriteria;
 import io.d4tzz.ecommerce.payment.query.RefundRequestView;
-import io.d4tzz.ecommerce.query.PageResponse;
+import io.d4tzz.ecommerce.common.PageResponse;
 import io.d4tzz.ecommerce.spring.SpringValidation;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import org.springframework.http.ResponseEntity;

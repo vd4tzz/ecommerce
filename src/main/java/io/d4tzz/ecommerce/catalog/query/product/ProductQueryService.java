@@ -1,6 +1,6 @@
 package io.d4tzz.ecommerce.catalog.query.product;
 
-import io.d4tzz.ecommerce.query.PageResponse;
+import io.d4tzz.ecommerce.common.PageResponse;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;

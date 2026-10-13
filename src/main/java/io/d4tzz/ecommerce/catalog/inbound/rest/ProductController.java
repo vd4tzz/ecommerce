@@ -1,7 +1,7 @@
 package io.d4tzz.ecommerce.catalog.inbound.rest;
 
 import io.d4tzz.ecommerce.common.exception.NotFoundException;
-import io.d4tzz.ecommerce.query.PageResponse;
+import io.d4tzz.ecommerce.common.PageResponse;
 import io.d4tzz.ecommerce.catalog.query.product.FilterSidebarView;
 import io.d4tzz.ecommerce.catalog.query.product.ProductCardView;
 import io.d4tzz.ecommerce.catalog.query.product.ProductDetailView;

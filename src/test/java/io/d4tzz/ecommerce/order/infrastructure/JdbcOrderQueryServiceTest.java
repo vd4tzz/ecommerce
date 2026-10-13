@@ -12,7 +12,7 @@ import io.d4tzz.ecommerce.order.infrastructure.query.JdbcOrderQueryService;
 import io.d4tzz.ecommerce.order.query.OrderSearchCriteria;
 import io.d4tzz.ecommerce.order.query.OrderSummaryView;
 import io.d4tzz.ecommerce.order.query.OrderView;
-import io.d4tzz.ecommerce.query.PageResponse;
+import io.d4tzz.ecommerce.common.PageResponse;
 import io.d4tzz.ecommerce.support.PostgresContainerTest;
 import io.d4tzz.ecommerce.user.domain.PhoneNumber;
 import io.d4tzz.ecommerce.user.domain.UserId;

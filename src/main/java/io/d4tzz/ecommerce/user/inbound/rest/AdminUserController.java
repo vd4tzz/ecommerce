@@ -1,7 +1,7 @@
 package io.d4tzz.ecommerce.user.inbound.rest;
 
 import io.d4tzz.ecommerce.common.exception.NotFoundException;
-import io.d4tzz.ecommerce.query.PageResponse;
+import io.d4tzz.ecommerce.common.PageResponse;
 import io.d4tzz.ecommerce.user.query.UserQueryService;
 import io.d4tzz.ecommerce.user.query.UserSearchCriteria;
 import io.d4tzz.ecommerce.user.query.UserView;

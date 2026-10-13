@@ -16,7 +16,7 @@ import io.d4tzz.ecommerce.catalog.query.option.OptionQueryService;
 import io.d4tzz.ecommerce.catalog.query.option.OptionSearchCriteria;
 import io.d4tzz.ecommerce.catalog.query.option.OptionTableRowView;
 import io.d4tzz.ecommerce.common.exception.NotFoundException;
-import io.d4tzz.ecommerce.query.PageResponse;
+import io.d4tzz.ecommerce.common.PageResponse;
 import io.d4tzz.ecommerce.spring.SpringValidation;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.media.Content;

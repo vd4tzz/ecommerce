@@ -1,6 +1,6 @@
 package io.d4tzz.ecommerce.inventory.query;
 
-import io.d4tzz.ecommerce.query.PageResponse;
+import io.d4tzz.ecommerce.common.PageResponse;
 import java.util.Collection;
 import java.util.List;
 import java.util.UUID;

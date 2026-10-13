@@ -3,7 +3,7 @@ package io.d4tzz.ecommerce.payment.infrastructure.query;
 import io.d4tzz.ecommerce.payment.query.PaymentQueryService;
 import io.d4tzz.ecommerce.payment.query.PaymentSearchCriteria;
 import io.d4tzz.ecommerce.payment.query.PaymentView;
-import io.d4tzz.ecommerce.query.PageResponse;
+import io.d4tzz.ecommerce.common.PageResponse;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.time.OffsetDateTime;

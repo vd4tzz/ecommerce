@@ -10,7 +10,7 @@ import io.d4tzz.ecommerce.order.query.OrderSearchCriteria;
 import io.d4tzz.ecommerce.order.query.OrderSummaryView;
 import io.d4tzz.ecommerce.order.query.OrderView;
 import io.d4tzz.ecommerce.payment.application.port.PaymentRedirect;
-import io.d4tzz.ecommerce.query.PageResponse;
+import io.d4tzz.ecommerce.common.PageResponse;
 import io.d4tzz.ecommerce.spring.SpringValidation;
 import io.d4tzz.ecommerce.spring.security.CurrentUser;
 import io.swagger.v3.oas.annotations.Operation;

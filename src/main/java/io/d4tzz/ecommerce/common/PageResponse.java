@@ -1,4 +1,4 @@
-package io.d4tzz.ecommerce.query;
+package io.d4tzz.ecommerce.common;
 
 import java.util.List;
 

@@ -15,7 +15,7 @@ import io.d4tzz.ecommerce.order.query.OrderQueryService;
 import io.d4tzz.ecommerce.order.query.OrderSearchCriteria;
 import io.d4tzz.ecommerce.order.query.OrderSummaryView;
 import io.d4tzz.ecommerce.order.query.OrderView;
-import io.d4tzz.ecommerce.query.PageResponse;
+import io.d4tzz.ecommerce.common.PageResponse;
 import io.d4tzz.ecommerce.spring.SpringValidation;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.media.Content;

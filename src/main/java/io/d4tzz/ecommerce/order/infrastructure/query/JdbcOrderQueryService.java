@@ -4,7 +4,7 @@ import io.d4tzz.ecommerce.order.query.OrderQueryService;
 import io.d4tzz.ecommerce.order.query.OrderSearchCriteria;
 import io.d4tzz.ecommerce.order.query.OrderSummaryView;
 import io.d4tzz.ecommerce.order.query.OrderView;
-import io.d4tzz.ecommerce.query.PageResponse;
+import io.d4tzz.ecommerce.common.PageResponse;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Timestamp;

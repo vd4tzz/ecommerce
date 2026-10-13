@@ -1,6 +1,6 @@
 package io.d4tzz.ecommerce.catalog.infrastructure.query.option;
 
-import io.d4tzz.ecommerce.query.PageResponse;
+import io.d4tzz.ecommerce.common.PageResponse;
 import io.d4tzz.ecommerce.catalog.query.option.OptionDetailView;
 import io.d4tzz.ecommerce.catalog.query.option.OptionQueryService;
 import io.d4tzz.ecommerce.catalog.query.option.OptionSearchCriteria;

@@ -8,7 +8,7 @@ import io.d4tzz.ecommerce.catalog.query.product.ProductDetailView;
 import io.d4tzz.ecommerce.catalog.query.product.ProductQueryService;
 import io.d4tzz.ecommerce.catalog.query.product.ProductSearchCriteria;
 import io.d4tzz.ecommerce.catalog.query.product.ProductVariantSummaryView;
-import io.d4tzz.ecommerce.query.PageResponse;
+import io.d4tzz.ecommerce.common.PageResponse;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;

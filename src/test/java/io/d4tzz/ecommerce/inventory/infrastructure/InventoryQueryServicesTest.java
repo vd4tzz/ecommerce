@@ -40,7 +40,7 @@ import io.d4tzz.ecommerce.inventory.query.StockReservationView;
 import io.d4tzz.ecommerce.inventory.query.StockSearchCriteria;
 import io.d4tzz.ecommerce.inventory.query.VariantAvailabilityView;
 import io.d4tzz.ecommerce.inventory.query.WarehouseView;
-import io.d4tzz.ecommerce.query.PageResponse;
+import io.d4tzz.ecommerce.common.PageResponse;
 import io.d4tzz.ecommerce.support.PostgresContainerTest;
 import jakarta.persistence.EntityManager;
 import java.time.Instant;
