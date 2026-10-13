@@ -1,5 +1,7 @@
 package io.d4tzz.ecommerce.cart.application;
 
+import io.d4tzz.ecommerce.cart.domain.CartItem;
+import io.d4tzz.ecommerce.common.exception.InvalidArgumentException;
 import io.d4tzz.ecommerce.cart.application.command.UpdateCartItemCommand;
 import io.d4tzz.ecommerce.cart.domain.Cart;
 import io.d4tzz.ecommerce.cart.domain.CartRepository;
@@ -24,6 +26,12 @@ public class UpdateCartItemUseCase {
         this.variantSaleChecker = variantSaleChecker;
     }
 
+    /**
+     * Sets the quantity of the variant in the user's cart, adding it (and the cart itself) if it is not there yet.
+     *
+     * @throws InvalidOperationException if the variant does not exist or its product is not published
+     * @throws InvalidArgumentException  if the quantity is not between 1 and {@link CartItem#MAX_QUANTITY}
+     */
     public void execute(UpdateCartItemCommand command) {
         VariantId variantId = VariantId.of(command.variantId());
         if (!variantSaleChecker.checkNotForSale(List.of(variantId)).isEmpty()) {

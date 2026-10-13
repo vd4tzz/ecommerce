@@ -4,8 +4,12 @@ import io.d4tzz.ecommerce.common.Repository;
 import io.d4tzz.ecommerce.user.domain.UserId;
 import java.util.Optional;
 
+/**
+ * Persistence port for {@link Cart}. A user has at most one cart.
+ */
 public interface CartRepository extends Repository<Cart, CartId> {
 
+    /** Finds the user's cart, with its items. */
     Optional<Cart> findByUserId(UserId userId);
 
     /**

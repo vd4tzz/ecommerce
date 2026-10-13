@@ -1,5 +1,7 @@
 package io.d4tzz.ecommerce.cart.application;
 
+import io.d4tzz.ecommerce.cart.domain.CartItem;
+import io.d4tzz.ecommerce.common.exception.InvalidArgumentException;
 import io.d4tzz.ecommerce.cart.application.command.AddToCartCommand;
 import io.d4tzz.ecommerce.cart.domain.Cart;
 import io.d4tzz.ecommerce.cart.domain.CartRepository;
@@ -24,6 +26,13 @@ public class AddToCartUseCase {
         this.variantSaleChecker = variantSaleChecker;
     }
 
+    /**
+     * Adds {@code quantity} of the variant to the user's cart. If the cart already has the variant, the quantity is
+     * added to the existing item.
+     *
+     * @throws InvalidOperationException if the variant does not exist or its product is not published
+     * @throws InvalidArgumentException  if the item would hold more than {@link CartItem#MAX_QUANTITY}
+     */
     public void execute(AddToCartCommand command) {
         VariantId variantId = VariantId.of(command.variantId());
         if (!variantSaleChecker.checkNotForSale(List.of(variantId)).isEmpty()) {

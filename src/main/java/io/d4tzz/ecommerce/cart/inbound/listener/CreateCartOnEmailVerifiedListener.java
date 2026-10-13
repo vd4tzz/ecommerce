@@ -6,6 +6,7 @@ import io.d4tzz.ecommerce.user.domain.event.EmailVerifiedEvent;
 import org.springframework.modulith.events.ApplicationModuleListener;
 import org.springframework.stereotype.Component;
 
+/** Gives a user an empty cart as soon as their email is verified. */
 @Component
 public class CreateCartOnEmailVerifiedListener {
 
@@ -15,6 +16,7 @@ public class CreateCartOnEmailVerifiedListener {
         this.cartRepository = cartRepository;
     }
 
+    /** Creates the user's cart if they do not have one yet, so a repeated event creates no second cart. */
     @ApplicationModuleListener
     public void onEmailVerified(EmailVerifiedEvent event) {
         cartRepository.lockForUser(event.userId());

@@ -18,6 +18,7 @@ public class RemoveCartItemUseCase {
         this.cartRepository = cartRepository;
     }
 
+    /** Removes the variant from the user's cart. Nothing happens if the user has no cart or the cart lacks the variant. */
     public void execute(RemoveCartItemCommand command) {
         UserId userId = UserId.of(command.userId());
         cartRepository.lockForUser(userId);

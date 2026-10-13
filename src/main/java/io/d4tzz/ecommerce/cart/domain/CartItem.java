@@ -12,6 +12,12 @@ public class CartItem {
     private final VariantId variantId;
     private int quantity;
 
+    /**
+     * Rebuilds an item from persisted data. The quantity is still checked.
+     *
+     * @param id cart item id, {@code null} if not yet persisted
+     * @throws InvalidArgumentException if the quantity is not between 1 and {@link #MAX_QUANTITY}
+     */
     public CartItem(CartItemId id, VariantId variantId, int quantity) {
         requireValidQuantity(quantity);
         this.id = id;
@@ -19,14 +25,27 @@ public class CartItem {
         this.quantity = quantity;
     }
 
+    /**
+     * Creates a new item that is not yet persisted.
+     *
+     * @throws InvalidArgumentException if the quantity is not between 1 and {@link #MAX_QUANTITY}
+     */
     public static CartItem create(VariantId variantId, int quantity) {
         return new CartItem(null, variantId, quantity);
     }
 
+    /** Rebuilds an item from persisted data. Same as the constructor. */
     public static CartItem restore(CartItemId id, VariantId variantId, int quantity) {
         return new CartItem(id, variantId, quantity);
     }
 
+    /**
+     * Adds to the quantity.
+     *
+     * @param amount how many units to add, greater than zero
+     * @throws InvalidArgumentException if {@code amount} is not greater than zero, or the quantity would go above
+     *                                  {@link #MAX_QUANTITY}
+     */
     public void increaseQuantity(int amount) {
         if (amount <= 0) {
             throw new InvalidArgumentException("Quantity increment must be greater than zero");
@@ -39,6 +58,11 @@ public class CartItem {
         this.quantity += amount;
     }
 
+    /**
+     * Replaces the quantity.
+     *
+     * @throws InvalidArgumentException if the new quantity is not between 1 and {@link #MAX_QUANTITY}
+     */
     public void changeQuantity(int newQuantity) {
         requireValidQuantity(newQuantity);
         this.quantity = newQuantity;

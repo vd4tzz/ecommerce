@@ -1,5 +1,6 @@
 package io.d4tzz.ecommerce.cart.application;
 
+import io.d4tzz.ecommerce.cart.domain.CartItem;
 import io.d4tzz.ecommerce.cart.application.command.MergeCartCommand;
 import io.d4tzz.ecommerce.cart.domain.Cart;
 import io.d4tzz.ecommerce.cart.domain.CartRepository;
@@ -26,6 +27,11 @@ public class MergeCartUseCase {
         this.variantSaleChecker = variantSaleChecker;
     }
 
+    /**
+     * Adds the guest cart's items to the user's cart, creating the cart if needed. A variant already in the user's cart
+     * keeps its quantity, a quantity above {@link CartItem#MAX_QUANTITY} is lowered to it, and a variant that is not
+     * for sale is skipped.
+     */
     public void execute(MergeCartCommand command) {
         Set<VariantId> notForSale = variantSaleChecker.checkNotForSale(
             command

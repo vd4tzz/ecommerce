@@ -17,6 +17,7 @@ public class ClearCartUseCase {
         this.cartRepository = cartRepository;
     }
 
+    /** Removes every item from the user's cart. Nothing happens if the user has no cart. */
     public void execute(ClearCartCommand command) {
         UserId userId = UserId.of(command.userId());
         cartRepository.lockForUser(userId);
