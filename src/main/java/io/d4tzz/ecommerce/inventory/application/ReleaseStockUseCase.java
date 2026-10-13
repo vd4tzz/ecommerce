@@ -1,6 +1,7 @@
 package io.d4tzz.ecommerce.inventory.application;
 
 import io.d4tzz.ecommerce.catalog.domain.product.VariantId;
+import io.d4tzz.ecommerce.common.exception.InvalidOperationException;
 import io.d4tzz.ecommerce.inventory.application.command.ReleaseStockCommand;
 import io.d4tzz.ecommerce.inventory.domain.InventoryItem;
 import io.d4tzz.ecommerce.inventory.domain.InventoryItemRepository;
@@ -15,7 +16,6 @@ import java.util.Map;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-/** Releases every reservation of a cancelled/expired order. Already released reservations are skipped. */
 @Service
 @Transactional
 public class ReleaseStockUseCase {
@@ -37,6 +37,13 @@ public class ReleaseStockUseCase {
         this.reservationService = reservationService;
     }
 
+    /**
+     * Releases every reservation of a cancelled/expired order.
+     * Already released reservations are skipped.
+     *
+     * @throws InvalidOperationException if a reservation of the order cannot be released,
+     * because it is committed or restocked
+     */
     public void execute(ReleaseStockCommand command) {
         Instant now = Instant.now();
 

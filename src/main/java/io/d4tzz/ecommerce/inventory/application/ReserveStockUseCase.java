@@ -1,5 +1,6 @@
 package io.d4tzz.ecommerce.inventory.application;
 
+import io.d4tzz.ecommerce.common.exception.InvalidOperationException;
 import io.d4tzz.ecommerce.common.exception.NotFoundException;
 import io.d4tzz.ecommerce.catalog.domain.product.VariantId;
 import io.d4tzz.ecommerce.inventory.application.command.ReserveStockCommand;
@@ -18,13 +19,6 @@ import java.util.Map;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-/**
- * Holds stock for an order in one warehouse. Meant to be called synchronously by order placement, inside the
- * same transaction: if any line is out of stock the whole order fails.
- *
- * <p>Idempotent per (order, warehouse). When an order spans several warehouses, call it once per warehouse in
- * ascending warehouse id order.
- */
 @Service
 @Transactional
 public class ReserveStockUseCase {
@@ -49,6 +43,17 @@ public class ReserveStockUseCase {
         this.reservationService = reservationService;
     }
 
+    /**
+     * Holds stock for an order in one warehouse. Meant to be called synchronously by order placement, inside the
+     * same transaction: if any line is out of stock the whole order fails.
+     *
+     * <p>Idempotent per (order, warehouse): does nothing when the order already holds stock in the warehouse. When an
+     * order spans several warehouses, call it once per warehouse in ascending warehouse id order.
+     *
+     * @throws NotFoundException         if the warehouse does not exist
+     * @throws InvalidOperationException if the warehouse is inactive, or a variant has no item or too little
+     *                                   available stock
+     */
     public void execute(ReserveStockCommand command) {
         Long orderId = command.orderId();
         WarehouseId warehouseId = WarehouseId.of(command.warehouseId());

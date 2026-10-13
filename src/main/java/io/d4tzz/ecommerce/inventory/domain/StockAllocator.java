@@ -1,8 +1,8 @@
 package io.d4tzz.ecommerce.inventory.domain;
 
+import io.d4tzz.ecommerce.catalog.domain.product.VariantId;
 import io.d4tzz.ecommerce.common.exception.InvalidArgumentException;
 import io.d4tzz.ecommerce.common.exception.InvalidOperationException;
-import io.d4tzz.ecommerce.catalog.domain.product.VariantId;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
@@ -27,13 +27,18 @@ import java.util.Map;
  */
 public class StockAllocator {
 
-    /** One allocation per warehouse, in ascending warehouse id order (the order reservations must be made in). */
+    /**
+     * One allocation per warehouse, in ascending warehouse id order (the order reservations must be made in).
+     *
+     * @throws InvalidArgumentException  if there are no lines
+     * @throws InvalidOperationException if a variant has too little available stock in all warehouses together
+     */
     public List<WarehouseAllocation> allocate(List<ReservationLine> lines, List<WarehouseStock> warehouses) {
         if (lines.isEmpty()) {
             throw new InvalidArgumentException("Nothing to allocate");
         }
 
-        Map<VariantId, Integer> missing = new LinkedHashMap<>();
+        Map<VariantId, Integer> missing = LinkedHashMap.newLinkedHashMap(lines.size());
         for (ReservationLine line : lines) {
             missing.merge(line.variantId(), line.quantity(), Integer::sum);
         }

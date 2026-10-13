@@ -3,6 +3,7 @@ package io.d4tzz.ecommerce.inventory.query;
 import java.time.Instant;
 import java.util.UUID;
 
+/** One line of the stock ledger. {@code type} is a StockLedgerEntryType, {@code referenceType} a StockLedgerReference.Type. */
 public record StockLedgerEntryView(
     UUID id,
     Long warehouseId,

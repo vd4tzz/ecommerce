@@ -15,6 +15,7 @@ import java.util.Map;
  */
 public class StockReservationService {
 
+    /** The new reservation, and one ledger entry per line. */
     public record ReservationResult(StockReservation reservation, List<StockLedgerEntry> entries) {}
 
     private enum ReservationAction {
@@ -23,7 +24,12 @@ public class StockReservationService {
         RESTOCK,
     }
 
-    // used to reserve for an order
+    /**
+     * Holds the lines for an order in one warehouse. {@code lockedItems} may hold more variants than the lines need.
+     *
+     * @throws InvalidOperationException if the warehouse is inactive, or a variant has no item or too little
+     *                                   available stock
+     */
     public ReservationResult reserve(
         Long orderId,
         Warehouse warehouse,
@@ -47,7 +53,12 @@ public class StockReservationService {
         return new ReservationResult(reservation, entries);
     }
 
-    /** Returns no entries when the reservation was already released. */
+    /**
+     * Returns no entries when the reservation was already released.
+     *
+     * @throws InvalidOperationException if the reservation was committed or restocked
+     * @throws IllegalStateException     if {@code lockedItems} lacks an item of a line
+     */
     public List<StockLedgerEntry> release(
         StockReservation reservation,
         Map<VariantId, InventoryItem> lockedItems,
@@ -59,7 +70,12 @@ public class StockReservationService {
         return applyToItems(reservation, lockedItems, ReservationAction.RELEASE, now);
     }
 
-    /** Returns no entries when the reservation was already committed. */
+    /**
+     * Returns no entries when the reservation was already committed.
+     *
+     * @throws InvalidOperationException if the reservation was released or restocked
+     * @throws IllegalStateException     if {@code lockedItems} lacks an item of a line
+     */
     public List<StockLedgerEntry> commit(
         StockReservation reservation,
         Map<VariantId, InventoryItem> lockedItems,
@@ -71,7 +87,12 @@ public class StockReservationService {
         return applyToItems(reservation, lockedItems, ReservationAction.COMMIT, now);
     }
 
-    /** Returns no entries when the reservation was already restocked. */
+    /**
+     * Returns no entries when the reservation was already restocked.
+     *
+     * @throws InvalidOperationException if the reservation was not committed
+     * @throws IllegalStateException     if {@code lockedItems} lacks an item of a line
+     */
     public List<StockLedgerEntry> restock(
         StockReservation reservation,
         Map<VariantId, InventoryItem> lockedItems,

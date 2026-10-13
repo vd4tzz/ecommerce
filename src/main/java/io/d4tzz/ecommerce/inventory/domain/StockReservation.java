@@ -48,6 +48,11 @@ public class StockReservation {
         this.updatedAt = updatedAt;
     }
 
+    /**
+     * A new RESERVED reservation. Duplicate variants are summed and the lines sorted by variant id.
+     *
+     * @throws InvalidArgumentException if there are no lines
+     */
     static StockReservation create(Long orderId, WarehouseId warehouseId, List<ReservationLine> lines, Instant now) {
         return new StockReservation(
             null,
@@ -60,6 +65,11 @@ public class StockReservation {
         );
     }
 
+    /**
+     * Rebuilds a reservation from storage.
+     *
+     * @throws InvalidArgumentException if there are no lines
+     */
     public static StockReservation restore(
         StockReservationId id,
         Long orderId,
@@ -72,18 +82,34 @@ public class StockReservation {
         return new StockReservation(id, orderId, warehouseId, lines, status, createdAt, updatedAt);
     }
 
+    /**
+     * RESERVED to RELEASED.
+     *
+     * @throws InvalidOperationException if the reservation is COMMITTED or RESTOCKED
+     */
     boolean release(Instant now) {
         return transitionTo(ReservationStatus.RELEASED, now);
     }
 
+    /**
+     * RESERVED to COMMITTED.
+     *
+     * @throws InvalidOperationException if the reservation is RELEASED or RESTOCKED
+     */
     boolean commit(Instant now) {
         return transitionTo(ReservationStatus.COMMITTED, now);
     }
 
+    /**
+     * COMMITTED to RESTOCKED.
+     *
+     * @throws InvalidOperationException if the reservation is RESERVED or RELEASED
+     */
     boolean restock(Instant now) {
         return transitionTo(ReservationStatus.RESTOCKED, now);
     }
 
+    /** The variants of the lines, in line order (ascending variant id). */
     public List<VariantId> variantIds() {
         return lines.stream().map(ReservationLine::variantId).toList();
     }

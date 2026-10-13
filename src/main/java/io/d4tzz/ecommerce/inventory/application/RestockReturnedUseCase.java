@@ -1,6 +1,7 @@
 package io.d4tzz.ecommerce.inventory.application;
 
 import io.d4tzz.ecommerce.catalog.domain.product.VariantId;
+import io.d4tzz.ecommerce.common.exception.InvalidOperationException;
 import io.d4tzz.ecommerce.inventory.application.command.RestockReturnedCommand;
 import io.d4tzz.ecommerce.inventory.domain.InventoryItem;
 import io.d4tzz.ecommerce.inventory.domain.InventoryItemRepository;
@@ -15,7 +16,6 @@ import java.util.Map;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-/** The shipped goods of an order came back: puts them back into sellable stock in every warehouse of the order. Already restocked reservations are skipped. */
 @Service
 @Transactional
 public class RestockReturnedUseCase {
@@ -37,6 +37,12 @@ public class RestockReturnedUseCase {
         this.reservationService = reservationService;
     }
 
+    /**
+     * The shipped goods of an order came back: puts them back into sellable stock in every warehouse of the order.
+     * Already restocked reservations are skipped.
+     *
+     * @throws InvalidOperationException if a reservation of the order cannot be restocked, because it is not committed
+     */
     public void execute(RestockReturnedCommand command) {
         Instant now = Instant.now();
 

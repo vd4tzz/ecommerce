@@ -6,6 +6,10 @@ import io.d4tzz.ecommerce.common.exception.InvalidOperationException;
 import io.d4tzz.ecommerce.common.Address;
 import java.time.Instant;
 
+/**
+ * A place that keeps stock. It is ACTIVE when created. While INACTIVE it takes no new goods and no new
+ * reservations, but reservations it already holds can still be released, committed or restocked.
+ */
 public class Warehouse {
 
     private static final int NAME_MAX_LENGTH = 150;
@@ -36,6 +40,12 @@ public class Warehouse {
         this.updatedAt = updatedAt;
     }
 
+    /**
+     * A new ACTIVE warehouse.
+     *
+     * @throws ConflictException        if the code is taken
+     * @throws InvalidArgumentException if the name is blank or longer than 150 characters
+     */
     public static Warehouse create(
         WarehouseCode code,
         String name,
@@ -49,6 +59,11 @@ public class Warehouse {
         return new Warehouse(null, code, name, address, WarehouseStatus.ACTIVE, now, now);
     }
 
+    /**
+     * Rebuilds a warehouse from storage.
+     *
+     * @throws InvalidArgumentException if the name is blank or longer than 150 characters
+     */
     public static Warehouse restore(
         WarehouseId id,
         WarehouseCode code,
@@ -61,12 +76,18 @@ public class Warehouse {
         return new Warehouse(id, code, name, address, status, createdAt, updatedAt);
     }
 
+    /**
+     * Changes the name and address. The code never changes.
+     *
+     * @throws InvalidArgumentException if the name is blank or longer than 150 characters
+     */
     public void update(String name, Address address, Instant now) {
         this.name = validateName(name);
         this.address = address;
         this.updatedAt = now;
     }
 
+    /** Returns {@code false} when it was already active. */
     public boolean activate(Instant now) {
         if (status == WarehouseStatus.ACTIVE) {
             return false;
@@ -76,6 +97,7 @@ public class Warehouse {
         return true;
     }
 
+    /** Returns {@code false} when it was already inactive. */
     public boolean deactivate(Instant now) {
         if (status == WarehouseStatus.INACTIVE) {
             return false;
@@ -89,6 +111,11 @@ public class Warehouse {
         return status == WarehouseStatus.ACTIVE;
     }
 
+    /**
+     * Checks the warehouse can take part in new receipts and reservations.
+     *
+     * @throws InvalidOperationException if the warehouse is inactive
+     */
     public void ensureActive() {
         if (!isActive()) {
             throw new InvalidOperationException("Warehouse " + code + " is inactive");

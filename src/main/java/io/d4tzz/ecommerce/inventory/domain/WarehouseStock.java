@@ -9,6 +9,7 @@ public record WarehouseStock(WarehouseId warehouseId, boolean nearDestination, M
         available = Map.copyOf(available);
     }
 
+    /** Sellable units of the variant, 0 when the warehouse has none. */
     public int availableOf(VariantId variantId) {
         return Math.max(0, available.getOrDefault(variantId, 0));
     }

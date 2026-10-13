@@ -1,5 +1,6 @@
 package io.d4tzz.ecommerce.inventory.domain;
 
+/** What a stock ledger entry did to the stock. */
 public enum StockLedgerEntryType {
     /** Goods received into the warehouse: onHand increases. */
     RECEIVE,

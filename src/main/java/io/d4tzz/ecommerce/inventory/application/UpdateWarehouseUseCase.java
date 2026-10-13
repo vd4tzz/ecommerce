@@ -1,5 +1,6 @@
 package io.d4tzz.ecommerce.inventory.application;
 
+import io.d4tzz.ecommerce.common.exception.InvalidArgumentException;
 import io.d4tzz.ecommerce.common.exception.NotFoundException;
 import io.d4tzz.ecommerce.common.Address;
 import io.d4tzz.ecommerce.inventory.application.command.UpdateWarehouseCommand;
@@ -20,6 +21,12 @@ public class UpdateWarehouseUseCase {
         this.warehouseRepository = warehouseRepository;
     }
 
+    /**
+     * Changes the name and address of a warehouse.
+     *
+     * @throws NotFoundException        if the warehouse does not exist
+     * @throws InvalidArgumentException if the name or address is invalid
+     */
     public void execute(UpdateWarehouseCommand command) {
         Warehouse warehouse = warehouseRepository
             .find(WarehouseId.of(command.warehouseId()))

@@ -1,10 +1,11 @@
 package io.d4tzz.ecommerce.inventory.application;
 
-import io.d4tzz.ecommerce.common.exception.ConflictException;
-import io.d4tzz.ecommerce.common.exception.NotFoundException;
 import io.d4tzz.ecommerce.catalog.domain.product.VariantId;
-import io.d4tzz.ecommerce.inventory.application.command.ReceiveGoodsCommand;
 import io.d4tzz.ecommerce.catalog.published.VariantExistenceChecker;
+import io.d4tzz.ecommerce.common.exception.ConflictException;
+import io.d4tzz.ecommerce.common.exception.InvalidOperationException;
+import io.d4tzz.ecommerce.common.exception.NotFoundException;
+import io.d4tzz.ecommerce.inventory.application.command.ReceiveGoodsCommand;
 import io.d4tzz.ecommerce.inventory.domain.InventoryItem;
 import io.d4tzz.ecommerce.inventory.domain.InventoryItemRepository;
 import io.d4tzz.ecommerce.inventory.domain.StockLedgerEntry;
@@ -44,7 +45,15 @@ public class ReceiveGoodsUseCase {
         this.variantExistenceChecker = variantExistenceChecker;
     }
 
-    /** Returns the ids of the ledger entries recorded for this receipt. */
+    /**
+     * Puts goods into an active warehouse and records them in the ledger under the receipt code. A receipt code can be
+     * used once per warehouse, so a repeated request does not count the goods twice. A variant the warehouse has not
+     * stocked before gets its item here. Returns the ids of the ledger entries recorded for this receipt.
+     *
+     * @throws NotFoundException         if the warehouse or a variant does not exist
+     * @throws InvalidOperationException if the warehouse is inactive
+     * @throws ConflictException         if the receipt code was already received into the warehouse
+     */
     public List<UUID> execute(ReceiveGoodsCommand command) {
         WarehouseId warehouseId = WarehouseId.of(command.warehouseId());
         Warehouse warehouse = warehouseRepository
@@ -83,8 +92,10 @@ public class ReceiveGoodsUseCase {
 
         List<StockLedgerEntry> entries = new ArrayList<>(quantities.size());
         quantities.forEach((variantId, quantity) -> {
+            // if iventory item not exist (absent in map) create new one.
             InventoryItem item = items.computeIfAbsent(variantId, id -> InventoryItem.create(warehouseId, id, now));
-            entries.add(item.receive(quantity, reference, command.note(), now));
+            StockLedgerEntry stockLedgerEntry = item.receive(quantity, reference, command.note(), now);
+            entries.add(stockLedgerEntry);
         });
 
         inventoryItemRepository.saveAll(items.values());

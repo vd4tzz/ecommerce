@@ -8,6 +8,7 @@ import jakarta.validation.constraints.Positive;
 import jakarta.validation.constraints.Size;
 import java.util.List;
 
+/** Goods received into a warehouse. {@code receiptCode} identifies the receipt and can be used once per warehouse. */
 public record ReceiveGoodsCommand(
     @NotNull Long warehouseId,
     @NotBlank @Size(max = 100) String receiptCode,

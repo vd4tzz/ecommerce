@@ -1,6 +1,8 @@
 package io.d4tzz.ecommerce.inventory.application;
 
 import io.d4tzz.ecommerce.common.Address;
+import io.d4tzz.ecommerce.common.exception.ConflictException;
+import io.d4tzz.ecommerce.common.exception.InvalidArgumentException;
 import io.d4tzz.ecommerce.inventory.application.command.CreateWarehouseCommand;
 import io.d4tzz.ecommerce.inventory.domain.Warehouse;
 import io.d4tzz.ecommerce.inventory.domain.WarehouseCode;
@@ -19,6 +21,12 @@ public class CreateWarehouseUseCase {
         this.warehouseRepository = warehouseRepository;
     }
 
+    /**
+     * Adds a warehouse. Its code must not be used by another warehouse. Returns the id of the new warehouse.
+     *
+     * @throws InvalidArgumentException if the code, name or address is invalid
+     * @throws ConflictException        if the code is already used by another warehouse
+     */
     public Long execute(CreateWarehouseCommand command) {
         Warehouse warehouse = Warehouse.create(
             WarehouseCode.of(command.code()),

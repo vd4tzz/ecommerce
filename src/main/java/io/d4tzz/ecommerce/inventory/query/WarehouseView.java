@@ -2,6 +2,7 @@ package io.d4tzz.ecommerce.inventory.query;
 
 import java.time.Instant;
 
+/** A warehouse. {@code status} is ACTIVE or INACTIVE. */
 public record WarehouseView(
     Long id,
     String code,

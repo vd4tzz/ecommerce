@@ -1,6 +1,7 @@
 package io.d4tzz.ecommerce.inventory.application;
 
 import io.d4tzz.ecommerce.catalog.domain.product.VariantId;
+import io.d4tzz.ecommerce.common.exception.InvalidOperationException;
 import io.d4tzz.ecommerce.inventory.application.command.CommitStockCommand;
 import io.d4tzz.ecommerce.inventory.domain.InventoryItem;
 import io.d4tzz.ecommerce.inventory.domain.InventoryItemRepository;
@@ -15,7 +16,6 @@ import java.util.Map;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-/** The goods of an order left the warehouse: deducts them from on-hand stock in every warehouse of the order. Already committed reservations are skipped. */
 @Service
 @Transactional
 public class CommitStockUseCase {
@@ -37,6 +37,13 @@ public class CommitStockUseCase {
         this.reservationService = reservationService;
     }
 
+    /**
+     * The goods of an order left the warehouse: deducts them from on-hand stock in every warehouse of the order.
+     * Already committed reservations are skipped.
+     *
+     * @throws InvalidOperationException if a reservation of the order cannot be committed, because it is released or
+     *                                   restocked
+     */
     public void execute(CommitStockCommand command) {
         Instant now = Instant.now();
 

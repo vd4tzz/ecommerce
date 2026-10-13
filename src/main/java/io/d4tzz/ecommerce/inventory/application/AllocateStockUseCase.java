@@ -1,6 +1,7 @@
 package io.d4tzz.ecommerce.inventory.application;
 
 import io.d4tzz.ecommerce.catalog.domain.product.VariantId;
+import io.d4tzz.ecommerce.common.exception.InvalidOperationException;
 import io.d4tzz.ecommerce.inventory.application.command.AllocateStockCommand;
 import io.d4tzz.ecommerce.inventory.application.result.StockAllocation;
 import io.d4tzz.ecommerce.inventory.domain.ReservationLine;
@@ -19,11 +20,6 @@ import java.util.stream.Collectors;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-/**
- * Says which active warehouses should send an order, so checkout can price shipping per warehouse and then
- * reserve. Only reads: call {@link ReserveStockUseCase} once per returned warehouse, in the returned order, to
- * actually hold the stock.
- */
 @Service
 @Transactional(readOnly = true)
 public class AllocateStockUseCase {
@@ -42,6 +38,13 @@ public class AllocateStockUseCase {
         this.stockAllocator = stockAllocator;
     }
 
+    /**
+     * Says which active warehouses should send an order, so checkout can price shipping per warehouse and then
+     * reserve. Only reads: call {@link ReserveStockUseCase} once per returned warehouse, in the returned order, to
+     * actually hold the stock. Returns one entry per warehouse, in ascending warehouse id order.
+     *
+     * @throws InvalidOperationException if a variant has too little stock in all active warehouses together
+     */
     public List<StockAllocation> execute(AllocateStockCommand command) {
         List<ReservationLine> lines = command
             .lines()

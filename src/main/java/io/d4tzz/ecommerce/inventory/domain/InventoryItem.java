@@ -45,10 +45,16 @@ public class InventoryItem {
         this.updatedAt = updatedAt;
     }
 
+    /** A new item with no stock yet. */
     public static InventoryItem create(WarehouseId warehouseId, VariantId variantId, Instant now) {
         return new InventoryItem(null, warehouseId, variantId, 0, 0, now, now);
     }
 
+    /**
+     * Rebuilds an item from storage.
+     *
+     * @throws InvalidArgumentException if {@code reserved} is negative or above {@code onHand}
+     */
     public static InventoryItem restore(
         InventoryItemId id,
         WarehouseId warehouseId,
@@ -61,12 +67,23 @@ public class InventoryItem {
         return new InventoryItem(id, warehouseId, variantId, onHand, reserved, createdAt, updatedAt);
     }
 
+    /**
+     * Goods came into the warehouse: {@code onHand} goes up.
+     *
+     * @throws InvalidArgumentException if the quantity is not above zero
+     */
     public StockLedgerEntry receive(int quantity, StockLedgerReference reference, String note, Instant now) {
         requirePositive(quantity);
         this.onHand += quantity;
         return recordChange(StockLedgerEntryType.RECEIVE, quantity, reference, note, now);
     }
 
+    /**
+     * Holds {@code quantity} units.
+     *
+     * @throws InvalidArgumentException  if the quantity is not above zero
+     * @throws InvalidOperationException if fewer than {@code quantity} units are {@link #available()}
+     */
     StockLedgerEntry reserve(int quantity, StockLedgerReference reference, Instant now) {
         requirePositive(quantity);
         if (available() < quantity) {
@@ -78,6 +95,12 @@ public class InventoryItem {
         return recordChange(StockLedgerEntryType.RESERVE, quantity, reference, "", now);
     }
 
+    /**
+     * Gives held units back to sellable stock.
+     *
+     * @throws InvalidArgumentException  if the quantity is not above zero
+     * @throws InvalidOperationException if fewer than {@code quantity} units are reserved
+     */
     StockLedgerEntry release(int quantity, StockLedgerReference reference, Instant now) {
         requirePositive(quantity);
         requireReserved(quantity);
@@ -85,6 +108,12 @@ public class InventoryItem {
         return recordChange(StockLedgerEntryType.RELEASE, quantity, reference, "", now);
     }
 
+    /**
+     * Held units left the warehouse: both {@code onHand} and {@code reserved} go down.
+     *
+     * @throws InvalidArgumentException  if the quantity is not above zero
+     * @throws InvalidOperationException if fewer than {@code quantity} units are reserved
+     */
     StockLedgerEntry commit(int quantity, StockLedgerReference reference, Instant now) {
         requirePositive(quantity);
         requireReserved(quantity);
@@ -93,12 +122,18 @@ public class InventoryItem {
         return recordChange(StockLedgerEntryType.COMMIT, quantity, reference, "", now);
     }
 
+    /**
+     * Shipped units came back: {@code onHand} goes up.
+     *
+     * @throws InvalidArgumentException if the quantity is not above zero
+     */
     StockLedgerEntry restock(int quantity, StockLedgerReference reference, Instant now) {
         requirePositive(quantity);
         this.onHand += quantity;
         return recordChange(StockLedgerEntryType.RESTOCK, quantity, reference, "", now);
     }
 
+    /** Units that can still be sold: {@code onHand - reserved}. */
     public int available() {
         return onHand - reserved;
     }

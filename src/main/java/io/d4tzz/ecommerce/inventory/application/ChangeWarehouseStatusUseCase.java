@@ -9,10 +9,6 @@ import java.time.Instant;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-/**
- * Deactivating only blocks new receipts and reservations; existing reservations can still be released,
- * committed or restocked.
- */
 @Service
 @Transactional
 public class ChangeWarehouseStatusUseCase {
@@ -23,6 +19,12 @@ public class ChangeWarehouseStatusUseCase {
         this.warehouseRepository = warehouseRepository;
     }
 
+    /**
+     * Activates or deactivates a warehouse. Deactivating only blocks new receipts and reservations; existing
+     * reservations can still be released, committed or restocked.
+     *
+     * @throws NotFoundException if the warehouse does not exist
+     */
     public void execute(ChangeWarehouseStatusCommand command) {
         Warehouse warehouse = warehouseRepository
             .find(WarehouseId.of(command.warehouseId()))

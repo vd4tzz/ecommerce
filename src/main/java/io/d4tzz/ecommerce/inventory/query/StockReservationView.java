@@ -3,6 +3,7 @@ package io.d4tzz.ecommerce.inventory.query;
 import java.time.Instant;
 import java.util.List;
 
+/** Stock held for an order in one warehouse. {@code status} is a ReservationStatus. */
 public record StockReservationView(
     Long id,
     Long orderId,
