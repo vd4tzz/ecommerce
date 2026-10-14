@@ -22,10 +22,15 @@ import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.security.SecurityRequirements;
 import io.swagger.v3.oas.annotations.tags.Tag;
+import io.d4tzz.ecommerce.user.infrastructure.security.JwtProperties;
+import jakarta.servlet.http.HttpServletRequest;
 import java.net.URI;
+import org.springframework.http.HttpHeaders;
 import org.springframework.http.ProblemDetail;
+import org.springframework.http.ResponseCookie;
 import org.springframework.http.ResponseEntity;
 import org.springframework.validation.Validator;
+import org.springframework.web.bind.annotation.CookieValue;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -38,6 +43,8 @@ import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
 @SecurityRequirements
 public class AuthController {
 
+    private static final String REFRESH_COOKIE = "refreshToken";
+
     private final RegisterUserUseCase registerUserUseCase;
     private final VerifyEmailUseCase verifyEmailUseCase;
     private final SendVerificationOtpUseCase sendVerificationOtpUseCase;
@@ -45,6 +52,7 @@ public class AuthController {
     private final ResetPasswordUseCase resetPasswordUseCase;
     private final LoginUseCase loginUseCase;
     private final RefreshTokenUseCase refreshTokenUseCase;
+    private final JwtProperties jwtProperties;
     private final Validator validator;
 
     public AuthController(
@@ -55,6 +63,7 @@ public class AuthController {
         ResetPasswordUseCase resetPasswordUseCase,
         LoginUseCase loginUseCase,
         RefreshTokenUseCase refreshTokenUseCase,
+        JwtProperties jwtProperties,
         Validator validator
     ) {
         this.registerUserUseCase = registerUserUseCase;
@@ -64,6 +73,7 @@ public class AuthController {
         this.resetPasswordUseCase = resetPasswordUseCase;
         this.loginUseCase = loginUseCase;
         this.refreshTokenUseCase = refreshTokenUseCase;
+        this.jwtProperties = jwtProperties;
         this.validator = validator;
     }
 
@@ -98,10 +108,10 @@ public class AuthController {
 
     @Operation(
         summary = "Log in",
-        description = "Exchanges email and password for an access token and a refresh token."
+        description = "Exchanges email and password for an access token. The refresh token is set in an HttpOnly cookie."
     )
     @ApiResponses({
-        @ApiResponse(responseCode = "200", description = "Token pair"),
+        @ApiResponse(responseCode = "200", description = "Access token, with the refresh token in a cookie"),
         @ApiResponse(
             responseCode = "400",
             description = "Invalid input",
@@ -119,15 +129,19 @@ public class AuthController {
         ),
     })
     @PostMapping("/login")
-    public ResponseEntity<LoginUseCase.Response> login(@RequestBody LoginRequest request) {
+    public ResponseEntity<AccessTokenResponse> login(
+        @RequestBody LoginRequest request,
+        HttpServletRequest httpRequest
+    ) {
         var command = new LoginCommand(request.email(), request.password());
         SpringValidation.validate(command, validator);
-        return ResponseEntity.ok(loginUseCase.execute(command));
+        var response = loginUseCase.execute(command);
+        return tokenResponse(response.accessToken(), response.refreshToken(), httpRequest);
     }
 
-    @Operation(summary = "Refresh tokens", description = "Exchanges a refresh token for a new token pair.")
+    @Operation(summary = "Refresh tokens", description = "Exchanges the refresh token cookie for a new access token and a new refresh token cookie.")
     @ApiResponses({
-        @ApiResponse(responseCode = "200", description = "New token pair"),
+        @ApiResponse(responseCode = "200", description = "New access token, with the new refresh token in a cookie"),
         @ApiResponse(
             responseCode = "400",
             description = "Invalid input",
@@ -140,10 +154,14 @@ public class AuthController {
         ),
     })
     @PostMapping("/refresh-token")
-    public ResponseEntity<RefreshTokenUseCase.Response> refreshToken(@RequestBody RefreshTokenRequest request) {
-        var command = new RefreshTokenCommand(request.refreshToken());
+    public ResponseEntity<AccessTokenResponse> refreshToken(
+        @CookieValue(name = REFRESH_COOKIE, required = false) String refreshToken,
+        HttpServletRequest httpRequest
+    ) {
+        var command = new RefreshTokenCommand(refreshToken);
         SpringValidation.validate(command, validator);
-        return ResponseEntity.ok(refreshTokenUseCase.execute(command));
+        var response = refreshTokenUseCase.execute(command);
+        return tokenResponse(response.accessToken(), response.refreshToken(), httpRequest);
     }
 
     @Operation(
@@ -226,13 +244,30 @@ public class AuthController {
         resetPasswordUseCase.execute(command);
         return ResponseEntity.ok().build();
     }
+
+    private ResponseEntity<AccessTokenResponse> tokenResponse(
+        String accessToken,
+        String refreshToken,
+        HttpServletRequest request
+    ) {
+        ResponseCookie cookie = ResponseCookie.from(REFRESH_COOKIE, refreshToken)
+            .httpOnly(true)
+            .secure(request.isSecure())
+            .sameSite("Lax")
+            .path("/auth")
+            .maxAge(jwtProperties.refreshTokenValidity())
+            .build();
+        return ResponseEntity.ok()
+            .header(HttpHeaders.SET_COOKIE, cookie.toString())
+            .body(new AccessTokenResponse(accessToken));
+    }
 }
 
 record RegisterUserRequest(String email, String password, String fullName) {}
 
 record LoginRequest(String email, String password) {}
 
-record RefreshTokenRequest(String refreshToken) {}
+record AccessTokenResponse(String accessToken) {}
 
 record VerifyEmailRequest(String email, String code) {}
 
