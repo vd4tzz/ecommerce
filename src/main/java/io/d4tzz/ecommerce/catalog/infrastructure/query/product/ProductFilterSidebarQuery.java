@@ -56,7 +56,8 @@ public class ProductFilterSidebarQuery {
             String sql = """
             SELECT DISTINCT c.id, c.name, c.slug
             FROM categories c
-            JOIN products p ON p.category_id = c.id
+            JOIN categories sub ON (sub.id = c.id OR sub.path LIKE CONCAT(COALESCE(c.path, ''), c.id, '.%'))
+            JOIN products p ON p.category_id = sub.id
             WHERE c.parent_id IS NULL
               AND p.status = 'PUBLISHED'
             ORDER BY c.name ASC
@@ -71,7 +72,8 @@ public class ProductFilterSidebarQuery {
             String sql = """
             SELECT DISTINCT c.id, c.name, c.slug
             FROM categories c
-            JOIN products p ON p.category_id = c.id
+            JOIN categories sub ON (sub.id = c.id OR sub.path LIKE CONCAT(COALESCE(c.path, ''), c.id, '.%'))
+            JOIN products p ON p.category_id = sub.id
             WHERE c.parent_id = :parentCategoryId
               AND p.status = 'PUBLISHED'
             ORDER BY c.name ASC
